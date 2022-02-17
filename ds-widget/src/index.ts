@@ -24,7 +24,7 @@ export { TextBox } from "./resource/widget/system-components/textbox/TextBox";
 export { TextQryBox } from "./resource/widget/system-components/textqryBox/TextQryBox";
 export { Tree } from "./resource/widget/system-components/treeview/TreeView";
 
-export { System } from "./resource/widget/system-control/System";
+export { System } from "./resource/widget/system-control/System_Login";
 export { Form } from "./resource/widget/system-control/Form";
 export {
   SystemContext,
