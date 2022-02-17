@@ -1,0 +1,19 @@
+MERGE INTO FUNCTION_LIST t
+     USING (SELECT C.ACCOUNT, B.*
+              FROM ACCOUNT_TOKEN A, FUNCTION_LIST B, ACCOUNTS C
+             WHERE     A.ACCESS_TOKEN = :ACCESS_TOKEN
+                   AND EXPIRATION_DATE >= TRUNC (SYSDATE)
+                   AND IS_EFFECTIVE = 'Y'
+                   AND B.FUNCTION_UID = :FUNCTION_UID
+                   AND A.ACCOUNT_UID = C.ACCOUNT_UID) s
+        ON (t.FUNCTION_UID = s.FUNCTION_UID)
+WHEN MATCHED
+THEN
+   UPDATE SET FUNCTION_NAME = :FUNCTION_NAME,
+              FUNCTION_DESC = :FUNCTION_DESC,
+              FUNCTION_CODE = :FUNCTION_CODE,
+              IS_CORE = :IS_CORE,
+              ENABLED = :ENABLED,
+              SEQ = :SEQ,
+              UP_USER = S.ACCOUNT,
+              UP_DATE = SYSDATE

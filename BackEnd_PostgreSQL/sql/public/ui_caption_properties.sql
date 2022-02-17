@@ -1,0 +1,5 @@
+SELECT *
+  FROM UI_CAPTION_PROPERTIES
+ WHERE     LANGUAGE = coalesce ( $1::VARCHAR, LANGUAGE)
+       AND SOURCE = coalesce ( $2::VARCHAR, SOURCE)
+       AND WORD = coalesce ( $3::VARCHAR, WORD)

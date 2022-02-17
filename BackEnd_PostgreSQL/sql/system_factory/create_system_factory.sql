@@ -1,0 +1,21 @@
+insert
+	into
+		SYSTEM_FACTORY_LIST(
+			FACTORY_UID,
+			SYSTEM_UID,
+			FACTORY_NAME,
+			WS_URL,
+			WS_DATASOURCE,
+			IS_ENABLED
+		)
+	values(
+		$1::varchar,
+		$2::varchar,
+		$3::varchar,
+		$4::varchar,
+		$5::varchar,
+		coalesce(
+			$6::varchar,
+			'N'
+		)
+	)
