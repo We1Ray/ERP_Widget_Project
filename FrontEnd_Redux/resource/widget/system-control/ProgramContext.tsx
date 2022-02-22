@@ -127,7 +127,7 @@ function ProgramProvider(props: any) {
 const ProgramReducer = (state: any, action: any) => {
   switch (action.type) {
     case "program_code":
-      return { ...state, program_code: action.value };
+      return { ...state, program_code: action.value, queryParameters: {} };
     case "data":
       return { ...state, data: action.value };
     case "dataKey":
