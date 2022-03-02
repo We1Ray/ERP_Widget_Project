@@ -25,6 +25,7 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
       disabled,
       name,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       result,
@@ -39,7 +40,7 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [textboxValue, setTextboxValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

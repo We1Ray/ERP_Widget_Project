@@ -16,6 +16,7 @@ export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
       visible,
       disabled,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       result,
@@ -27,7 +28,7 @@ export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
     forwardedRef
   ) => {
     const [textboxValue, setTextboxValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

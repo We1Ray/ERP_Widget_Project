@@ -22,6 +22,9 @@ router.route("/get_languagelocalisation").post(async (req, res) => {
     req.body["languagelocalisation_UP_DATE2"]
       ? req.body["languagelocalisation_UP_DATE2"]
       : null,
+    req.body["languagelocalisation_UP_USER"]
+      ? req.body["languagelocalisation_UP_USER"]
+      : null,
   ];
   let sql = fs
     .readFileSync(

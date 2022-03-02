@@ -25,6 +25,7 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
       visible,
       disabled,
       name,
+      defaultValue,
       value,
       handleValidation,
       options,
@@ -39,7 +40,7 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [radioButtonValue, setRadioButtonValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [radioButtonDisable, setRadioButtonDisable] = useState(false);
     const [display, setDisplay] = useState(true);

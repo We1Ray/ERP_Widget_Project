@@ -16,6 +16,7 @@ export const CommonCheckBox: React.FC<CheckBoxProps> = forwardRef(
     {
       visible,
       disabled,
+      defaultValue,
       value,
       checkedText,
       notCheckedText,
@@ -28,11 +29,13 @@ export const CommonCheckBox: React.FC<CheckBoxProps> = forwardRef(
     forwardedRef
   ) => {
     const [checked, setChecked] = useState(
-      PublicMethod.checkValue(value) ? value == checkedValue : false
+      PublicMethod.checkValue(defaultValue)
+        ? defaultValue == checkedValue
+        : false
     );
     const [checkboxText, setCheckboxText] = useState(
-      PublicMethod.checkValue(value)
-        ? value == checkedValue
+      PublicMethod.checkValue(defaultValue)
+        ? defaultValue == checkedValue
           ? checkedText
           : notCheckedText
         : notCheckedText

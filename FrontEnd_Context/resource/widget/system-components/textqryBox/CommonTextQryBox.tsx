@@ -25,6 +25,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       visible,
       disabled,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       delimiter,
@@ -43,7 +44,9 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     const [objectDisable, setObjectDisable] = useState(false);
     const [labelValue, setLabelValue] = useState("");
     const [textboxValue, setTextboxValue] = useState("");
-    const [selectedValue, setSelectedValue] = useState("");
+    const [selectedValue, setSelectedValue] = useState(
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
+    );
     const [dialogValue, setDialogValue] = useState({});
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [valueDelimiter] = useState(
@@ -74,19 +77,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log(error);
       }
     }, [visible]);
-
-    useEffect(() => {
-      try {
-        if (value) {
-          setSelectedValue(value);
-        } else {
-          setSelectedValue("");
-        }
-      } catch (error) {
-        console.log("EROOR: CommonTextQryBox.useEffect[value]");
-        console.log(error);
-      }
-    }, [value]);
 
     useEffect(() => {
       try {
@@ -238,7 +228,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   System.factory.name,
                   System.factory.ip + label.api,
                   { [text.name]: textboxValue }
-                ).then(async (res) => {
+                ).then((res) => {
                   if (PublicMethod.checkValue(res.data)) {
                     //額外再給予Operation和api做查詢給值
                     lable = res.data[0][label.name];
@@ -313,6 +303,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   <CommonTextBox
                     maxLength={maxLength}
                     disabled={textboxDisable}
+                    defaultValue={defaultValue}
                     value={selectedValue}
                     style={text.style}
                     handleValidation={handleValidation}

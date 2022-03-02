@@ -1,3 +1,14 @@
-SELECT *
-  FROM ACCOUNTS
- WHERE ACCOUNT = $1::VARCHAR
+select
+	row_number() over() as ROW_NUM_ID,
+	A.*
+from
+	ACCOUNTS A
+where
+	($1::varchar is null
+		or (account = $1::varchar ))
+	and(
+		$2::varchar is null
+		or(
+			account_uid = $2::varchar
+		)
+	)

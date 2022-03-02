@@ -203,6 +203,8 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             if (!PublicMethod.checkValue(defaultValue)) {
               //有綁定則設定禁用
               clearValue();
+            } else {
+              setSelectedValue(defaultValue);
             }
             checkDisable();
             break;

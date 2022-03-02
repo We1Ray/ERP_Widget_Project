@@ -18,6 +18,7 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     {
       visible,
       disabled,
+      defaultValue,
       value,
       handleValidation,
       format,
@@ -29,7 +30,7 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     forwardedRef
   ) => {
     const [datetimeValue, setDatetimeValue] = useState(
-      PublicMethod.checkValue(value) ? value : null
+      PublicMethod.checkValue(defaultValue) ? defaultValue : null
     );
     const [datetimeBoxDisable, setDatetimeBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

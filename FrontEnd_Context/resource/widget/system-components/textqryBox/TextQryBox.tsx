@@ -115,7 +115,7 @@ interface TextQryBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (value: string) => any | ((value: string) => Promise<any>);
   /**
    * 元件的Reference
    */
@@ -167,6 +167,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             disabled={disabled}
             name={name}
             maxLength={maxLength}
+            defaultValue={defaultValue}
             value={defaultValue}
             handleValidation={handleValidation}
             delimiter={delimiter}
@@ -199,6 +200,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             maxLength={maxLength}
+            defaultValue={defaultValue}
             value={defaultValue}
             handleValidation={handleValidation}
             delimiter={delimiter}

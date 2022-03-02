@@ -3,6 +3,7 @@ import { ComponentContext } from "./ComponentContext";
 import { ProgramContext, statusContext, STATUS } from "./ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
 import { None } from "../system-ui/None";
+import { SystemContext } from "../system-control/SystemContext";
 interface Props {
   /**
    * 作業名稱
@@ -31,6 +32,7 @@ export const Form: React.FC<Props> = ({
   style,
   ...props
 }) => {
+  const { System } = useContext(SystemContext);
   const { Component, ComponentDispatch } = useContext(ComponentContext);
   const { status, send, service } = useContext(statusContext);
   const { Program, ProgramDispatch } = useContext(ProgramContext);
@@ -112,7 +114,8 @@ export const Form: React.FC<Props> = ({
 
   return (
     <>
-      {PublicMethod.checkValue(Program.program_code) ? (
+      {PublicMethod.checkValue(Program.program_code) &&
+      PublicMethod.checkValue(System.factory.ip) ? (
         <div
           className={Program.loading === "READ" ? "" : "whirl helicopter"}
           style={style}

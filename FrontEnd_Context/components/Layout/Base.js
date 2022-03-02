@@ -22,7 +22,7 @@ export default function Base({ ...props }) {
 }
 
 function BaseContent({ ...props }) {
-  const { System } = useContext(SystemContext);
+  // const { System } = useContext(SystemContext);
 
   return (
     <div className="wrapper">

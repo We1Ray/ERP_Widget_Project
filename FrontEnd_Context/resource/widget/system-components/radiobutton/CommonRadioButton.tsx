@@ -16,6 +16,7 @@ export const CommonRadioButton: React.FC<RadioButtonProps> = forwardRef(
     {
       visible,
       disabled,
+      defaultValue,
       value,
       handleValidation,
       options,
@@ -27,7 +28,7 @@ export const CommonRadioButton: React.FC<RadioButtonProps> = forwardRef(
     forwardedRef
   ) => {
     const [radioButtonValue, setRadioButtonValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [radioButtonDisable, setRadioButtonDisable] = useState(false);
     const [display, setDisplay] = useState(true);

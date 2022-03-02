@@ -27,6 +27,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       visible,
       disabled,
       name,
+      defaultValue,
       value,
       handleValidation,
       format,
@@ -41,7 +42,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [datetimeValue, setDatetimeValue] = useState(
-      PublicMethod.checkValue(value) ? value : null
+      PublicMethod.checkValue(defaultValue) ? defaultValue : null
     );
     const [datetimeBoxDisable, setDatetimeBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

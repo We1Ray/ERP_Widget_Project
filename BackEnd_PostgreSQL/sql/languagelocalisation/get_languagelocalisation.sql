@@ -60,6 +60,12 @@ where
 			)
 		)
 	)
+	and(
+		$6::varchar is null
+		or(
+			up_user = $6::varchar
+		)
+	)
 order by
 	source,
 	WORD,

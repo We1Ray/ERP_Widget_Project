@@ -27,6 +27,7 @@ export const QrySelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       disabled,
       name,
       maxSelections,
+      defaultValue,
       value,
       handleValidation,
       options,
@@ -45,7 +46,7 @@ export const QrySelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       PublicMethod.checkValue(options) ? options : []
     );
     const [selectedValue, setSelectedValue] = useState(
-      PublicMethod.checkValue(value) ? value : []
+      PublicMethod.checkValue(defaultValue) ? defaultValue : []
     );
     const [selectionBoxDisable, setSelectionBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

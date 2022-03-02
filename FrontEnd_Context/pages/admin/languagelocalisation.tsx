@@ -8,6 +8,7 @@ import {
   Label,
   Block,
   TextBox,
+  TextQryBox,
   DataTable,
   SelectionBox,
   DatetimeBox,
@@ -31,6 +32,7 @@ import {
 } from "../../resource/index";
 import "ds-widget/dist/index.css";
 import moment from "moment";
+import Qry_accounts from "./Qry_accounts";
 
 export default function LanguageLocalisation() {
   return (
@@ -49,6 +51,33 @@ function LanguageLocalisation_Content() {
   const [source_Options, setSource_Options] = useState([]);
   const [language_Options, setLanguage_Options] = useState([]);
   const [updateParams, setUpdateParams] = useState([]);
+  const [qryBoxLabel, setQryBoxLabel] = useState("");
+
+  async function getQryBoxLabel(text: string) {
+    if (text) {
+      await CallApi.ExecuteApi(
+        System.factory.name,
+        System.factory.ip + "/public/get_account",
+        { account_uid: text }
+      )
+        .then((res) => {
+          if (res) {
+            if (res.data[0]["name"]) {
+              setQryBoxLabel(res.data[0]["name"]);
+            } else {
+              setQryBoxLabel(
+                System.getLocalization("Public", "None") +
+                  text +
+                  System.getLocalization("Public", "Data")
+              );
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }
 
   useEffect(() => {
     SystemDispatch({ type: "mustlogin", value: true });
@@ -458,6 +487,13 @@ function LanguageLocalisation_Content() {
                             "UP_DATE"
                           ),
                         },
+                        {
+                          value: "languagelocalisation_UP_USER",
+                          label: System.getLocalization(
+                            "system_administrator",
+                            "UP_USER"
+                          ),
+                        },
                       ]}
                       defaultValue={[
                         {
@@ -521,6 +557,36 @@ function LanguageLocalisation_Content() {
                       }
                     />
                     <TextBox query={true} name="languagelocalisation_KEY" />
+                  </Column>
+                  <Column md={6} name="languagelocalisation_UP_USER">
+                    <Label
+                      text={
+                        System.getLocalization(
+                          "system_administrator",
+                          "UP_USER"
+                        ) + ":"
+                      }
+                    />
+                    <TextQryBox
+                      query={true}
+                      name="languagelocalisation_UP_USER"
+                      maxLength={60}
+                      dialog={{
+                        window: Qry_accounts,
+                        style: { height: "500px" },
+                      }}
+                      text={{
+                        name: "account_uid",
+                        disabled: true,
+                        visible: false,
+                      }}
+                      label={{
+                        name: "name",
+                        value: qryBoxLabel,
+                      }}
+                      result={getQryBoxLabel}
+                      defaultValue="81127c77-7d8d-4420-99cd-8f4d7191b727"
+                    />
                   </Column>
                   <Column md={6} name="languagelocalisation_UP_DATE1">
                     <Label

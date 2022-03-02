@@ -19,6 +19,7 @@ export const CommonSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       visible,
       disabled,
       maxSelections,
+      defaultValue,
       value,
       handleValidation,
       options,
@@ -35,7 +36,7 @@ export const CommonSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       PublicMethod.checkValue(options) ? options : []
     );
     const [selectedValue, setSelectedValue] = useState(
-      PublicMethod.checkValue(value) ? value : []
+      PublicMethod.checkValue(defaultValue) ? defaultValue : []
     );
     const [selectionBoxDisable, setSelectionBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);

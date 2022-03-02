@@ -31,6 +31,7 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       disabled,
       name,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       delimiter,
@@ -51,7 +52,9 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     const [objectDisable, setObjectDisable] = useState(false);
     const [labelValue, setLabelValue] = useState("");
     const [textboxValue, setTextboxValue] = useState("");
-    const [selectedValue, setSelectedValue] = useState("");
+    const [selectedValue, setSelectedValue] = useState(
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
+    );
     const [dialogValue, setDialogValue] = useState({});
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [valueDelimiter] = useState(
@@ -333,6 +336,7 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                     name={name}
                     maxLength={maxLength}
                     disabled={textboxDisable}
+                    defaultValue={defaultValue}
                     value={selectedValue}
                     handleValidation={handleValidation}
                     result={(value) => resultValue(value)}

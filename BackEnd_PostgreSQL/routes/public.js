@@ -66,7 +66,10 @@ router.route("/get_ticket_granting_cookie").post(async (req, res) => {
 
 router.route("/get_account").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [req.body["account"] ? req.body["account"] : null];
+  let parameter = [
+    req.body["account"] ? req.body["account"] : null,
+    req.body["account_uid"] ? req.body["account_uid"] : null,
+  ];
   let sql = fs
     .readFileSync(path.resolve(__dirname, "../sql/public/get_account.sql"))
     .toString();
