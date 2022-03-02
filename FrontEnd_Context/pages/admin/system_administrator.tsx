@@ -3,7 +3,7 @@ import { Card, ButtonToolbar } from "reactstrap";
 import Swal from "sweetalert2";
 import moment from "moment";
 import {
-  RoW,
+  Row,
   Column,
   DatetimeBox,
   TextQryBox,
@@ -74,10 +74,10 @@ function System_administrator_Content({ system_uid }) {
         defaultQueryParameters={{ administrator_SYSTEM_UID: system_uid }}
         style={{ display: "none" }}
       />
-      <RoW>
+      <Row>
         <Column>
           <Card>
-            <RoW>
+            <Row>
               <Column>
                 <div className="input-group mb-3">
                   <div className="input-group-append">
@@ -271,10 +271,10 @@ function System_administrator_Content({ system_uid }) {
                   }}
                 />
               </Column>
-            </RoW>
+            </Row>
           </Card>
         </Column>
-      </RoW>
+      </Row>
     </Form>
   );
 }

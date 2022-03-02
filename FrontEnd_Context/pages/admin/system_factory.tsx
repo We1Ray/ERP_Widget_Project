@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Card, ButtonToolbar } from "reactstrap";
 import Swal from "sweetalert2";
 import {
-  RoW,
+  Row,
   Column,
   TextBox,
   Label,
@@ -70,7 +70,7 @@ function System_factory_Content({ system_uid }) {
   return (
     <Form program_code="admin.system.factory" dataKey={["factory_uid"]}>
       <Card>
-        <RoW>
+        <Row>
           <Column md={9}>
             <div className="input-group mb-3">
               <div className="input-group-append">
@@ -103,7 +103,7 @@ function System_factory_Content({ system_uid }) {
               ]}
             />
           </Column>
-        </RoW>
+        </Row>
         <div className="content">
           <Label
             text={System.getLocalization("system_factory", "IS_ENABLED") + ":"}

@@ -10,7 +10,7 @@ import {
 } from "reactstrap";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import {
-  RoW,
+  Row,
   Column,
   Label,
   TextBox,
@@ -247,7 +247,7 @@ function Group_Content() {
                       </Nav>
                       <TabContent activeTab={activeTab}>
                         <TabPane tabId="groupinfo" role="tabpanel">
-                          <RoW>
+                          <Row>
                             <Column>
                               <div className="input-group mb-3">
                                 <div className="input-group-append">
@@ -280,8 +280,8 @@ function Group_Content() {
                                 </div>
                               </div>
                             </Column>
-                          </RoW>
-                          <RoW>
+                          </Row>
+                          <Row>
                             <Column md={6}>
                               <Label
                                 text={System.getLocalization(
@@ -386,7 +386,7 @@ function Group_Content() {
                                 )}
                               />
                             </Column>
-                          </RoW>
+                          </Row>
                         </TabPane>
                         <TabPane tabId="groupauthority" role="tabpanel">
                           <Group_permissions

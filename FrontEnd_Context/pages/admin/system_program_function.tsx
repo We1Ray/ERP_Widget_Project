@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Card, ButtonToolbar, Input } from "reactstrap";
 import Swal from "sweetalert2";
 import {
-  RoW,
+  Row,
   Column,
   Label,
   DataTable,
@@ -110,10 +110,10 @@ function System_program_function_Content({ system_uid, program_uid }) {
           return PublicMethod.checkValue(program_uid) ? false : true;
         }}
       />
-      <RoW>
+      <Row>
         <Column>
           <Card>
-            <RoW>
+            <Row>
               <Column>
                 <div className="input-group mb-3">
                   <div className="input-group-append">
@@ -354,10 +354,10 @@ function System_program_function_Content({ system_uid, program_uid }) {
                   }}
                 />
               </Column>
-            </RoW>
+            </Row>
           </Card>
         </Column>
-      </RoW>
+      </Row>
     </Form>
   );
 }

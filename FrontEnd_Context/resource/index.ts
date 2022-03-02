@@ -1,7 +1,7 @@
 export { Block } from "./widget/system-ui/Block";
 export { Loading } from "./widget/system-ui/Loading";
 export { None } from "./widget/system-ui/None";
-export { RoW } from "./widget/system-ui/Row";
+export { Row } from "./widget/system-ui/Row";
 export { Column } from "./widget/system-ui/Column";
 export { default as DraggableDialog } from "./widget/system-ui/DraggableDialog";
 

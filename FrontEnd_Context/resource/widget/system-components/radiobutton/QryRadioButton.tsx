@@ -14,7 +14,7 @@ import {
 } from "../../system-control/ProgramContext";
 import PublicMethod from "../../../methods/PublicMethod";
 import { Input, Col } from "reactstrap";
-import { RoW } from "../../system-ui/Row";
+import { Row } from "../../system-ui/Row";
 import { None } from "../../system-ui/None";
 import { RadioButtonProps } from "./RadioButton";
 import useLatest from "../../../methods/useLatest";
@@ -254,9 +254,9 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
       <>
         {display ? (
           <>
-            <RoW ref={radioButtonRef} {...props}>
+            <Row ref={radioButtonRef} {...props}>
               {Selection}
-            </RoW>
+            </Row>
           </>
         ) : (
           <None />

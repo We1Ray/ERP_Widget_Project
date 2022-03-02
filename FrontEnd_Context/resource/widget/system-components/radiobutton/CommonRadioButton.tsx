@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import PublicMethod from "../../../methods/PublicMethod";
 import { Input, Col } from "reactstrap";
-import { RoW } from "../../system-ui/Row";
+import { Row } from "../../system-ui/Row";
 import { None } from "../../system-ui/None";
 import { RadioButtonProps } from "./RadioButton";
 
@@ -170,9 +170,9 @@ export const CommonRadioButton: React.FC<RadioButtonProps> = forwardRef(
       <>
         {display ? (
           <>
-            <RoW ref={radioButtonRef} {...props}>
+            <Row ref={radioButtonRef} {...props}>
               {Selection}
-            </RoW>
+            </Row>
           </>
         ) : (
           <None />

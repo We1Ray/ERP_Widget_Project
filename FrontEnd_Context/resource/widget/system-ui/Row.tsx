@@ -6,7 +6,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Row } from "reactstrap";
+import { Row as Roa } from "reactstrap";
 import PublicMethod from "../../methods/PublicMethod";
 import { ProgramContext } from "../system-control/ProgramContext";
 import { None } from "./None";
@@ -29,7 +29,7 @@ interface Props {
   ref?: React.Ref<any>;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
-export const RoW: React.FC<Props> = forwardRef(
+export const Row: React.FC<Props> = forwardRef(
   ({ visible, name, callbackRef, ...props }, forwardedRef) => {
     const { Program } = useContext(ProgramContext);
     const [display, setDisplay] = useState(true);
@@ -47,7 +47,7 @@ export const RoW: React.FC<Props> = forwardRef(
           callbackRef(rowRef);
         }
       } catch (error) {
-        console.log("EROOR: RoW.useEffect()");
+        console.log("EROOR: Row.useEffect()");
         console.log(error);
       }
     });
@@ -55,9 +55,9 @@ export const RoW: React.FC<Props> = forwardRef(
     return (
       <>
         {display ? (
-          <Row ref={rowRef} {...props}>
+          <Roa ref={rowRef} {...props}>
             {props.children}
-          </Row>
+          </Roa>
         ) : (
           <None />
         )}

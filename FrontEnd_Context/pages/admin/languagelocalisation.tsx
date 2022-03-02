@@ -3,7 +3,7 @@ import { Button, Card, CardBody, ButtonToolbar } from "reactstrap";
 import XLSX from "xlsx";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import {
-  RoW,
+  Row,
   Column,
   Label,
   Block,
@@ -58,7 +58,7 @@ function LanguageLocalisation_Content() {
       await CallApi.ExecuteApi(
         System.factory.name,
         System.factory.ip + "/public/get_account",
-        { account_uid: text }
+        { account: text }
       )
         .then((res) => {
           if (res) {
@@ -333,7 +333,7 @@ function LanguageLocalisation_Content() {
     return (
       <Block>
         <Column>
-          <RoW>
+          <Row>
             <Column md={6}>
               <Label
                 text={System.getLocalization(
@@ -376,7 +376,7 @@ function LanguageLocalisation_Content() {
                 }}
               />
             </Column>
-          </RoW>
+          </Row>
         </Column>
       </Block>
     );
@@ -408,7 +408,7 @@ function LanguageLocalisation_Content() {
           >
             <Block>
               <Column md={12}>
-                <RoW>
+                <Row>
                   <Column md={9}>
                     <div className="input-group mb-3">
                       <div className="input-group-append">
@@ -507,8 +507,8 @@ function LanguageLocalisation_Content() {
                       ]}
                     />
                   </Column>
-                </RoW>
-                <RoW>
+                </Row>
+                <Row>
                   <Column md={6} name="languagelocalisation_LANGUAGE">
                     <Label
                       text={System.getLocalization(
@@ -576,7 +576,7 @@ function LanguageLocalisation_Content() {
                         style: { height: "500px" },
                       }}
                       text={{
-                        name: "account_uid",
+                        name: "account",
                         disabled: true,
                         visible: false,
                       }}
@@ -585,7 +585,7 @@ function LanguageLocalisation_Content() {
                         value: qryBoxLabel,
                       }}
                       result={getQryBoxLabel}
-                      defaultValue="81127c77-7d8d-4420-99cd-8f4d7191b727"
+                      defaultValue="WEIRAY.LIN"
                     />
                   </Column>
                   <Column md={6} name="languagelocalisation_UP_DATE1">
@@ -615,8 +615,8 @@ function LanguageLocalisation_Content() {
                       />
                     </div>
                   </Column>
-                </RoW>
-                <RoW>
+                </Row>
+                <Row>
                   <Column>
                     <DataTable
                       bind={true}
@@ -716,7 +716,7 @@ function LanguageLocalisation_Content() {
                               </ButtonToolbar>
                             </Column>
                             <Column>
-                              <RoW>
+                              <Row>
                                 <Column md={6}>
                                   <Label
                                     text={System.getLocalization(
@@ -777,14 +777,14 @@ function LanguageLocalisation_Content() {
                                     maxLength={200}
                                   />
                                 </Column>
-                              </RoW>
+                              </Row>
                             </Column>
                           </Block>
                         ),
                       }}
                     />
                   </Column>
-                </RoW>
+                </Row>
               </Column>
             </Block>
           </Form>

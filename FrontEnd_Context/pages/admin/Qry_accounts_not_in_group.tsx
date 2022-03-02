@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Card, ButtonToolbar } from "reactstrap";
 import {
-  RoW,
+  Row,
   Column,
   DataTable,
   Label,
@@ -43,7 +43,7 @@ function Qry_accounts_not_in_group_Content({ group_uid, callback }) {
         individual={true}
       >
         <Column md={12}>
-          <RoW>
+          <Row>
             <Column md={12}>
               <ButtonToolbar>
                 <BtnQuery
@@ -65,7 +65,7 @@ function Qry_accounts_not_in_group_Content({ group_uid, callback }) {
                 name="account_not_group_KEY"
               />
             </Column>
-          </RoW>
+          </Row>
         </Column>
         <Column md={12}>
           <Column>

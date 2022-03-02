@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import paginationFactory from "react-bootstrap-table2-paginator";
 import {
-  RoW,
+  Row,
   Column,
   Block,
   SelectionBox,
@@ -288,7 +288,7 @@ function Group_permissions_Content({ group_uid, is_core, group_name }) {
 
   return (
     <>
-      <RoW>
+      <Row>
         <Column md={3}>
           <legend className="mb-2">
             <b>
@@ -464,7 +464,7 @@ function Group_permissions_Content({ group_uid, is_core, group_name }) {
             </Block>
           </Form>
         </Column>
-      </RoW>
+      </Row>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Card, TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import {
-  RoW,
+  Row,
   Column,
   Label,
   Tree,
@@ -207,7 +207,7 @@ function System_program_Content({ system_uid }) {
         defaultQueryParameters={{ programadmin_SYSTEM_UID: system_uid }}
         style={{ display: "none" }}
       />
-      <RoW>
+      <Row>
         <Column md={3}>
           <Tree
             bind={true}
@@ -249,7 +249,7 @@ function System_program_Content({ system_uid }) {
                 </Nav>
                 <TabContent activeTab={activeTab}>
                   <TabPane tabId="ProgramInfo" role="tabpanel">
-                    <RoW>
+                    <Row>
                       <Column>
                         <div className="input-group mb-3">
                           <div className="input-group-append">
@@ -281,7 +281,7 @@ function System_program_Content({ system_uid }) {
                             <BtnCancel />
                           </div>
                         </div>
-                        <RoW
+                        <Row
                           style={{
                             display:
                               status.value === STATUS.CREATE ? "block" : "none",
@@ -316,8 +316,8 @@ function System_program_Content({ system_uid }) {
                               }}
                             />
                           </Column>
-                        </RoW>
-                        <RoW>
+                        </Row>
+                        <Row>
                           <Column>
                             <p
                               style={{
@@ -337,7 +337,7 @@ function System_program_Content({ system_uid }) {
                                 bind={true}
                                 name="self_code"
                               />
-                              <RoW>
+                              <Row>
                                 <Column md={4}>
                                   <Label text={parent_code + "."} bind={true} />
                                 </Column>
@@ -352,7 +352,7 @@ function System_program_Content({ system_uid }) {
                                     }
                                   />
                                 </Column>
-                              </RoW>
+                              </Row>
                             </p>
                             <p
                               style={{
@@ -395,8 +395,8 @@ function System_program_Content({ system_uid }) {
                               handleValidation={NotNull_handleValidation}
                             />
                           </Column>
-                        </RoW>
-                        <RoW>
+                        </Row>
+                        <Row>
                           <Column>
                             <Label
                               text={System.getLocalization(
@@ -419,9 +419,9 @@ function System_program_Content({ system_uid }) {
                             />
                             <TextBox bind={true} name="icon" maxLength={300} />
                           </Column>
-                        </RoW>
+                        </Row>
 
-                        <RoW>
+                        <Row>
                           <Column>
                             <Label
                               text={System.getLocalization(
@@ -470,8 +470,8 @@ function System_program_Content({ system_uid }) {
                               )}
                             />
                           </Column>
-                        </RoW>
-                        <RoW>
+                        </Row>
+                        <Row>
                           <Column>
                             <Label
                               text={System.getLocalization(
@@ -499,9 +499,9 @@ function System_program_Content({ system_uid }) {
                               handleValidation={SEQ_handleValidation}
                             />
                           </Column>
-                        </RoW>
+                        </Row>
                       </Column>
-                    </RoW>
+                    </Row>
                   </TabPane>
                   <TabPane tabId="Authority" role="tabpanel">
                     <System_program_function
@@ -514,7 +514,7 @@ function System_program_Content({ system_uid }) {
             </form>
           </Card>
         </Column>
-      </RoW>
+      </Row>
     </Form>
   );
 }

@@ -119,7 +119,7 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
         console.log("EROOR: BindSelectionBox.useEffect[status]");
         console.log(error);
       }
-    }, [status, defaultValue]);
+    }, [status, disabled, defaultValue]);
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {

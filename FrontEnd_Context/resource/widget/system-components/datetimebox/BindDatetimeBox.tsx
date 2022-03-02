@@ -75,7 +75,7 @@ export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     /** 狀態改變執行的地方 */
     useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled, defaultValue]);
 
     useEffect(() => {
       try {

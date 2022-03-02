@@ -10,7 +10,7 @@ import CallApi from "../../../api/CallApi";
 import { Card, Button, Col } from "reactstrap";
 import { SystemContext } from "../../system-control/SystemContext";
 import PublicMethod from "../../../methods/PublicMethod";
-import { RoW } from "../../system-ui/Row";
+import { Row } from "../../system-ui/Row";
 import { CommonTextBox } from "../textbox/CommonTextBox";
 import "./TextQryBox.scss";
 import { Label } from "../label/Label";
@@ -18,6 +18,9 @@ import { None } from "../../system-ui/None";
 import swal from "sweetalert";
 import { TextQryBoxProps } from "./TextQryBox";
 import useLatest from "../../../methods/useLatest";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DraggableDialog from "../../system-ui/DraggableDialog";
 
 export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
   (
@@ -286,7 +289,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       <Card>
         {display ? (
           <>
-            <RoW {...props}>
+            <Row {...props}>
               {
                 <Col
                   md={7}
@@ -325,7 +328,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               ) : (
                 <None />
               )}
-              <RoW>
+              <Row>
                 <Col>
                   <Button disabled={objectDisable} onClick={() => clearValue()}>
                     <em className="fa fa-trash"></em>
@@ -337,36 +340,31 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                     <em className="fa fa-search"></em>
                   </Button>
                 </Col>
-              </RoW>
-            </RoW>
-            {dialogOn && !objectDisable ? (
-              <div className="dialog" style={dialog.style}>
-                <RoW>
-                  <Col>
-                    <dialog.window
-                      callback={(value: any) => {
-                        setDialogValue(value);
-                      }}
-                      {...dialog.parameter}
-                    />
-                  </Col>
-                </RoW>
-                <RoW>
-                  <Col md={7} />
-                  <Col md={5}>
-                    <Button onClick={() => setDialogOn(false)}>
-                      <em className={"fas fa-ban"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Cancel")}
-                    </Button>
-                    <Button color="success" onClick={selectQryValue}>
-                      <em className={"far fa-save"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Determine")}
-                    </Button>
-                  </Col>
-                </RoW>
-              </div>
+              </Row>
+            </Row>
+            {PublicMethod.checkValue(dialogOn) ? (
+              <DraggableDialog open={dialogOn && !objectDisable}>
+                <DialogContent style={dialog.style}>
+                  <dialog.window
+                    callback={(value: any) => {
+                      setDialogValue(value);
+                    }}
+                    {...dialog.parameter}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setDialogOn(false)}>
+                    <em className={"fas fa-ban"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Cancel")}
+                  </Button>
+                  <Button color="success" onClick={selectQryValue}>
+                    <em className={"far fa-save"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Determine")}
+                  </Button>
+                </DialogActions>
+              </DraggableDialog>
             ) : (
               <None />
             )}

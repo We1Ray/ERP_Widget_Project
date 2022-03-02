@@ -5,7 +5,7 @@ from
 	ACCOUNTS A
 where
 	($1::varchar is null
-		or (account = $1::varchar ))
+		or (upper(account) like concat( '%', upper( $1::varchar ), '%' )))
 	and(
 		$2::varchar is null
 		or(

@@ -13,7 +13,7 @@ import {
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import {
-  RoW,
+  Row,
   Column,
   Label,
   None,
@@ -144,7 +144,7 @@ function System_Content() {
   function dataContent(system_Type_Options: any[]) {
     return (
       <>
-        <RoW>
+        <Row>
           <Column>
             <Label
               text={System.getLocalization("system", "SYSTEM_NAME")}
@@ -158,8 +158,8 @@ function System_Content() {
               handleValidation={NotNull_handleValidation}
             />
           </Column>
-        </RoW>
-        <RoW>
+        </Row>
+        <Row>
           <Column>
             <Label
               text={System.getLocalization("system", "SYSTEM_DESC")}
@@ -173,8 +173,8 @@ function System_Content() {
               area={true}
             />
           </Column>
-        </RoW>
-        <RoW>
+        </Row>
+        <Row>
           <Column>
             <Label
               text={System.getLocalization("system", "SYSTEM_TYPE")}
@@ -194,8 +194,8 @@ function System_Content() {
               maxSelections={1}
             />
           </Column>
-        </RoW>
-        <RoW>
+        </Row>
+        <Row>
           <Column>
             <Label
               text={System.getLocalization("system", "ENABLED")}
@@ -211,7 +211,7 @@ function System_Content() {
               notCheckedText={System.getLocalization("Public", "No")}
             />
           </Column>
-        </RoW>
+        </Row>
       </>
     );
   }
@@ -313,7 +313,7 @@ function System_Content() {
                             }}
                             style={{ display: "none" }}
                           />
-                          <RoW>
+                          <Row>
                             <Column>
                               <div className="input-group mb-3">
                                 <div className="input-group-append">
@@ -328,8 +328,8 @@ function System_Content() {
                                 </div>
                               </div>
                             </Column>
-                          </RoW>
-                          <RoW>
+                          </Row>
+                          <Row>
                             <Column>
                               <Label
                                 text={System.getLocalization(
@@ -346,8 +346,8 @@ function System_Content() {
                                 disabled={true}
                               />
                             </Column>
-                          </RoW>
-                          <RoW>
+                          </Row>
+                          <Row>
                             <Column>
                               <Label
                                 text={System.getLocalization(
@@ -364,7 +364,7 @@ function System_Content() {
                                 disabled={true}
                               />
                             </Column>
-                          </RoW>
+                          </Row>
                           {dataContent(system_Type_Options)}
                         </Form>
                       </TabPane>
@@ -385,7 +385,7 @@ function System_Content() {
           ) : (
             <div className="content-wrapper">
               <Form program_code="admin.system" dataKey={["system_uid"]}>
-                <RoW>
+                <Row>
                   <Column md={6}>
                     <div className="input-group mb-3">
                       <TextBox query={true} name="systemadmin_SYSTEM_NAME" />
@@ -410,8 +410,8 @@ function System_Content() {
                       </div>
                     </div>
                   </Column>
-                </RoW>
-                <RoW>
+                </Row>
+                <Row>
                   {Program.data.map((data) => (
                     <Column md="3">
                       <Card className="card card-default">
@@ -438,7 +438,7 @@ function System_Content() {
                       </Card>
                     </Column>
                   ))}
-                </RoW>
+                </Row>
                 <BtnCreate
                   insertApi="/system/create_system"
                   defaultParameters={{

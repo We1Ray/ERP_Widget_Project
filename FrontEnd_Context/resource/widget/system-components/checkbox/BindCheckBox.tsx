@@ -97,7 +97,7 @@ export const BindCheckBox: React.FC<CheckBoxProps> = forwardRef(
     /** Bind useEffect */
     useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled, defaultValue]);
 
     /**當查詢資料變更時的動作*/
     useEffect(() => {
