@@ -14,6 +14,10 @@ from
 			'ZK' SYSTEM_TYPE,
 			'ZK' SYSTEM_TYPE_NAME,
 			3 SEQ
+	union all select
+			'A' SYSTEM_TYPE,
+			'A' SYSTEM_TYPE_NAME,
+			4 SEQ
 	) A
 order by
 	SEQ

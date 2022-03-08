@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import PublicMethod from "../../../methods/PublicMethod";
 import { None } from "../../system-ui/None";
-import { getheight, showCurrentValue } from "./TextBox";
+import { handleKeyDown, showCurrentValue, getheight } from "./TextBox";
 import { TextBoxProps } from "./TextBox";
 
 export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
@@ -91,9 +91,6 @@ export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea) {
-          getheight(textboxRef);
-        }
         showCurrentValue(textboxRef, textboxValue);
         if (result) {
           result(textboxValue);
@@ -103,6 +100,17 @@ export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
         console.log(error);
       }
     }, [textboxValue]);
+
+    useEffect(() => {
+      try {
+        if (textArea && !style) {
+          getheight(textboxRef);
+        }
+      } catch (error) {
+        console.log("EROOR: BindTextBox.useEffect");
+        console.log(error);
+      }
+    });
 
     useEffect(() => {
       try {
@@ -141,6 +149,7 @@ export const CommonTextBox: React.FC<TextBoxProps> = forwardRef(
                 style={style ? style : { minHeight: "40px" }}
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}
+                onKeyDown={handleKeyDown}
                 {...props}
               />
             ) : (

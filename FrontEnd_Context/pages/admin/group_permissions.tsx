@@ -138,6 +138,7 @@ function Group_permissions_Content({ group_uid, is_core, group_name }) {
         checkedValue={"Y"}
         notCheckedText={""}
         notCheckedValue={"N"}
+        defaultValue={check}
         value={check}
         result={(e) => {
           change(e);

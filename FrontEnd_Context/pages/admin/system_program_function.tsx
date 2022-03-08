@@ -192,7 +192,7 @@ function System_program_function_Content({ system_uid, program_uid }) {
                           checkedValue={"Y"}
                           notCheckedText={""}
                           notCheckedValue={"N"}
-                          value={row.is_core}
+                          defaultValue={row.is_core}
                         />
                       ),
                     },
@@ -210,6 +210,7 @@ function System_program_function_Content({ system_uid, program_uid }) {
                           checkedValue={"Y"}
                           notCheckedText={""}
                           notCheckedValue={"N"}
+                          defaultValue={row.enabled}
                           value={row.enabled}
                         />
                       ),

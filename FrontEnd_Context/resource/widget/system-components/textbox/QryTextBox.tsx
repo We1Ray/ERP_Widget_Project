@@ -14,8 +14,8 @@ import {
 } from "../../system-control/ProgramContext";
 import PublicMethod from "../../../methods/PublicMethod";
 import { None } from "../../system-ui/None";
-import { getheight, showCurrentValue } from "./TextBox";
-import { TextBoxProps } from "./TextBox";
+import { showCurrentValue } from "./TextBox";
+import { TextBoxProps, handleKeyDown, getheight } from "./TextBox";
 import useLatest from "../../../methods/useLatest";
 
 export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
@@ -67,9 +67,6 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea) {
-          getheight(textboxRef);
-        }
         showCurrentValue(textboxRef, textboxValue);
         setQryTextboxValueToChangeData();
         if (result) {
@@ -80,6 +77,17 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
         console.log(error);
       }
     }, [textboxValue]);
+
+    useEffect(() => {
+      try {
+        if (textArea && !style) {
+          getheight(textboxRef);
+        }
+      } catch (error) {
+        console.log("EROOR: BindTextBox.useEffect");
+        console.log(error);
+      }
+    });
 
     /** Qry useEffect */
     useEffect(() => {
@@ -233,6 +241,7 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
                 style={style ? style : { minHeight: "40px" }}
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}
+                onKeyDown={handleKeyDown}
                 {...props}
               />
             ) : (
