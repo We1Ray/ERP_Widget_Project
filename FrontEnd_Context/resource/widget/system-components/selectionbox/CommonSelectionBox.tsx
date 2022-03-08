@@ -171,6 +171,8 @@ export const CommonSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
                   ? !selectedValue.some((selected) => selected.isFixed)
                   : true
               }
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               {...props}
             />
           </NoSSR>

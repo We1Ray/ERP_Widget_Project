@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
+import { Portal } from "react-overlays";
 import { SystemContext } from "../../system-control/SystemContext";
 import {
   ProgramContext,
@@ -210,6 +211,12 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       }
     }
 
+    const CalendarContainer = ({ children }) => {
+      const el = document.getElementById("calendar-portal");
+
+      return <Portal container={el}>{children}</Portal>;
+    };
+
     return (
       <>
         {display ? (
@@ -225,6 +232,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
               type="text"
               className="form-control"
               customInput={<MaskedInput mask={mask} {...props} />}
+              popperContainer={CalendarContainer}
             />
           </>
         ) : (
