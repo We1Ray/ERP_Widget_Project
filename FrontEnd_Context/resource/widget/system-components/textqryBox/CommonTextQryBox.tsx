@@ -14,7 +14,7 @@ import { Row } from "../../system-ui/Row";
 import { CommonTextBox } from "../textbox/CommonTextBox";
 import "./TextQryBox.scss";
 import { Label } from "../label/Label";
-import { None } from "../../system-ui/None";
+import { None } from '../../system-ui/None';
 import swal from "sweetalert";
 import { TextQryBoxProps } from "./TextQryBox";
 import useLatest from "../../../methods/useLatest";
@@ -36,6 +36,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       text,
       label,
       result,
+      hideButton,
       callbackRef,
       ...props
     },
@@ -60,6 +61,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     useImperativeHandle(forwardedRef, () => textboxRef.current);
 
     useEffect(() => {
+
       try {
         if (PublicMethod.checkValue(callbackRef)) {
           callbackRef(textboxRef);
@@ -286,13 +288,13 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     }
 
     return (
-      <Card>
+      <Card {...props}>
         {display ? (
           <>
-            <Row {...props}>
+            <Row>
               {
                 <Col
-                  md={7}
+                  md={5}
                   style={{
                     display: (
                       PublicMethod.checkValue(text.visible)
@@ -318,7 +320,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               {(
                 PublicMethod.checkValue(label.visible) ? label.visible : true
               ) ? (
-                <Col md={3}>
+                <Col md={5}>
                   <Label
                     style={label.style ? label.style : { fontWeight: "normal" }}
                   >
@@ -328,8 +330,10 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               ) : (
                 <None />
               )}
-              <Row>
-                <Col>
+
+              {(PublicMethod.checkValue(hideButton) ? hideButton : false) ? (
+                <div>
+                
                   <Button disabled={objectDisable} onClick={() => clearValue()}>
                     <em className="fa fa-trash"></em>
                   </Button>
@@ -339,8 +343,11 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   >
                     <em className="fa fa-search"></em>
                   </Button>
-                </Col>
-              </Row>
+                
+              </div>
+              ): (<None/>)}
+              
+              
             </Row>
             {PublicMethod.checkValue(dialogOn) ? (
               <DraggableDialog open={dialogOn && !objectDisable}>

@@ -80,8 +80,14 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea && !style) {
-          getheight(textboxRef);
+        if (textArea) {
+          if (style) {
+            if (!style.height) {
+              getheight(textboxRef);
+            }
+          } else {
+            getheight(textboxRef);
+          }
         }
       } catch (error) {
         console.log("EROOR: BindTextBox.useEffect");
@@ -238,7 +244,15 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
                 disabled={textboxDisable}
                 defaultValue={textboxValue}
                 maxLength={maxLength}
-                style={style ? style : { minHeight: "40px" }}
+                style={
+                  style
+                    ? Object.assign({
+                      minHeight: "40px",
+                    }, style)
+                    : {
+                      minHeight: "40px",
+                    }
+                }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}
                 onKeyDown={handleKeyDown}

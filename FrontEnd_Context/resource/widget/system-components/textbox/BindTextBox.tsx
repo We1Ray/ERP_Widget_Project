@@ -93,8 +93,14 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea && !style) {
-          getheight(textboxRef);
+        if (textArea) {
+          if (style) {
+            if (!style.height) {
+              getheight(textboxRef);
+            }
+          } else {
+            getheight(textboxRef);
+          }
         }
       } catch (error) {
         console.log("EROOR: BindTextBox.useEffect");
@@ -312,11 +318,14 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
                 maxLength={maxLength}
                 style={
                   style
-                    ? style
+                    ? Object.assign({
+                      minHeight: "40px",
+                      backgroundColor: backColor,
+                    }, style)
                     : {
-                        minHeight: "40px",
-                        backgroundColor: backColor,
-                      }
+                      minHeight: "40px",
+                      backgroundColor: backColor,
+                    }
                 }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}

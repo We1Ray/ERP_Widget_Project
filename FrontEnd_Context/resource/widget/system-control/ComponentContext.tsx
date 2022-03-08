@@ -36,6 +36,9 @@ interface ComponentProps {
 const ComponentContext = React.createContext<ComponentProps>({
   Component: ComponentInitialState,
 });
+/**
+ * 設定元件的公用方法和資料的Context
+ */
 function ComponentProvider(props: any) {
   const [Component, ComponentDispatch] = useReducer(
     ComponentReducer,

@@ -109,6 +109,9 @@ const ProgramContext = React.createContext<ProgramProps>({
 const statusContext = React.createContext<statusProps>({
   status: STATUS.READ,
 });
+/**
+ * 設定作業的公用方法和資料的Context
+ */
 function ProgramProvider(props: any) {
   const [Program, ProgramDispatch] = useReducer(
     ProgramReducer,

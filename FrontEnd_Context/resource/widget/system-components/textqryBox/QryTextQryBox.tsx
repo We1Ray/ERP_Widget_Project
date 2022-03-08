@@ -318,13 +318,13 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     }
 
     return (
-      <Card>
+      <Card {...props}>
         {display ? (
           <>
-            <Row {...props}>
+            <Row>
               {
                 <Col
-                  md={7}
+                  md={5}
                   style={{
                     display: (
                       PublicMethod.checkValue(text.visible)
@@ -351,7 +351,7 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               {(
                 PublicMethod.checkValue(label.visible) ? label.visible : true
               ) ? (
-                <Col md={3}>
+                <Col md={5}>
                   <Label
                     style={label.style ? label.style : { fontWeight: "normal" }}
                   >
@@ -361,8 +361,8 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               ) : (
                 <None />
               )}
-              <Row>
-                <Col>
+              <div>
+                
                   <Button disabled={objectDisable} onClick={() => clearValue()}>
                     <em className="fa fa-trash"></em>
                   </Button>
@@ -372,8 +372,8 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   >
                     <em className="fa fa-search"></em>
                   </Button>
-                </Col>
-              </Row>
+                
+              </div>
             </Row>
             {PublicMethod.checkValue(dialogOn) ? (
               <DraggableDialog open={dialogOn && !objectDisable}>

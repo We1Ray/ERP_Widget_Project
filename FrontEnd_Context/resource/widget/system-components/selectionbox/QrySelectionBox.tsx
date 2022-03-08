@@ -6,7 +6,6 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
-import { Portal } from "react-overlays";
 import Select, { components } from "react-select";
 import { SystemContext } from "../../system-control/SystemContext";
 import {
@@ -237,12 +236,6 @@ export const QrySelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       }
     }
 
-    const CalendarContainer = ({ children }) => {
-      const el = document.getElementById("calendar-portal");
-
-      return <Portal container={el}>{children}</Portal>;
-    };
-
     return (
       <>
         {display ? (
@@ -275,7 +268,6 @@ export const QrySelectionBox: React.FC<SelectionBoxProps> = forwardRef(
               }
               menuPortalTarget={document.body}
               styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              popperContainer={CalendarContainer}
               {...props}
             />
           </NoSSR>
