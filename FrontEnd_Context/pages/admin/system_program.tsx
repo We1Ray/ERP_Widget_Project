@@ -303,7 +303,6 @@ function System_program_Content({ system_uid }) {
                               dialog={{
                                 window: Qry_system_program,
                                 parameter: { system_uid: system_uid },
-                                style: { height: "400px" },
                               }}
                               text={{
                                 name: "program_uid",

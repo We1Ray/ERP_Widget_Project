@@ -299,7 +299,6 @@ function System_Content() {
                       <TabPane
                         tabId="system"
                         role="tabpanel"
-                        style={{ height: "600px" }}
                       >
                         <Form
                           program_code="admin.system"
@@ -397,9 +396,7 @@ function System_Content() {
                           }}
                         />
                         <DraggableDialog open={dialogOn}>
-                          <DialogContent
-                            style={{ height: "400px", width: "400px" }}
-                          >
+                          <DialogContent style={{ width: "400px" }}>
                             <Column>{dataContent(system_Type_Options)}</Column>
                           </DialogContent>
                           <DialogActions>

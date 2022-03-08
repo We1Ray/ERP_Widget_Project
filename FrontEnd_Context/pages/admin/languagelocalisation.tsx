@@ -573,7 +573,6 @@ function LanguageLocalisation_Content() {
                       maxLength={60}
                       dialog={{
                         window: Qry_accounts,
-                        style: { height: "500px" },
                       }}
                       text={{
                         name: "account",

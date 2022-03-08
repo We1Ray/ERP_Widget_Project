@@ -162,7 +162,6 @@ function System_factory_Content({ system_uid }) {
           data={Program.data}
           multipleSelection={true}
           dialog={{
-            style: { width: "600px", height: "auto" },
             content: (
               <Block head="資料編輯">
                 <Column md={12}>

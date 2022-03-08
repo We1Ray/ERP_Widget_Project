@@ -297,7 +297,6 @@ function Group_Content() {
                                 maxLength={60}
                                 dialog={{
                                   window: Qry_group_list_for_admin,
-                                  style: { height: "400px" },
                                 }}
                                 text={{
                                   name: "group_uid",

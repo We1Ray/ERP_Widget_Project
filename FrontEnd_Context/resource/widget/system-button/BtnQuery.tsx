@@ -236,7 +236,36 @@ export const BtnQuery: React.FC<Props> = ({
           //刪除和查詢後指定第一筆資料
           switch (type) {
             case "QUERY":
-              ProgramDispatch({ type: "selectedData", value: data[0] });
+              if (PublicMethod.checkValue(Program.selectedData)) {
+                let select = false;
+                let row = {};
+                for (let i = 0; i < data.length; i++) {
+                  //設定selectedData的RowID
+                  if (!select) {
+                    for (let j = 0; j < Program.dataKey.length; j++) {
+                      if (
+                        Program.selectedData[Program.dataKey[j]] ===
+                        data[i][Program.dataKey[j]]
+                      ) {
+                        select = true;
+                        row = data[i];
+                      } else {
+                        select = false;
+                      }
+                    }
+                  } else {
+                    break;
+                  }
+                }
+                if (select) {
+                  ProgramDispatch({ type: "selectedData", value: row });
+                } else {
+                  ProgramDispatch({ type: "selectedData", value: data[0] });
+                }
+              } else {
+                ProgramDispatch({ type: "selectedData", value: data[0] });
+              }
+
               ProgramDispatch({ type: "selectedMultiData", value: [] });
               break;
             case "SAVE":
@@ -302,7 +331,10 @@ export const BtnQuery: React.FC<Props> = ({
       style={style}
       color="green"
       disabled={queryDisable}
-      onClick={() => send(STATUS.QUERY)}
+      onClick={() => {
+        ProgramDispatch({ type: "selectedData", value: {} });
+        send(STATUS.QUERY);
+      }}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

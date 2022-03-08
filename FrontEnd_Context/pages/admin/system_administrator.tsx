@@ -200,7 +200,6 @@ function System_administrator_Content({ system_uid }) {
                   data={Program.data}
                   multipleSelection={true}
                   dialog={{
-                    style: { width: "600px", height: "auto" },
                     content: (
                       <Block head="資料編輯">
                         <Column md={12}>
@@ -237,7 +236,6 @@ function System_administrator_Content({ system_uid }) {
                             dialog={{
                               window: Qry_accounts_not_in_system,
                               parameter: { system_uid: system_uid },
-                              style: { height: "400px" },
                             }}
                             text={{
                               name: "account_uid",

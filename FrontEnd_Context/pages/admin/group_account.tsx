@@ -236,7 +236,6 @@ function Group_account_Content({ group_uid, is_core }) {
           data={Program.data}
           multipleSelection={true}
           dialog={{
-            style: { width: "600px" },
             content: (
               <Block head={System.getLocalization("group", "group")}>
                 <Column
@@ -266,7 +265,6 @@ function Group_account_Content({ group_uid, is_core }) {
                     dialog={{
                       window: Qry_accounts_not_in_group,
                       parameter: { group_uid: group_uid },
-                      style: { height: "500px" },
                     }}
                     text={{
                       name: "account_uid",
