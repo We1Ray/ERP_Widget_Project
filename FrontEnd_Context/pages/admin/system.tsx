@@ -296,10 +296,7 @@ function System_Content() {
                       </NavItem>
                     </Nav>
                     <TabContent activeTab={activeTab}>
-                      <TabPane
-                        tabId="system"
-                        role="tabpanel"
-                      >
+                      <TabPane tabId="system" role="tabpanel">
                         <Form
                           program_code="admin.system"
                           dataKey={["system_uid"]}

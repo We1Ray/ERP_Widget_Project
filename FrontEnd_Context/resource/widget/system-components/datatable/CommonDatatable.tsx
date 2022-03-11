@@ -5,7 +5,6 @@ import React, {
   forwardRef,
 } from "react";
 import BootstrapTable from "react-bootstrap-table-next";
-import "./DataTable.scss";
 import PublicMethod from "../../../methods/PublicMethod";
 import { DataTableProps } from "./DataTable";
 

@@ -212,7 +212,8 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     }
 
     const CalendarContainer = ({ children }) => {
-      const el = document.getElementById("calendar-portal");
+      let handle = Math.floor(Math.random() * 10000);
+      const el = document.getElementById("calendar-portal" + handle);
 
       return <Portal container={el}>{children}</Portal>;
     };

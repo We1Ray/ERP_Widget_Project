@@ -284,7 +284,7 @@ function LanguageLocalisation_Content() {
     }
   }, [status]);
 
-  function expandContent(row, updateParams, setUpdateParams) {
+  function expandContent(row) {
     const [data] = useState(row);
     const [display, setDisplay] = useState(row["display"]);
 
@@ -318,17 +318,15 @@ function LanguageLocalisation_Content() {
           });
           if (index > -1) {
             update[index] = rowdata;
-            setUpdateParams(update);
           } else {
-            update.push(rowdata);
-            setUpdateParams(update);
+            update.push(data);
           }
         } else {
-          update.push(rowdata);
-          setUpdateParams(update);
+          update.push(data);
         }
+        setUpdateParams(update);
       }
-    }, [display, updateParams]);
+    }, [display]);
 
     return (
       <Block>
@@ -372,7 +370,13 @@ function LanguageLocalisation_Content() {
                 disabled={!status.matches(STATUS.UPDATE)}
                 maxLength={200}
                 result={(value) => {
-                  setDisplay(value);
+                  switch (status.value) {
+                    case STATUS.UPDATE:
+                      setDisplay(value);
+                      break;
+                    default:
+                      break;
+                  }
                 }}
               />
             </Column>
@@ -573,6 +577,7 @@ function LanguageLocalisation_Content() {
                       maxLength={60}
                       dialog={{
                         window: Qry_accounts,
+                        style: { width: 1000 },
                       }}
                       text={{
                         name: "account",
@@ -683,9 +688,7 @@ function LanguageLocalisation_Content() {
                       data={Program.data}
                       multipleSelection={true}
                       sizePerPageList={[10, 20, 50, 100]}
-                      Expand={({ row }) =>
-                        expandContent(row, updateParams, setUpdateParams)
-                      }
+                      Expand={({ row }) => expandContent(row)}
                       dialog={{
                         content: (
                           <Block head="資料編輯">

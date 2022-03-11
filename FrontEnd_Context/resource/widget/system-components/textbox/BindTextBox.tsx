@@ -289,6 +289,8 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
             }
             break;
           case STATUS.UPDATE:
+            console.log(Program.updateParameters[name]);
+            console.log(textboxValue);
             if (Program.updateParameters[name] !== textboxValue) {
               ProgramDispatch({
                 type: "updateParameters",
@@ -318,14 +320,17 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
                 maxLength={maxLength}
                 style={
                   style
-                    ? Object.assign({
-                      minHeight: "40px",
-                      backgroundColor: backColor,
-                    }, style)
+                    ? Object.assign(
+                        {
+                          minHeight: "40px",
+                          backgroundColor: backColor,
+                        },
+                        style
+                      )
                     : {
-                      minHeight: "40px",
-                      backgroundColor: backColor,
-                    }
+                        minHeight: "40px",
+                        backgroundColor: backColor,
+                      }
                 }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}

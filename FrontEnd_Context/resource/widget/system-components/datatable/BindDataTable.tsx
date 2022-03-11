@@ -15,7 +15,6 @@ import {
   statusContext,
   STATUS,
 } from "../../system-control/ProgramContext";
-import "./DataTable.scss";
 import PublicMethod from "../../../methods/PublicMethod";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -439,7 +438,7 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
           {...props}
         />
         {PublicMethod.checkValue(dialog) ? (
-          <DraggableDialog open={dialogOn}>
+          <DraggableDialog open={dialogOn} style={dialog.style}>
             <DialogContent style={dialog.style}>{dialog.content}</DialogContent>
             <DialogActions>
               <Button
