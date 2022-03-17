@@ -72,7 +72,7 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
     /** 狀態改變執行的地方 */
     useEffect(() => {
       checkStatus();
-    }, [status, disabled, defaultValue]);
+    }, [status, disabled]);
 
     /**當查詢資料變更時的動作*/
     useEffect(() => {
@@ -81,7 +81,7 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && radioButtonValue !== value) {
           if (value) {
             setRadioButtonValue(value);
           } else {

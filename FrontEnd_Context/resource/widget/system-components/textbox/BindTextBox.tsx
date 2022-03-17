@@ -110,11 +110,11 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       checkStatus();
-    }, [status, disabled, defaultValue]);
+    }, [status, disabled]);
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && textboxValue !== value) {
           if (value) {
             setTextboxValue(value);
           } else {

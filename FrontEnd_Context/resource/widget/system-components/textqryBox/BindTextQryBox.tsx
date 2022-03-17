@@ -171,7 +171,7 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && selectedValue !== value) {
           if (value) {
             setSelectedValue(value);
           } else {
@@ -192,7 +192,7 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log("EROOR: BindTextQryBox.useEffect[status]");
         console.log(error);
       }
-    }, [status, disabled, defaultValue]);
+    }, [status, disabled]);
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {
@@ -371,17 +371,15 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 <None />
               )}
               <div>
-                
-                  <Button disabled={objectDisable} onClick={() => clearValue()}>
-                    <em className="fa fa-trash"></em>
-                  </Button>
-                  <Button
-                    disabled={objectDisable}
-                    onClick={() => setDialogOn(!dialogOn)}
-                  >
-                    <em className="fa fa-search"></em>
-                  </Button>
-                
+                <Button disabled={objectDisable} onClick={() => clearValue()}>
+                  <em className="fa fa-trash"></em>
+                </Button>
+                <Button
+                  disabled={objectDisable}
+                  onClick={() => setDialogOn(!dialogOn)}
+                >
+                  <em className="fa fa-search"></em>
+                </Button>
               </div>
             </Row>
             {PublicMethod.checkValue(dialogOn) ? (

@@ -98,7 +98,10 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (
+          value !== undefined &&
+          !PublicMethod.isArrayItemEqual(selectedValue, value)
+        ) {
           if (value) {
             setSelectedValue(value);
           } else {
@@ -109,7 +112,7 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
         console.log("EROOR: BindTextBox.useEffect[value]");
         console.log(error);
       }
-    }, [value]);
+    }, [JSON.stringify(value)]);
 
     /** 狀態改變執行的地方 */
     useEffect(() => {
@@ -119,7 +122,7 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
         console.log("EROOR: BindSelectionBox.useEffect[status]");
         console.log(error);
       }
-    }, [status, disabled, defaultValue]);
+    }, [status, disabled]);
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {
