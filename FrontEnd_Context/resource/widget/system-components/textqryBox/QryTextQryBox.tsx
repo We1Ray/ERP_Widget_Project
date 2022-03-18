@@ -286,6 +286,12 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 System.getLocalization("Public", "Data");
             }
             if (latest()) {
+              if (
+                PublicMethod.checkValue(textboxValue) &&
+                textboxValue !== selectedValue
+              ) {
+                setSelectedValue(textboxValue);
+              }
               setLabelValue(lable);
             }
           } catch (error) {
@@ -362,17 +368,15 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 <None />
               )}
               <div>
-                
-                  <Button disabled={objectDisable} onClick={() => clearValue()}>
-                    <em className="fa fa-trash"></em>
-                  </Button>
-                  <Button
-                    disabled={objectDisable}
-                    onClick={() => setDialogOn(!dialogOn)}
-                  >
-                    <em className="fa fa-search"></em>
-                  </Button>
-                
+                <Button disabled={objectDisable} onClick={() => clearValue()}>
+                  <em className="fa fa-trash"></em>
+                </Button>
+                <Button
+                  disabled={objectDisable}
+                  onClick={() => setDialogOn(!dialogOn)}
+                >
+                  <em className="fa fa-search"></em>
+                </Button>
               </div>
             </Row>
             {PublicMethod.checkValue(dialogOn) ? (

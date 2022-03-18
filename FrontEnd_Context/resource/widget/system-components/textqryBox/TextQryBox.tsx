@@ -55,7 +55,7 @@ interface TextQryBoxProps {
   /**
    * 是否隱藏控制項
    */
-  hideButton?:boolean;
+  hideButton?: boolean;
   /**
    * 開窗
    */
@@ -174,7 +174,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             name={name}
             maxLength={maxLength}
             defaultValue={defaultValue}
-            value={defaultValue}
+            value={value}
             handleValidation={handleValidation}
             delimiter={delimiter}
             dialog={dialog}
@@ -207,7 +207,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             disabled={disabled}
             maxLength={maxLength}
             defaultValue={defaultValue}
-            value={defaultValue}
+            value={value}
             handleValidation={handleValidation}
             delimiter={delimiter}
             dialog={dialog}

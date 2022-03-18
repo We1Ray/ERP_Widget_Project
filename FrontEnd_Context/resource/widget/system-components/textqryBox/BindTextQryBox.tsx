@@ -295,6 +295,12 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 System.getLocalization("Public", "Data");
             }
             if (latest()) {
+              if (
+                PublicMethod.checkValue(textboxValue) &&
+                textboxValue !== selectedValue
+              ) {
+                setSelectedValue(textboxValue);
+              }
               setLabelValue(lable);
             }
           } catch (error) {

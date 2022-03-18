@@ -289,8 +289,6 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
             }
             break;
           case STATUS.UPDATE:
-            console.log(Program.updateParameters[name]);
-            console.log(textboxValue);
             if (Program.updateParameters[name] !== textboxValue) {
               ProgramDispatch({
                 type: "updateParameters",

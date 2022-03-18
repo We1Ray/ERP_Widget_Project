@@ -14,7 +14,7 @@ import { Row } from "../../system-ui/Row";
 import { CommonTextBox } from "../textbox/CommonTextBox";
 import "./TextQryBox.scss";
 import { Label } from "../label/Label";
-import { None } from '../../system-ui/None';
+import { None } from "../../system-ui/None";
 import swal from "sweetalert";
 import { TextQryBoxProps } from "./TextQryBox";
 import useLatest from "../../../methods/useLatest";
@@ -61,7 +61,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     useImperativeHandle(forwardedRef, () => textboxRef.current);
 
     useEffect(() => {
-
       try {
         if (PublicMethod.checkValue(callbackRef)) {
           callbackRef(textboxRef);
@@ -256,6 +255,12 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 System.getLocalization("Public", "Data");
             }
             if (latest()) {
+              if (
+                PublicMethod.checkValue(textboxValue) &&
+                textboxValue !== selectedValue
+              ) {
+                setSelectedValue(textboxValue);
+              }
               setLabelValue(lable);
             }
           } catch (error) {
@@ -333,7 +338,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
 
               {(PublicMethod.checkValue(hideButton) ? hideButton : false) ? (
                 <div>
-                
                   <Button disabled={objectDisable} onClick={() => clearValue()}>
                     <em className="fa fa-trash"></em>
                   </Button>
@@ -343,11 +347,10 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   >
                     <em className="fa fa-search"></em>
                   </Button>
-                
-              </div>
-              ): (<None/>)}
-              
-              
+                </div>
+              ) : (
+                <None />
+              )}
             </Row>
             {PublicMethod.checkValue(dialogOn) ? (
               <DraggableDialog open={dialogOn && !objectDisable}>
