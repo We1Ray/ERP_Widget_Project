@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -36,6 +36,7 @@ import {
   BtnCreate,
   PublicMethod,
   CallApi,
+  Window,
 } from "../../resource/index";
 import "ds-widget/dist/index.css";
 import System_program from "./system_program";
@@ -64,6 +65,7 @@ function System_Content() {
   const [activeTab, setActiveTab] = useState("system");
   const [backButtonDisable, setBackButtonDisable] = useState(false);
   const [system_Type_Options, setSystem_Type_Options] = useState([]);
+  const contentRef = useRef(null);
 
   useEffect(() => {
     initial_System_Type_Option();
@@ -223,10 +225,43 @@ function System_Content() {
     }
     return msg;
   }
+  const defaultAppState = {
+    component: () => {
+      return (
+        <div
+          style={{
+            height: "1000px",
+            width: "100%",
+          }}
+        >
+          77777
+        </div>
+      );
+    },
+    header: {
+      title: "Internet Explorer",
+      icon: "/static/img/ie-paper.png",
+      // invisible: true,
+    },
+    defaultSize: {
+      width: 500,
+      height: 400,
+    },
+    defaultOffset: {
+      x: 350,
+      y: -100,
+    },
+    resizable: true,
+    minimized: false,
+    maximized: false,
+    id: "123",
+    ParentRef: contentRef,
+  };
 
   return (
     <div
       style={{ height: PublicMethod.checkValue(system_uid) ? "100%" : "90vh" }}
+      ref={contentRef}
     >
       {PublicMethod.checkValue(System.token) &&
       PublicMethod.checkValue(System.system_uid) ? (
@@ -457,6 +492,8 @@ function System_Content() {
               </Form>
             </div>
           )}
+
+          <Window app={defaultAppState} focusedAppId={"123"} />
         </>
       ) : (
         <None />

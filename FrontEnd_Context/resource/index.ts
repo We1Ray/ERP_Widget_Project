@@ -4,6 +4,7 @@ export { None } from "./widget/system-ui/None";
 export { Row } from "./widget/system-ui/Row";
 export { Column } from "./widget/system-ui/Column";
 export { default as DraggableDialog } from "./widget/system-ui/DraggableDialog";
+export { default as Window } from "./widget/system-ui/Windows";
 
 export { BtnCancel } from "./widget/system-button/BtnCancel";
 export { BtnCreate } from "./widget/system-button/BtnCreate";

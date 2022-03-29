@@ -43,7 +43,9 @@ function BaseContent({ ...props }) {
           props.props.children
         )}
       </section> */}
-      <section className="section-container">{props.props.children}</section>
+      <section style={{ zIndex: 0 }} className="section-container">
+        {props.props.children}
+      </section>
       <Footer />
     </div>
   );
