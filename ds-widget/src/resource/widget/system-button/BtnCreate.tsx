@@ -10,6 +10,7 @@ import {
 } from "../system-control/ProgramContext";
 import { ComponentContext } from "../system-control/ComponentContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 interface Props {
   /**
    * 設定是否可使用
@@ -93,59 +94,57 @@ export const BtnCreate: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        let check = false;
-        if (!Program.individual) {
-          for (var key in Component.status) {
-            if (check) break;
-            if (Component.status[key] == STATUS.READ) {
-              for (var key2 in Component.loading) {
-                if (check) break;
-                if (Component.loading[key2] == "READ") {
-                  check = false;
-                } else {
-                  check = true;
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          let check = false;
+          if (!Program.individual) {
+            for (var key in Component.status) {
+              if (check) break;
+              if (Component.status[key] == STATUS.READ) {
+                for (var key2 in Component.loading) {
+                  if (check) break;
+                  if (Component.loading[key2] == "READ") {
+                    check = false;
+                  } else {
+                    check = true;
+                  }
                 }
+              } else {
+                check = true;
               }
+            }
+          }
+          if (status.matches(STATUS.READ) && !check) {
+            if (Program.loading == "READ") {
+              check = !createPermission;
             } else {
               check = true;
             }
-          }
-        }
-        if (status.matches(STATUS.READ) && !check) {
-          if (Program.loading == "READ") {
-            check = !createPermission;
           } else {
             check = true;
           }
-        } else {
-          check = true;
+          if (latest()) {
+            setCreateDisable(check);
+          }
+        } catch (error) {
+          console.log("EROOR: BtnCreate.checkEnable");
+          console.log(error);
         }
-        if (latest) {
-          setCreateDisable(check);
-        }
-      } catch (error) {
-        console.log("EROOR: BtnCreate.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-
-    return () => {
-      latest = false;
-    };
-  }, [
-    JSON.stringify(Component.status),
-    JSON.stringify(Component.loading),
-    JSON.stringify(Program.selectedData),
-    Program.individual,
-    Program.loading,
-    status,
-    createPermission,
-  ]);
+      checkEnable();
+    },
+    [
+      JSON.stringify(Component.status),
+      JSON.stringify(Component.loading),
+      JSON.stringify(Program.selectedData),
+      Program.individual,
+      Program.loading,
+      status,
+      createPermission,
+    ]
+  );
 
   useEffect(() => {
     onCreate();

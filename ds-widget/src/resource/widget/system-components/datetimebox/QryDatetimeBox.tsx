@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
+import { Portal } from "react-overlays";
 import { SystemContext } from "../../system-control/SystemContext";
 import {
   ProgramContext,
@@ -19,6 +20,7 @@ import MaskedInput from "react-maskedinput";
 import "./DatetimeBox.scss";
 import { None } from "../../system-ui/None";
 import { DatetimeBoxProps } from "./DatetimeBox";
+import useLatest from "../../../methods/useLatest";
 
 export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
   (
@@ -26,6 +28,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       visible,
       disabled,
       name,
+      defaultValue,
       value,
       handleValidation,
       format,
@@ -40,7 +43,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [datetimeValue, setDatetimeValue] = useState(
-      PublicMethod.checkValue(value) ? value : null
+      PublicMethod.checkValue(defaultValue) ? defaultValue : null
     );
     const [datetimeBoxDisable, setDatetimeBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);
@@ -87,36 +90,40 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       checkLoading();
     }, [Program.loading]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (PublicMethod.checkValue(handleValidation)) {
-            valid = await handleValidation(newValue);
-          }
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["query"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["query"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue) => {
+          try {
+            let valid = "";
+            if (PublicMethod.checkValue(handleValidation)) {
+              valid = await handleValidation(newValue);
             }
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation["query"][name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation["query"][name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: QryDatetimeBox.valueValidation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: QryDatetimeBox.valueValidation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     useEffect(() => {
       try {
@@ -204,6 +211,13 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       }
     }
 
+    const CalendarContainer = ({ children }) => {
+      let handle = Math.floor(Math.random() * 10000);
+      const el = document.getElementById("calendar-portal" + handle);
+
+      return <Portal container={el}>{children}</Portal>;
+    };
+
     return (
       <>
         {display ? (
@@ -219,6 +233,7 @@ export const QryDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
               type="text"
               className="form-control"
               customInput={<MaskedInput mask={mask} {...props} />}
+              popperContainer={CalendarContainer}
             />
           </>
         ) : (

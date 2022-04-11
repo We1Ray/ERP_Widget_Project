@@ -110,6 +110,7 @@ const TextBox: React.FC<TextBoxProps> = forwardRef(
             disabled={disabled}
             name={name}
             maxLength={maxLength}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             result={result}
@@ -138,6 +139,7 @@ const TextBox: React.FC<TextBoxProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             maxLength={maxLength}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             result={result}
@@ -155,12 +157,30 @@ const TextBox: React.FC<TextBoxProps> = forwardRef(
 function getheight(ref: React.MutableRefObject<any>) {
   try {
     ref.current.style.height = "0px";
-    const scrollHeight = ref.current.scrollHeight;
+    let scrollHeight = ref.current.scrollHeight;
     ref.current.style.height = scrollHeight + "px";
   } catch (error) {
     console.log("EROOR: TextBox.getheight");
     console.log(error);
   }
+}
+
+function handleKeyDown(e: any) {
+  // Reset field height
+  e.target.style.height = "inherit";
+
+  // Get the computed styles for the element
+  const computed = window.getComputedStyle(e.target);
+
+  // Calculate the height
+  const height =
+    parseInt(computed.getPropertyValue("border-top-width"), 10) +
+    parseInt(computed.getPropertyValue("padding-top"), 10) +
+    e.target.scrollHeight +
+    parseInt(computed.getPropertyValue("padding-bottom"), 10) +
+    parseInt(computed.getPropertyValue("border-bottom-width"), 10);
+
+  e.target.style.height = `${height}px`;
 }
 
 function showCurrentValue(ref: React.MutableRefObject<any>, value: string) {
@@ -177,5 +197,5 @@ function showCurrentValue(ref: React.MutableRefObject<any>, value: string) {
     console.log(error);
   }
 }
-export { TextBox, getheight, showCurrentValue };
+export { TextBox, handleKeyDown, getheight, showCurrentValue };
 export type { TextBoxProps };

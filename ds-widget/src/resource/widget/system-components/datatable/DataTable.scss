@@ -12,3 +12,12 @@
 .react-bs-table-no-data {
   text-align: center;
 }
+
+.Select-menu-outer {
+  z-index: 1000;
+}
+
+.react-bootstrap-table-pagination .dropdown-menu {
+  bottom: 100% !important;
+  top: auto !important;
+}

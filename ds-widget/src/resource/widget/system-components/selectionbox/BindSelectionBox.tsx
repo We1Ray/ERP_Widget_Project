@@ -18,6 +18,7 @@ import { None } from "../../system-ui/None";
 import NoSSR from "react-no-ssr";
 import { getSelectionFromData, getSelectionToData } from "./SelectionBox";
 import { SelectionBoxProps } from "./SelectionBox";
+import useLatest from "../../../methods/useLatest";
 
 export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
   (
@@ -97,7 +98,10 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (
+          value !== undefined &&
+          !PublicMethod.isArrayItemEqual(selectedValue, value)
+        ) {
           if (value) {
             setSelectedValue(value);
           } else {
@@ -108,7 +112,7 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
         console.log("EROOR: BindTextBox.useEffect[value]");
         console.log(error);
       }
-    }, [value]);
+    }, [JSON.stringify(value)]);
 
     /** 狀態改變執行的地方 */
     useEffect(() => {
@@ -118,7 +122,7 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
         console.log("EROOR: BindSelectionBox.useEffect[status]");
         console.log(error);
       }
-    }, [status, defaultValue]);
+    }, [status, disabled]);
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {
@@ -206,46 +210,52 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
       setBindValueToStatusParameter();
     }, [selectedValue, status]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (
-            status.matches(STATUS.CREATE) &&
-            Program.dataKey.indexOf(name) > -1 &&
-            !PublicMethod.checkValue(newValue)
-          ) {
-            //判斷Key值是否為空
-            valid = System.getLocalization("Public", "ErrorMsgEmpty");
-          } else if (
-            (status.matches(STATUS.UPDATE) || status.matches(STATUS.CREATE)) &&
-            PublicMethod.checkValue(handleValidation)
-          ) {
-            //判斷新增/修改時 是否有正規表示式
-            valid = await handleValidation(newValue);
-          }
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["bind"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["bind"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue: any) => {
+          try {
+            let valid = "";
+            if (
+              status.matches(STATUS.CREATE) &&
+              Program.dataKey.indexOf(name) > -1 &&
+              !PublicMethod.checkValue(newValue)
+            ) {
+              //判斷Key值是否為空
+              valid = System.getLocalization("Public", "ErrorMsgEmpty");
+            } else if (
+              (status.matches(STATUS.UPDATE) ||
+                status.matches(STATUS.CREATE)) &&
+              PublicMethod.checkValue(handleValidation)
+            ) {
+              //判斷新增/修改時 是否有正規表示式
+              valid = await handleValidation(newValue);
             }
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation.bind[name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation.bind[name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: BindSelectionBox.valueValidation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: BindSelectionBox.valueValidation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     function setBindValueToStatusParameter() {
       try {
@@ -329,6 +339,8 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
                   ? !selectedValue.some((selected) => selected.isFixed)
                   : true
               }
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               {...props}
             />
           </NoSSR>

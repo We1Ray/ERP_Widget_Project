@@ -53,6 +53,10 @@ interface TextQryBoxProps {
    */
   delimiter?: string;
   /**
+   * 是否隱藏控制項
+   */
+  hideButton?: boolean;
+  /**
    * 開窗
    */
   dialog: {
@@ -115,7 +119,8 @@ interface TextQryBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (value: string) => any | ((value: string) => Promise<any>);
+  [x: string]: any;
   /**
    * 元件的Reference
    */
@@ -140,6 +145,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       text,
       label,
       result,
+      hideButton,
       callbackRef,
       ...props
     },
@@ -167,7 +173,8 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             disabled={disabled}
             name={name}
             maxLength={maxLength}
-            value={defaultValue}
+            defaultValue={defaultValue}
+            value={value}
             handleValidation={handleValidation}
             delimiter={delimiter}
             dialog={dialog}
@@ -199,13 +206,15 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             maxLength={maxLength}
-            value={defaultValue}
+            defaultValue={defaultValue}
+            value={value}
             handleValidation={handleValidation}
             delimiter={delimiter}
             dialog={dialog}
             text={text}
             label={label}
             result={result}
+            hideButton={hideButton}
             ref={textboxRef}
             {...props}
           />

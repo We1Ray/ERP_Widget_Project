@@ -104,6 +104,7 @@ const CheckBox: React.FC<CheckBoxProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             name={name}
+            defaultValue={defaultValue}
             value={value}
             checkedText={checkedText}
             notCheckedText={notCheckedText}
@@ -132,6 +133,7 @@ const CheckBox: React.FC<CheckBoxProps> = forwardRef(
           <CommonCheckBox
             visible={visible}
             disabled={disabled}
+            defaultValue={defaultValue}
             value={value}
             checkedText={checkedText}
             notCheckedText={notCheckedText}

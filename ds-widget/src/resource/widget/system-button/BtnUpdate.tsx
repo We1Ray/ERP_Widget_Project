@@ -10,6 +10,7 @@ import {
   STATUS,
 } from "../system-control/ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 interface Props {
   /**
    * 設定是否可使用
@@ -93,65 +94,64 @@ export const BtnUpdate: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        let check = false;
-        if (!Program.individual) {
-          for (var key in Component.status) {
-            if (check) break;
-            if (
-              Component.status[key] == STATUS.READ &&
-              PublicMethod.checkValue(Program.selectedData)
-            ) {
-              for (var key2 in Component.loading) {
-                if (check) break;
-                if (Component.loading[key2] == "READ") {
-                  check = false;
-                } else {
-                  check = true;
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          let check = false;
+          if (!Program.individual) {
+            for (var key in Component.status) {
+              if (check) break;
+              if (
+                Component.status[key] == STATUS.READ &&
+                PublicMethod.checkValue(Program.selectedData)
+              ) {
+                for (var key2 in Component.loading) {
+                  if (check) break;
+                  if (Component.loading[key2] == "READ") {
+                    check = false;
+                  } else {
+                    check = true;
+                  }
                 }
+              } else {
+                check = true;
               }
+            }
+          }
+          if (
+            status.matches(STATUS.READ) &&
+            PublicMethod.checkValue(Program.selectedData) &&
+            !check
+          ) {
+            if (Program.loading == "READ") {
+              check = !updatePermission;
             } else {
               check = true;
             }
-          }
-        }
-        if (
-          status.matches(STATUS.READ) &&
-          PublicMethod.checkValue(Program.selectedData) &&
-          !check
-        ) {
-          if (Program.loading == "READ") {
-            check = !updatePermission;
           } else {
             check = true;
           }
-        } else {
-          check = true;
+          if (latest()) {
+            setUpdateDisable(check);
+          }
+        } catch (error) {
+          console.log("EROOR: BtnUpdate.checkEnable");
+          console.log(error);
         }
-        if (latest) {
-          setUpdateDisable(check);
-        }
-      } catch (error) {
-        console.log("EROOR: BtnUpdate.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-    return () => {
-      latest = false;
-    };
-  }, [
-    JSON.stringify(Component.status),
-    JSON.stringify(Component.loading),
-    JSON.stringify(Program.selectedData),
-    Program.loading,
-    Program.individual,
-    status,
-    updatePermission,
-  ]);
+      checkEnable();
+    },
+    [
+      JSON.stringify(Component.status),
+      JSON.stringify(Component.loading),
+      JSON.stringify(Program.selectedData),
+      Program.loading,
+      Program.individual,
+      status,
+      updatePermission,
+    ]
+  );
 
   useEffect(() => {
     onUpdate();

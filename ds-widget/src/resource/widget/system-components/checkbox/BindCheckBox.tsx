@@ -86,7 +86,9 @@ export const BindCheckBox: React.FC<CheckBoxProps> = forwardRef(
     useEffect(() => {
       try {
         if (PublicMethod.checkValue(value)) {
-          setChecked(value == checkedValue);
+          if ((value == checkedValue) != checked) {
+            setChecked(value == checkedValue);
+          }
         }
       } catch (error) {
         console.log("EROOR: BindCheckBox.useEffect[defaultValue]");
@@ -97,7 +99,7 @@ export const BindCheckBox: React.FC<CheckBoxProps> = forwardRef(
     /** Bind useEffect */
     useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled]);
 
     /**當查詢資料變更時的動作*/
     useEffect(() => {

@@ -17,6 +17,10 @@ import { Label } from "../label/Label";
 import { None } from "../../system-ui/None";
 import swal from "sweetalert";
 import { TextQryBoxProps } from "./TextQryBox";
+import useLatest from "../../../methods/useLatest";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DraggableDialog from "../../system-ui/DraggableDialog";
 
 export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
   (
@@ -24,6 +28,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       visible,
       disabled,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       delimiter,
@@ -31,6 +36,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       text,
       label,
       result,
+      hideButton,
       callbackRef,
       ...props
     },
@@ -42,7 +48,9 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     const [objectDisable, setObjectDisable] = useState(false);
     const [labelValue, setLabelValue] = useState("");
     const [textboxValue, setTextboxValue] = useState("");
-    const [selectedValue, setSelectedValue] = useState("");
+    const [selectedValue, setSelectedValue] = useState(
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
+    );
     const [dialogValue, setDialogValue] = useState({});
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [valueDelimiter] = useState(
@@ -73,19 +81,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log(error);
       }
     }, [visible]);
-
-    useEffect(() => {
-      try {
-        if (value) {
-          setSelectedValue(value);
-        } else {
-          setSelectedValue("");
-        }
-      } catch (error) {
-        console.log("EROOR: CommonTextQryBox.useEffect[value]");
-        console.log(error);
-      }
-    }, [value]);
 
     useEffect(() => {
       try {
@@ -224,56 +219,61 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       }
     }, [objectDisable]);
 
-    useEffect(() => {
-      let latest = true;
-      const lableChange = async () => {
-        try {
-          let lable = "";
-          if (PublicMethod.checkValue(textboxValue)) {
-            if (PublicMethod.checkValue(label.value)) {
-              lable = label.value;
-            } else if (PublicMethod.checkValue(label.api)) {
-              await CallApi.ExecuteApi(
-                System.factory.name,
-                System.factory.ip + label.api,
-                { [text.name]: textboxValue }
-              ).then(async (res) => {
-                if (PublicMethod.checkValue(res.data)) {
-                  //額外再給予Operation和api做查詢給值
-                  lable = res.data[0][label.name];
-                } else {
-                  lable =
-                    System.getLocalization("Public", "None") +
-                    textboxValue +
-                    System.getLocalization("Public", "Data");
-                }
-              });
+    useLatest(
+      (latest) => {
+        const lableChange = async () => {
+          try {
+            let lable = "";
+            if (PublicMethod.checkValue(textboxValue)) {
+              if (PublicMethod.checkValue(label.value)) {
+                lable = label.value;
+              } else if (PublicMethod.checkValue(label.api)) {
+                await CallApi.ExecuteApi(
+                  System.factory.name,
+                  System.factory.ip + label.api,
+                  { [text.name]: textboxValue }
+                ).then((res) => {
+                  if (PublicMethod.checkValue(res.data)) {
+                    //額外再給予Operation和api做查詢給值
+                    lable = res.data[0][label.name];
+                  } else {
+                    lable =
+                      System.getLocalization("Public", "None") +
+                      textboxValue +
+                      System.getLocalization("Public", "Data");
+                  }
+                });
+              } else {
+                lable =
+                  System.getLocalization("Public", "None") +
+                  textboxValue +
+                  System.getLocalization("Public", "Data");
+              }
             } else {
               lable =
                 System.getLocalization("Public", "None") +
-                textboxValue +
                 System.getLocalization("Public", "Data");
             }
-          } else {
-            lable =
-              System.getLocalization("Public", "None") +
-              System.getLocalization("Public", "Data");
+            if (latest()) {
+              if (
+                PublicMethod.checkValue(textboxValue) &&
+                textboxValue !== selectedValue
+              ) {
+                setSelectedValue(textboxValue);
+              }
+              setLabelValue(lable);
+            }
+          } catch (error) {
+            console.log(
+              "EROOR: CommonTextQryBox.useEffect[textboxValue, JSON.stringify(label)]"
+            );
+            console.log(error);
           }
-          if (latest) {
-            setLabelValue(lable);
-          }
-        } catch (error) {
-          console.log(
-            "EROOR: CommonTextQryBox.useEffect[textboxValue, JSON.stringify(label)]"
-          );
-          console.log(error);
-        }
-      };
-      lableChange();
-      return () => {
-        latest = false;
-      };
-    }, [textboxValue, JSON.stringify(label)]);
+        };
+        lableChange();
+      },
+      [textboxValue, JSON.stringify(label)]
+    );
 
     useEffect(() => {
       try {
@@ -293,13 +293,13 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     }
 
     return (
-      <Card>
+      <Card {...props}>
         {display ? (
           <>
-            <Row {...props}>
+            <Row>
               {
                 <Col
-                  md={7}
+                  md={5}
                   style={{
                     display: (
                       PublicMethod.checkValue(text.visible)
@@ -313,6 +313,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   <CommonTextBox
                     maxLength={maxLength}
                     disabled={textboxDisable}
+                    defaultValue={defaultValue}
                     value={selectedValue}
                     style={text.style}
                     handleValidation={handleValidation}
@@ -324,7 +325,7 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               {(
                 PublicMethod.checkValue(label.visible) ? label.visible : true
               ) ? (
-                <Col md={3}>
+                <Col md={5}>
                   <Label
                     style={label.style ? label.style : { fontWeight: "normal" }}
                   >
@@ -334,8 +335,9 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               ) : (
                 <None />
               )}
-              <Row>
-                <Col>
+
+              {(PublicMethod.checkValue(hideButton) ? hideButton : false) ? (
+                <div>
                   <Button disabled={objectDisable} onClick={() => clearValue()}>
                     <em className="fa fa-trash"></em>
                   </Button>
@@ -345,37 +347,34 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                   >
                     <em className="fa fa-search"></em>
                   </Button>
-                </Col>
-              </Row>
+                </div>
+              ) : (
+                <None />
+              )}
             </Row>
-            {dialogOn && !objectDisable ? (
-              <div className="dialog" style={dialog.style}>
-                <Row>
-                  <Col>
-                    <dialog.window
-                      callback={(value: any) => {
-                        setDialogValue(value);
-                      }}
-                      {...dialog.parameter}
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col md={7} />
-                  <Col md={5}>
-                    <Button onClick={() => setDialogOn(false)}>
-                      <em className={"fas fa-ban"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Cancel")}
-                    </Button>
-                    <Button color="success" onClick={selectQryValue}>
-                      <em className={"far fa-save"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Determine")}
-                    </Button>
-                  </Col>
-                </Row>
-              </div>
+            {PublicMethod.checkValue(dialogOn) ? (
+              <DraggableDialog open={dialogOn && !objectDisable}>
+                <DialogContent style={dialog.style}>
+                  <dialog.window
+                    callback={(value: any) => {
+                      setDialogValue(value);
+                    }}
+                    {...dialog.parameter}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setDialogOn(false)}>
+                    <em className={"fas fa-ban"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Cancel")}
+                  </Button>
+                  <Button color="success" onClick={selectQryValue}>
+                    <em className={"far fa-save"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Determine")}
+                  </Button>
+                </DialogActions>
+              </DraggableDialog>
             ) : (
               <None />
             )}

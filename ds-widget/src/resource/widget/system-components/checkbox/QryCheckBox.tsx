@@ -23,6 +23,7 @@ export const QryCheckBox: React.FC<CheckBoxProps> = forwardRef(
       visible,
       disabled,
       name,
+      defaultValue,
       value,
       checkedText,
       notCheckedText,
@@ -37,11 +38,13 @@ export const QryCheckBox: React.FC<CheckBoxProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [checked, setChecked] = useState(
-      PublicMethod.checkValue(value) ? value == checkedValue : false
+      PublicMethod.checkValue(defaultValue)
+        ? defaultValue == checkedValue
+        : false
     );
     const [checkboxText, setCheckboxText] = useState(
-      PublicMethod.checkValue(value)
-        ? value == checkedValue
+      PublicMethod.checkValue(defaultValue)
+        ? defaultValue == checkedValue
           ? checkedText
           : notCheckedText
         : notCheckedText

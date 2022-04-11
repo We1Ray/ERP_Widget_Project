@@ -99,6 +99,7 @@ const DatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             name={name}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             format={format}
@@ -123,6 +124,7 @@ const DatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
           <CommonDatetimeBox
             visible={visible}
             disabled={disabled}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             format={format}

@@ -5,6 +5,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
+import { Portal } from "react-overlays";
 import PublicMethod from "../../../methods/PublicMethod";
 import DatePicker from "react-datepicker";
 import "./react-datepicker.css";
@@ -18,6 +19,7 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     {
       visible,
       disabled,
+      defaultValue,
       value,
       handleValidation,
       format,
@@ -29,7 +31,7 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     forwardedRef
   ) => {
     const [datetimeValue, setDatetimeValue] = useState(
-      PublicMethod.checkValue(value) ? value : null
+      PublicMethod.checkValue(defaultValue) ? defaultValue : null
     );
     const [datetimeBoxDisable, setDatetimeBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);
@@ -118,6 +120,13 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       }
     }
 
+    const CalendarContainer = ({ children }) => {
+      let handle = Math.floor(Math.random() * 10000);
+      const el = document.getElementById("calendar-portal" + handle);
+
+      return <Portal container={el}>{children}</Portal>;
+    };
+
     return (
       <>
         {display ? (
@@ -133,6 +142,7 @@ export const CommonDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
               type="text"
               className="form-control"
               customInput={<MaskedInput mask={mask} {...props} />}
+              popperContainer={CalendarContainer}
             />
           </>
         ) : (

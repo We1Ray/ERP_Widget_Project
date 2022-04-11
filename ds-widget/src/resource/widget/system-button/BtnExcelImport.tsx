@@ -9,6 +9,7 @@ import {
   STATUS,
 } from "../system-control/ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 
 // const make_cols = refstr => {
 //     let o = [],
@@ -98,65 +99,64 @@ export const BtnExcelImport: React.FC<Props> = ({
     return disable;
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        let check = false;
-        if (!Program.individual) {
-          for (var key in Component.status) {
-            if (check) break;
-            if (
-              Component.status[key] == STATUS.READ &&
-              PublicMethod.checkValue(Program.selectedData)
-            ) {
-              for (var key2 in Component.loading) {
-                if (check) break;
-                if (Component.loading[key2] == "READ") {
-                  check = false;
-                } else {
-                  check = true;
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          let check = false;
+          if (!Program.individual) {
+            for (var key in Component.status) {
+              if (check) break;
+              if (
+                Component.status[key] == STATUS.READ &&
+                PublicMethod.checkValue(Program.selectedData)
+              ) {
+                for (var key2 in Component.loading) {
+                  if (check) break;
+                  if (Component.loading[key2] == "READ") {
+                    check = false;
+                  } else {
+                    check = true;
+                  }
                 }
+              } else {
+                check = true;
               }
+            }
+          }
+          if (
+            status.matches(STATUS.READ) &&
+            PublicMethod.checkValue(Program.selectedData) &&
+            !check
+          ) {
+            if (Program.loading == "READ") {
+              check = !importPermission;
             } else {
               check = true;
             }
-          }
-        }
-        if (
-          status.matches(STATUS.READ) &&
-          PublicMethod.checkValue(Program.selectedData) &&
-          !check
-        ) {
-          if (Program.loading == "READ") {
-            check = !importPermission;
           } else {
             check = true;
           }
-        } else {
-          check = true;
+          if (latest()) {
+            setimportDisable(check);
+          }
+        } catch (error) {
+          console.log("EROOR: BtnExcelImport.checkEnable");
+          console.log(error);
         }
-        if (latest) {
-          setimportDisable(check);
-        }
-      } catch (error) {
-        console.log("EROOR: BtnExcelImport.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-    return () => {
-      latest = false;
-    };
-  }, [
-    JSON.stringify(Component.status),
-    JSON.stringify(Component.loading),
-    JSON.stringify(Program.selectedData),
-    Program.loading,
-    Program.individual,
-    status,
-    importPermission,
-  ]);
+      checkEnable();
+    },
+    [
+      JSON.stringify(Component.status),
+      JSON.stringify(Component.loading),
+      JSON.stringify(Program.selectedData),
+      Program.loading,
+      Program.individual,
+      status,
+      importPermission,
+    ]
+  );
 
   function handleFile(e) {
     try {

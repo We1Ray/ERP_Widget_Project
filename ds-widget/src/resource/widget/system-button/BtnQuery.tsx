@@ -9,6 +9,7 @@ import {
   STATUS,
 } from "../system-control/ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 interface Props {
   /**
    * 設定是否可使用
@@ -81,59 +82,58 @@ export const BtnQuery: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        let check = false;
-        if (!Program.individual) {
-          for (var key in Component.status) {
-            if (check) break;
-            if (Component.status[key] === STATUS.READ) {
-              for (var key2 in Component.loading) {
-                if (check) break;
-                if (Component.loading[key2] === "READ") {
-                  check = false;
-                } else {
-                  check = true;
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          let check = false;
+          if (!Program.individual) {
+            for (var key in Component.status) {
+              if (check) break;
+              if (Component.status[key] === STATUS.READ) {
+                for (var key2 in Component.loading) {
+                  if (check) break;
+                  if (Component.loading[key2] === "READ") {
+                    check = false;
+                  } else {
+                    check = true;
+                  }
                 }
+              } else {
+                check = true;
               }
+            }
+          }
+
+          if (status.matches(STATUS.READ) && !check) {
+            if (Program.loading === "READ") {
+              check = !queryPermission;
             } else {
               check = true;
             }
-          }
-        }
-
-        if (status.matches(STATUS.READ) && !check) {
-          if (Program.loading === "READ") {
-            check = !queryPermission;
           } else {
             check = true;
           }
-        } else {
-          check = true;
+          if (latest()) {
+            setQueryDisable(check);
+          }
+        } catch (error) {
+          console.log("EROOR: BtnQuery.checkEnable");
+          console.log(error);
         }
-        if (latest) {
-          setQueryDisable(check);
-        }
-      } catch (error) {
-        console.log("EROOR: BtnQuery.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-    return () => {
-      latest = false;
-    };
-  }, [
-    JSON.stringify(Component.status),
-    JSON.stringify(Component.loading),
-    JSON.stringify(Program.selectedData),
-    Program.individual,
-    Program.loading,
-    status,
-    queryPermission,
-  ]);
+      checkEnable();
+    },
+    [
+      JSON.stringify(Component.status),
+      JSON.stringify(Component.loading),
+      JSON.stringify(Program.selectedData),
+      Program.individual,
+      Program.loading,
+      status,
+      queryPermission,
+    ]
+  );
 
   useEffect(() => {
     onQuery();
@@ -236,7 +236,36 @@ export const BtnQuery: React.FC<Props> = ({
           //刪除和查詢後指定第一筆資料
           switch (type) {
             case "QUERY":
-              ProgramDispatch({ type: "selectedData", value: data[0] });
+              if (PublicMethod.checkValue(Program.selectedData)) {
+                let select = false;
+                let row = {};
+                for (let i = 0; i < data.length; i++) {
+                  //設定selectedData的RowID
+                  if (!select) {
+                    for (let j = 0; j < Program.dataKey.length; j++) {
+                      if (
+                        Program.selectedData[Program.dataKey[j]] ===
+                        data[i][Program.dataKey[j]]
+                      ) {
+                        select = true;
+                        row = data[i];
+                      } else {
+                        select = false;
+                      }
+                    }
+                  } else {
+                    break;
+                  }
+                }
+                if (select) {
+                  ProgramDispatch({ type: "selectedData", value: row });
+                } else {
+                  ProgramDispatch({ type: "selectedData", value: data[0] });
+                }
+              } else {
+                ProgramDispatch({ type: "selectedData", value: data[0] });
+              }
+
               ProgramDispatch({ type: "selectedMultiData", value: [] });
               break;
             case "SAVE":
@@ -302,7 +331,10 @@ export const BtnQuery: React.FC<Props> = ({
       style={style}
       color="green"
       disabled={queryDisable}
-      onClick={() => send(STATUS.QUERY)}
+      onClick={() => {
+        ProgramDispatch({ type: "selectedData", value: {} });
+        send(STATUS.QUERY);
+      }}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

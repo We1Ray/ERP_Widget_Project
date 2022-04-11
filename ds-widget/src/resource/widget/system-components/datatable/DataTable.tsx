@@ -7,6 +7,8 @@ import React, {
 import PublicMethod from "../../../methods/PublicMethod";
 import { BindDataTable } from "./BindDataTable";
 import { CommonDatatable } from "./CommonDatatable";
+import "./DataTable.scss";
+
 interface DataTableProps {
   /**
    * 是否綁定目前作業
@@ -45,7 +47,10 @@ interface DataTableProps {
   /**
    * 新增、修改(若有Expand則不會觸發)或雙點擊時將資料視窗化，視窗內的畫面
    */
-  dialog?: dialog;
+  dialog?: {
+    content: JSX.Element;
+    style?: React.CSSProperties;
+  };
   /**
    * 設定是否為多選
    */
@@ -57,10 +62,6 @@ interface DataTableProps {
   [x: string]: any;
   ref?: React.Ref<any>;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
-}
-interface dialog {
-  content: JSX.Element;
-  style?: React.CSSProperties;
 }
 interface SelectNode {
   mode?: string;

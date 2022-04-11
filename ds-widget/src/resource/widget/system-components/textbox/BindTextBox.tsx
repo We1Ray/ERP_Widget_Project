@@ -14,8 +14,9 @@ import {
 } from "../../system-control/ProgramContext";
 import PublicMethod from "../../../methods/PublicMethod";
 import { None } from "../../system-ui/None";
-import { getheight, showCurrentValue } from "./TextBox";
-import { TextBoxProps } from "./TextBox";
+import { showCurrentValue } from "./TextBox";
+import { TextBoxProps, handleKeyDown, getheight } from "./TextBox";
+import useLatest from "../../../methods/useLatest";
 
 export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
   (
@@ -73,9 +74,6 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea) {
-          getheight(textboxRef);
-        }
         showCurrentValue(textboxRef, textboxValue);
         //綁定欄位，新增欄位值異動時將值寫入新增參數
         if (Program.changeData[name] !== textboxValue) {
@@ -94,12 +92,29 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
     }, [textboxValue]);
 
     useEffect(() => {
+      try {
+        if (textArea) {
+          if (style) {
+            if (!style.height) {
+              getheight(textboxRef);
+            }
+          } else {
+            getheight(textboxRef);
+          }
+        }
+      } catch (error) {
+        console.log("EROOR: BindTextBox.useEffect");
+        console.log(error);
+      }
+    });
+
+    useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled]);
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && textboxValue !== value) {
           if (value) {
             setTextboxValue(value);
           } else {
@@ -126,47 +141,52 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
       }
     }, [textboxValue, status]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (
-            status.matches(STATUS.CREATE) &&
-            Program.dataKey.indexOf(name) > -1 &&
-            !PublicMethod.checkValue(newValue)
-          ) {
-            //判斷Key值是否為空
-            valid = System.getLocalization("Public", "ErrorMsgEmpty");
-          } else if (
-            (status.matches(STATUS.UPDATE) || status.matches(STATUS.CREATE)) &&
-            PublicMethod.checkValue(handleValidation)
-          ) {
-            //判斷新增/修改時 是否有正規表示式
-            valid = await handleValidation(newValue);
-          }
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["bind"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["bind"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue: any) => {
+          try {
+            let valid = "";
+            if (
+              status.matches(STATUS.CREATE) &&
+              Program.dataKey.indexOf(name) > -1 &&
+              !PublicMethod.checkValue(newValue)
+            ) {
+              //判斷Key值是否為空
+              valid = System.getLocalization("Public", "ErrorMsgEmpty");
+            } else if (
+              (status.matches(STATUS.UPDATE) ||
+                status.matches(STATUS.CREATE)) &&
+              PublicMethod.checkValue(handleValidation)
+            ) {
+              //判斷新增/修改時 是否有正規表示式
+              valid = await handleValidation(newValue);
             }
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation.bind[name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation.bind[name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: BindTextBox.valueValidation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: BindTextBox.valueValidation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {
@@ -298,7 +318,13 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
                 maxLength={maxLength}
                 style={
                   style
-                    ? style
+                    ? Object.assign(
+                        {
+                          minHeight: "40px",
+                          backgroundColor: backColor,
+                        },
+                        style
+                      )
                     : {
                         minHeight: "40px",
                         backgroundColor: backColor,
@@ -306,6 +332,8 @@ export const BindTextBox: React.FC<TextBoxProps> = forwardRef(
                 }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}
+                onKeyDown={handleKeyDown}
+                draggable={false}
                 {...props}
               />
             ) : (

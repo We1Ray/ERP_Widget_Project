@@ -1,4 +1,3 @@
-import axios from "axios";
 import moment from "moment";
 
 const CENTER_IP = "http://localhost:80";
@@ -161,6 +160,22 @@ export default new (class PublicMethod {
       }
     }
     return true;
+  }
+  /**
+   * 判斷兩個陣列裡的項目(不比較順序)
+   */
+  isArrayItemEqual(a = [], b = []) {
+    if (a.length !== b.length) {
+      return false;
+    } else {
+      // 循环遍历数组的值进行比较
+      for (let i = 0; i < a.length; i++) {
+        if (b.indexOf(a[i]) === -1) {
+          return false;
+        }
+      }
+      return true;
+    }
   }
 })();
 

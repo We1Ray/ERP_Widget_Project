@@ -58,8 +58,8 @@ export const BindLabel: React.FC<LabelProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (PublicMethod.checkValue(Program.validation["bind"][name])) {
-          setInvalidMessage(Program.validation["bind"][name]);
+        if (PublicMethod.checkValue(Program.validation.bind[name])) {
+          setInvalidMessage(Program.validation.bind[name]);
         } else {
           setInvalidMessage("");
         }
@@ -69,7 +69,7 @@ export const BindLabel: React.FC<LabelProps> = forwardRef(
         );
         console.log(error);
       }
-    }, [JSON.stringify(Program.validation)]);
+    }, [Program.validation.bind[name]]);
 
     return (
       <>

@@ -10,6 +10,7 @@ import {
   STATUS,
 } from "../system-control/ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 
 interface Props {
   /**
@@ -97,22 +98,34 @@ export const BtnDelete: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        let check = false;
-        if (!Program.individual) {
-          for (var key in Component.status) {
-            if (check) break;
-            if (
-              Component.status[key] == STATUS.READ &&
-              PublicMethod.checkValue(Program.selectedData)
-            ) {
-              //狀態為READ且有指定資料
-              if (multiple) {
-                //多選則還需判斷多選的指定資料
-                if (PublicMethod.checkValue(Program.selectedMultiData)) {
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          let check = false;
+          if (!Program.individual) {
+            for (var key in Component.status) {
+              if (check) break;
+              if (
+                Component.status[key] == STATUS.READ &&
+                PublicMethod.checkValue(Program.selectedData)
+              ) {
+                //狀態為READ且有指定資料
+                if (multiple) {
+                  //多選則還需判斷多選的指定資料
+                  if (PublicMethod.checkValue(Program.selectedMultiData)) {
+                    for (var key2 in Component.loading) {
+                      if (check) break;
+                      if (Component.loading[key2] == "READ") {
+                        check = false;
+                      } else {
+                        check = true;
+                      }
+                    }
+                  } else {
+                    check = true;
+                  }
+                } else {
                   for (var key2 in Component.loading) {
                     if (check) break;
                     if (Component.loading[key2] == "READ") {
@@ -121,72 +134,58 @@ export const BtnDelete: React.FC<Props> = ({
                       check = true;
                     }
                   }
+                }
+              } else {
+                check = true;
+              }
+            }
+          }
+          if (
+            status.matches(STATUS.READ) &&
+            PublicMethod.checkValue(Program.selectedData) &&
+            !check
+          ) {
+            if (multiple) {
+              if (PublicMethod.checkValue(Program.selectedMultiData)) {
+                if (Program.loading == "READ") {
+                  check = !deletePermission;
                 } else {
                   check = true;
                 }
               } else {
-                for (var key2 in Component.loading) {
-                  if (check) break;
-                  if (Component.loading[key2] == "READ") {
-                    check = false;
-                  } else {
-                    check = true;
-                  }
-                }
+                check = true;
               }
             } else {
-              check = true;
-            }
-          }
-        }
-        if (
-          status.matches(STATUS.READ) &&
-          PublicMethod.checkValue(Program.selectedData) &&
-          !check
-        ) {
-          if (multiple) {
-            if (PublicMethod.checkValue(Program.selectedMultiData)) {
               if (Program.loading == "READ") {
                 check = !deletePermission;
               } else {
                 check = true;
               }
-            } else {
-              check = true;
             }
           } else {
-            if (Program.loading == "READ") {
-              check = !deletePermission;
-            } else {
-              check = true;
-            }
+            check = true;
           }
-        } else {
-          check = true;
+          if (latest()) {
+            setDeleteDisable(check);
+          }
+        } catch (error) {
+          console.log("EROOR: BtnDelete.checkEnable");
+          console.log(error);
         }
-        if (latest) {
-          setDeleteDisable(check);
-        }
-      } catch (error) {
-        console.log("EROOR: BtnDelete.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-
-    return () => {
-      latest = false;
-    };
-  }, [
-    JSON.stringify(Component.status),
-    JSON.stringify(Component.loading),
-    JSON.stringify(Program.selectedData),
-    JSON.stringify(Program.selectedMultiData),
-    Program.individual,
-    Program.loading,
-    status,
-    deletePermission,
-  ]);
+      checkEnable();
+    },
+    [
+      JSON.stringify(Component.status),
+      JSON.stringify(Component.loading),
+      JSON.stringify(Program.selectedData),
+      JSON.stringify(Program.selectedMultiData),
+      Program.individual,
+      Program.loading,
+      status,
+      deletePermission,
+    ]
+  );
 
   useEffect(() => {
     const deleteStatus = async () => {

@@ -22,6 +22,10 @@ import { Label } from "../label/Label";
 import { None } from "../../system-ui/None";
 import swal from "sweetalert";
 import { TextQryBoxProps } from "./TextQryBox";
+import useLatest from "../../../methods/useLatest";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DraggableDialog from "../../system-ui/DraggableDialog";
 
 export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
   (
@@ -167,7 +171,7 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && selectedValue !== value) {
           if (value) {
             setSelectedValue(value);
           } else {
@@ -188,7 +192,7 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log("EROOR: BindTextQryBox.useEffect[status]");
         console.log(error);
       }
-    }, [status]);
+    }, [status, disabled]);
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {
@@ -202,6 +206,8 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             if (!PublicMethod.checkValue(defaultValue)) {
               //有綁定則設定禁用
               clearValue();
+            } else {
+              setSelectedValue(defaultValue);
             }
             checkDisable();
             break;
@@ -253,56 +259,61 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       }
     }, [objectDisable]);
 
-    useEffect(() => {
-      let latest = true;
-      const lableChange = async () => {
-        try {
-          let lable = "";
-          if (PublicMethod.checkValue(textboxValue)) {
-            if (PublicMethod.checkValue(label.value)) {
-              lable = label.value;
-            } else if (PublicMethod.checkValue(label.api)) {
-              await CallApi.ExecuteApi(
-                System.factory.name,
-                System.factory.ip + label.api,
-                { [text.name]: textboxValue }
-              ).then(async (res) => {
-                if (PublicMethod.checkValue(res.data)) {
-                  //額外再給予Operation和api做查詢給值
-                  lable = res.data[0][label.name];
-                } else {
-                  lable =
-                    System.getLocalization("Public", "None") +
-                    textboxValue +
-                    System.getLocalization("Public", "Data");
-                }
-              });
+    useLatest(
+      (latest) => {
+        const lableChange = async () => {
+          try {
+            let lable = "";
+            if (PublicMethod.checkValue(textboxValue)) {
+              if (PublicMethod.checkValue(label.value)) {
+                lable = label.value;
+              } else if (PublicMethod.checkValue(label.api)) {
+                await CallApi.ExecuteApi(
+                  System.factory.name,
+                  System.factory.ip + label.api,
+                  { [text.name]: textboxValue }
+                ).then(async (res) => {
+                  if (PublicMethod.checkValue(res.data)) {
+                    //額外再給予Operation和api做查詢給值
+                    lable = res.data[0][label.name];
+                  } else {
+                    lable =
+                      System.getLocalization("Public", "None") +
+                      textboxValue +
+                      System.getLocalization("Public", "Data");
+                  }
+                });
+              } else {
+                lable =
+                  System.getLocalization("Public", "None") +
+                  textboxValue +
+                  System.getLocalization("Public", "Data");
+              }
             } else {
               lable =
                 System.getLocalization("Public", "None") +
-                textboxValue +
                 System.getLocalization("Public", "Data");
             }
-          } else {
-            lable =
-              System.getLocalization("Public", "None") +
-              System.getLocalization("Public", "Data");
+            if (latest()) {
+              if (
+                PublicMethod.checkValue(textboxValue) &&
+                textboxValue !== selectedValue
+              ) {
+                setSelectedValue(textboxValue);
+              }
+              setLabelValue(lable);
+            }
+          } catch (error) {
+            console.log(
+              "EROOR: BindTextQryBox.useEffect[textboxValue, JSON.stringify(label)]"
+            );
+            console.log(error);
           }
-          if (latest) {
-            setLabelValue(lable);
-          }
-        } catch (error) {
-          console.log(
-            "EROOR: BindTextQryBox.useEffect[textboxValue, JSON.stringify(label)]"
-          );
-          console.log(error);
-        }
-      };
-      lableChange();
-      return () => {
-        latest = false;
-      };
-    }, [textboxValue, JSON.stringify(label)]);
+        };
+        lableChange();
+      },
+      [textboxValue, JSON.stringify(label)]
+    );
 
     useEffect(() => {
       try {
@@ -322,13 +333,13 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     }
 
     return (
-      <Card>
+      <Card {...props}>
         {display ? (
           <>
-            <Row {...props}>
+            <Row>
               {
                 <Col
-                  md={7}
+                  md={5}
                   style={{
                     display: (
                       PublicMethod.checkValue(text.visible)
@@ -355,7 +366,7 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               {(
                 PublicMethod.checkValue(label.visible) ? label.visible : true
               ) ? (
-                <Col md={3}>
+                <Col md={5}>
                   <Label
                     style={label.style ? label.style : { fontWeight: "normal" }}
                   >
@@ -365,48 +376,41 @@ export const BindTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
               ) : (
                 <None />
               )}
-              <Row>
-                <Col>
-                  <Button disabled={objectDisable} onClick={() => clearValue()}>
-                    <em className="fa fa-trash"></em>
-                  </Button>
-                  <Button
-                    disabled={objectDisable}
-                    onClick={() => setDialogOn(!dialogOn)}
-                  >
-                    <em className="fa fa-search"></em>
-                  </Button>
-                </Col>
-              </Row>
-            </Row>
-            {dialogOn && !objectDisable ? (
-              <div className="dialog" style={dialog.style}>
-                <Row>
-                  <Col>
-                    <dialog.window
-                      callback={(value: any) => {
-                        setDialogValue(value);
-                      }}
-                      {...dialog.parameter}
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col md={7} />
-                  <Col md={5}>
-                    <Button onClick={() => setDialogOn(false)}>
-                      <em className={"fas fa-ban"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Cancel")}
-                    </Button>
-                    <Button color="success" onClick={selectQryValue}>
-                      <em className={"far fa-save"} />
-                      &ensp;
-                      {System.getLocalization("Public", "Determine")}
-                    </Button>
-                  </Col>
-                </Row>
+              <div>
+                <Button disabled={objectDisable} onClick={() => clearValue()}>
+                  <em className="fa fa-trash"></em>
+                </Button>
+                <Button
+                  disabled={objectDisable}
+                  onClick={() => setDialogOn(!dialogOn)}
+                >
+                  <em className="fa fa-search"></em>
+                </Button>
               </div>
+            </Row>
+            {PublicMethod.checkValue(dialogOn) ? (
+              <DraggableDialog open={dialogOn && !objectDisable}>
+                <DialogContent style={dialog.style}>
+                  <dialog.window
+                    callback={(value: any) => {
+                      setDialogValue(value);
+                    }}
+                    {...dialog.parameter}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setDialogOn(false)}>
+                    <em className={"fas fa-ban"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Cancel")}
+                  </Button>
+                  <Button color="success" onClick={selectQryValue}>
+                    <em className={"far fa-save"} />
+                    &ensp;
+                    {System.getLocalization("Public", "Determine")}
+                  </Button>
+                </DialogActions>
+              </DraggableDialog>
             ) : (
               <None />
             )}

@@ -17,6 +17,7 @@ import { Input, Col } from "reactstrap";
 import { Row } from "../../system-ui/Row";
 import { None } from "../../system-ui/None";
 import { RadioButtonProps } from "./RadioButton";
+import useLatest from "../../../methods/useLatest";
 
 export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
   (
@@ -24,6 +25,7 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
       visible,
       disabled,
       name,
+      defaultValue,
       value,
       handleValidation,
       options,
@@ -38,7 +40,7 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [radioButtonValue, setRadioButtonValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [radioButtonDisable, setRadioButtonDisable] = useState(false);
     const [display, setDisplay] = useState(true);
@@ -98,36 +100,41 @@ export const QryRadioButton: React.FC<RadioButtonProps> = forwardRef(
       }
     }, [radioButtonValue]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (PublicMethod.checkValue(handleValidation)) {
-            valid = await handleValidation(newValue);
-          }
-
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["query"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["query"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue) => {
+          try {
+            let valid = "";
+            if (PublicMethod.checkValue(handleValidation)) {
+              valid = await handleValidation(newValue);
             }
+
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation["query"][name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation["query"][name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: QryRadioButton.validation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: QryRadioButton.validation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     function checkStatus() {
       try {

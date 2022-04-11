@@ -20,6 +20,7 @@ import {
 import PublicMethod from "../../../methods/PublicMethod";
 import { None } from "../../system-ui/None";
 import { StyledTreeItem, TreeViewProps, TreeViewitem } from "./TreeView";
+import useLatest from "../../../methods/useLatest";
 
 export const BindTreeView: React.FC<TreeViewProps> = forwardRef(
   (
@@ -134,67 +135,66 @@ export const BindTreeView: React.FC<TreeViewProps> = forwardRef(
       return tmp;
     };
 
-    useEffect(() => {
-      //狀態 or 資料變更時
-      let latest = true;
-      function checkStatus() {
-        //只有狀態:READ時可點換資料
-        let check = false;
-        try {
-          if (Program.individual) {
-            if (status.matches(STATUS.READ)) {
-              if (Program.loading == "READ") {
-                if (PublicMethod.checkValue(disabled)) {
-                  check = disabled;
+    useLatest(
+      (latest) => {
+        //狀態 or 資料變更時
+        function checkStatus() {
+          //只有狀態:READ時可點換資料
+          let check = false;
+          try {
+            if (Program.individual) {
+              if (status.matches(STATUS.READ)) {
+                if (Program.loading == "READ") {
+                  if (PublicMethod.checkValue(disabled)) {
+                    check = disabled;
+                  } else {
+                    check = false;
+                  }
                 } else {
-                  check = false;
+                  check = true;
                 }
               } else {
                 check = true;
               }
             } else {
-              check = true;
-            }
-          } else {
-            for (var key in Component.status) {
-              if (check) break;
-              if (Component.status[key] == STATUS.READ) {
-                for (var key2 in Component.loading) {
-                  if (!check) break;
-                  if (Component.loading[key2] == "READ") {
-                    if (PublicMethod.checkValue(disabled)) {
-                      check = disabled;
+              for (var key in Component.status) {
+                if (check) break;
+                if (Component.status[key] == STATUS.READ) {
+                  for (var key2 in Component.loading) {
+                    if (!check) break;
+                    if (Component.loading[key2] == "READ") {
+                      if (PublicMethod.checkValue(disabled)) {
+                        check = disabled;
+                      } else {
+                        check = false;
+                      }
                     } else {
-                      check = false;
+                      check = true;
                     }
-                  } else {
-                    check = true;
                   }
+                } else {
+                  check = true;
                 }
-              } else {
-                check = true;
               }
             }
+          } catch (error) {
+            console.log("EROOR: Tree.checkStatus");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: Tree.checkStatus");
-          console.log(error);
+          return check;
         }
-        return check;
-      }
-      if (latest) {
-        setTreeViewDisable(checkStatus());
-      }
-      return () => {
-        latest = false;
-      };
-    }, [
-      JSON.stringify(Component.status),
-      JSON.stringify(Component.loading),
-      Program.individual,
-      Program.loading,
-      status,
-    ]);
+        if (latest()) {
+          setTreeViewDisable(checkStatus());
+        }
+      },
+      [
+        JSON.stringify(Component.status),
+        JSON.stringify(Component.loading),
+        Program.individual,
+        Program.loading,
+        status,
+      ]
+    );
 
     const getTreeItemsFromData = (treeitem) => {
       try {

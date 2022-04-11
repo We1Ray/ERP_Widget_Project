@@ -14,8 +14,9 @@ import {
 } from "../../system-control/ProgramContext";
 import PublicMethod from "../../../methods/PublicMethod";
 import { None } from "../../system-ui/None";
-import { getheight, showCurrentValue } from "./TextBox";
-import { TextBoxProps } from "./TextBox";
+import { showCurrentValue } from "./TextBox";
+import { TextBoxProps, handleKeyDown, getheight } from "./TextBox";
+import useLatest from "../../../methods/useLatest";
 
 export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
   (
@@ -24,6 +25,7 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
       disabled,
       name,
       maxLength,
+      defaultValue,
       value,
       handleValidation,
       result,
@@ -38,7 +40,7 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [textboxValue, setTextboxValue] = useState(
-      PublicMethod.checkValue(value) ? value : ""
+      PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [display, setDisplay] = useState(true);
@@ -65,9 +67,6 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (textArea) {
-          getheight(textboxRef);
-        }
         showCurrentValue(textboxRef, textboxValue);
         setQryTextboxValueToChangeData();
         if (result) {
@@ -78,6 +77,23 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
         console.log(error);
       }
     }, [textboxValue]);
+
+    useEffect(() => {
+      try {
+        if (textArea) {
+          if (style) {
+            if (!style.height) {
+              getheight(textboxRef);
+            }
+          } else {
+            getheight(textboxRef);
+          }
+        }
+      } catch (error) {
+        console.log("EROOR: BindTextBox.useEffect");
+        console.log(error);
+      }
+    });
 
     /** Qry useEffect */
     useEffect(() => {
@@ -116,37 +132,41 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
       }
     }, [disabled]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (PublicMethod.checkValue(handleValidation)) {
-            valid = await handleValidation(newValue);
-          }
-
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["query"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["query"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue: any) => {
+          try {
+            let valid = "";
+            if (PublicMethod.checkValue(handleValidation)) {
+              valid = await handleValidation(newValue);
             }
-          }
-        } catch (error) {
-          console.log("EROOR: TextBox.valueValidation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
 
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, JSON.stringify(Program.changeData)]);
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation["query"][name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation["query"][name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: TextBox.valueValidation");
+            console.log(error);
+          }
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, JSON.stringify(Program.changeData)]
+    );
 
     useEffect(() => {
       try {
@@ -224,9 +244,18 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
                 disabled={textboxDisable}
                 defaultValue={textboxValue}
                 maxLength={maxLength}
-                style={style ? style : { minHeight: "40px" }}
+                style={
+                  style
+                    ? Object.assign({
+                      minHeight: "40px",
+                    }, style)
+                    : {
+                      minHeight: "40px",
+                    }
+                }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}
+                onKeyDown={handleKeyDown}
                 {...props}
               />
             ) : (

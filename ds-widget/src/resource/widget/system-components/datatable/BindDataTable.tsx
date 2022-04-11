@@ -15,7 +15,6 @@ import {
   statusContext,
   STATUS,
 } from "../../system-control/ProgramContext";
-import "./DataTable.scss";
 import PublicMethod from "../../../methods/PublicMethod";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -24,6 +23,7 @@ import { None } from "../../system-ui/None";
 import { BtnCancel } from "../../system-button/BtnCancel";
 import DraggableDialog from "../../system-ui/DraggableDialog";
 import { DataTableProps, SelectNode } from "./DataTable";
+import useLatest from "../../../methods/useLatest";
 
 export const BindDataTable: React.FC<DataTableProps> = forwardRef(
   (
@@ -269,35 +269,34 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
       return check;
     }
 
-    useEffect(() => {
-      //狀態 or 資料變更時
-      let latest = true;
-      try {
-        if (latest) {
-          if (multipleSelection) {
-            multiSelection(checkStatus);
-          } else {
-            selection(checkStatus);
+    useLatest(
+      (latest) => {
+        //狀態 or 資料變更時
+        try {
+          if (latest()) {
+            if (multipleSelection) {
+              multiSelection(checkStatus);
+            } else {
+              selection(checkStatus);
+            }
           }
+        } catch (error) {
+          console.log(
+            "EROOR: BindDataTable.useEffect[Program.individual, status, Program.loading, JSON.stringify(Component.status), JSON.stringify(Component.loading), JSON.stringify(Program.selectedData), JSON.stringify(Program.selectedMultiData)]"
+          );
+          console.log(error);
         }
-      } catch (error) {
-        console.log(
-          "EROOR: BindDataTable.useEffect[Program.individual, status, Program.loading, JSON.stringify(Component.status), JSON.stringify(Component.loading), JSON.stringify(Program.selectedData), JSON.stringify(Program.selectedMultiData)]"
-        );
-        console.log(error);
-      }
-      return () => {
-        latest = false;
-      };
-    }, [
-      JSON.stringify(Component.status),
-      JSON.stringify(Component.loading),
-      JSON.stringify(Program.selectedData),
-      JSON.stringify(Program.selectedMultiData),
-      Program.individual,
-      Program.loading,
-      status,
-    ]);
+      },
+      [
+        JSON.stringify(Component.status),
+        JSON.stringify(Component.loading),
+        JSON.stringify(Program.selectedData),
+        JSON.stringify(Program.selectedMultiData),
+        Program.individual,
+        Program.loading,
+        status,
+      ]
+    );
 
     function multiSelection(checkStatus) {
       try {
@@ -439,7 +438,7 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
           {...props}
         />
         {PublicMethod.checkValue(dialog) ? (
-          <DraggableDialog open={dialogOn}>
+          <DraggableDialog open={dialogOn} style={dialog.style}>
             <DialogContent style={dialog.style}>{dialog.content}</DialogContent>
             <DialogActions>
               <Button

@@ -17,6 +17,7 @@ import { Input, Col } from "reactstrap";
 import { Row } from "../../system-ui/Row";
 import { None } from "../../system-ui/None";
 import { RadioButtonProps } from "./RadioButton";
+import useLatest from "../../../methods/useLatest";
 
 export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
   (
@@ -71,7 +72,7 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
     /** 狀態改變執行的地方 */
     useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled]);
 
     /**當查詢資料變更時的動作*/
     useEffect(() => {
@@ -80,7 +81,7 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && radioButtonValue !== value) {
           if (value) {
             setRadioButtonValue(value);
           } else {
@@ -120,47 +121,53 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
       }
     }, [radioButtonValue]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (
-            status.matches(STATUS.CREATE) &&
-            Program.dataKey.indexOf(name) > -1 &&
-            !PublicMethod.checkValue(newValue)
-          ) {
-            //判斷Key值是否為空
-            valid = System.getLocalization("Public", "ErrorMsgEmpty");
-          } else if (
-            (status.matches(STATUS.UPDATE) || status.matches(STATUS.CREATE)) &&
-            PublicMethod.checkValue(handleValidation)
-          ) {
-            //判斷新增/修改時 是否有正規表示式
-            valid = await handleValidation(newValue);
-          }
-
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["bind"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["bind"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue) => {
+          try {
+            let valid = "";
+            if (
+              status.matches(STATUS.CREATE) &&
+              Program.dataKey.indexOf(name) > -1 &&
+              !PublicMethod.checkValue(newValue)
+            ) {
+              //判斷Key值是否為空
+              valid = System.getLocalization("Public", "ErrorMsgEmpty");
+            } else if (
+              (status.matches(STATUS.UPDATE) ||
+                status.matches(STATUS.CREATE)) &&
+              PublicMethod.checkValue(handleValidation)
+            ) {
+              //判斷新增/修改時 是否有正規表示式
+              valid = await handleValidation(newValue);
             }
+
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation.bind[name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation.bind[name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: BindRadioButton.validation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: BindRadioButton.validation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     /** 確認目前作業狀態後更改欄位狀態 */
     function checkStatus() {

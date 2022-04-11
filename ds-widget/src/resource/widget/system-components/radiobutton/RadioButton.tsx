@@ -104,6 +104,7 @@ const RadioButton: React.FC<RadioButtonProps> = forwardRef(
             visible={visible}
             disabled={disabled}
             name={name}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             options={options}
@@ -130,6 +131,7 @@ const RadioButton: React.FC<RadioButtonProps> = forwardRef(
           <CommonRadioButton
             visible={visible}
             disabled={disabled}
+            defaultValue={defaultValue}
             value={value}
             handleValidation={handleValidation}
             options={options}

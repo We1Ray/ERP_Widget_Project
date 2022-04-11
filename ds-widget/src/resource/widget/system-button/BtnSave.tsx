@@ -7,6 +7,7 @@ import {
   STATUS,
 } from "../system-control/ProgramContext";
 import PublicMethod from "../../methods/PublicMethod";
+import useLatest from "../../methods/useLatest";
 interface Props {
   /**
    * 設定是否可使用
@@ -37,19 +38,19 @@ export const BtnSave: React.FC<Props> = ({
 
   useEffect(() => {
     disable();
-  }, [disableFilter, JSON.stringify(Program.validation["bind"])]);
+  }, [disableFilter, JSON.stringify(Program.validation.bind)]);
 
   async function disable() {
     try {
       if (PublicMethod.checkValue(disableFilter)) {
         setSavePermission(
           !(
-            PublicMethod.checkValue(Program.validation["bind"]) ||
+            PublicMethod.checkValue(Program.validation.bind) ||
             (await disableFilter())
           )
         );
       } else {
-        setSavePermission(!PublicMethod.checkValue(Program.validation["bind"]));
+        setSavePermission(!PublicMethod.checkValue(Program.validation.bind));
       }
     } catch (error) {
       console.log("EROOR: BtnSave.disable");
@@ -57,27 +58,29 @@ export const BtnSave: React.FC<Props> = ({
     }
   }
 
-  useEffect(() => {
-    let latest = true;
-    async function checkEnable() {
-      try {
-        if (latest) {
-          if (status.matches(STATUS.CREATE) || status.matches(STATUS.UPDATE)) {
-            setSaveDisable(!savePermission);
-          } else {
-            setSaveDisable(true);
+  useLatest(
+    (latest) => {
+      async function checkEnable() {
+        try {
+          if (latest()) {
+            if (
+              status.matches(STATUS.CREATE) ||
+              status.matches(STATUS.UPDATE)
+            ) {
+              setSaveDisable(!savePermission);
+            } else {
+              setSaveDisable(true);
+            }
           }
+        } catch (error) {
+          console.log("EROOR: BtnSave.checkEnable");
+          console.log(error);
         }
-      } catch (error) {
-        console.log("EROOR: BtnSave.checkEnable");
-        console.log(error);
       }
-    }
-    checkEnable();
-    return () => {
-      latest = false;
-    };
-  }, [savePermission, status]);
+      checkEnable();
+    },
+    [savePermission, status]
+  );
 
   return (
     <Button

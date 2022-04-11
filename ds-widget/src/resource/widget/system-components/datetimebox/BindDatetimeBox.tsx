@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react";
+import { Portal } from "react-overlays";
 import { SystemContext } from "../../system-control/SystemContext";
 import {
   ProgramContext,
@@ -20,6 +21,7 @@ import moment from "moment";
 import "./DatetimeBox.scss";
 import { None } from "../../system-ui/None";
 import { DatetimeBoxProps } from "./DatetimeBox";
+import useLatest from "../../../methods/useLatest";
 
 export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
   (
@@ -74,11 +76,11 @@ export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
     /** 狀態改變執行的地方 */
     useEffect(() => {
       checkStatus();
-    }, [status, defaultValue]);
+    }, [status, disabled]);
 
     useEffect(() => {
       try {
-        if (value !== undefined) {
+        if (value !== undefined && datetimeValue !== value) {
           if (value) {
             setDatetimeValue(value);
           } else {
@@ -112,47 +114,52 @@ export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       }
     }, [datetimeValue, status]);
 
-    useEffect(() => {
-      /** 設定欄位值的正規表示式*/
-      let latest = true;
-      const validation = async (newValue: any) => {
-        try {
-          let valid = "";
-          if (
-            status.matches(STATUS.CREATE) &&
-            Program.dataKey.indexOf(name) > -1 &&
-            !PublicMethod.checkValue(newValue)
-          ) {
-            //判斷Key值是否為空
-            valid = System.getLocalization("Public", "ErrorMsgEmpty");
-          } else if (
-            (status.matches(STATUS.UPDATE) || status.matches(STATUS.CREATE)) &&
-            PublicMethod.checkValue(handleValidation)
-          ) {
-            //判斷新增/修改時 是否有正規表示式
-            valid = await handleValidation(newValue);
-          }
-          if (latest) {
-            let validation = Program.validation;
-            if (PublicMethod.checkValue(valid)) {
-              validation["bind"][name] = valid;
-              await ProgramDispatch({ type: "validation", value: validation });
-            } else {
-              delete validation["bind"][name];
-              await ProgramDispatch({ type: "validation", value: validation });
+    useLatest(
+      (latest) => {
+        /** 設定欄位值的正規表示式*/
+        const validation = async (newValue) => {
+          try {
+            let valid = "";
+            if (
+              status.matches(STATUS.CREATE) &&
+              Program.dataKey.indexOf(name) > -1 &&
+              !PublicMethod.checkValue(newValue)
+            ) {
+              //判斷Key值是否為空
+              valid = System.getLocalization("Public", "ErrorMsgEmpty");
+            } else if (
+              (status.matches(STATUS.UPDATE) ||
+                status.matches(STATUS.CREATE)) &&
+              PublicMethod.checkValue(handleValidation)
+            ) {
+              //判斷新增/修改時 是否有正規表示式
+              valid = await handleValidation(newValue);
             }
+            if (latest()) {
+              let validation = Program.validation;
+              if (PublicMethod.checkValue(valid)) {
+                validation.bind[name] = valid;
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              } else {
+                delete validation.bind[name];
+                await ProgramDispatch({
+                  type: "validation",
+                  value: validation,
+                });
+              }
+            }
+          } catch (error) {
+            console.log("EROOR: BindDatetimeBox.valueValidation");
+            console.log(error);
           }
-        } catch (error) {
-          console.log("EROOR: BindDatetimeBox.valueValidation");
-          console.log(error);
-        }
-      };
-      validation(Program.changeData[name]);
-
-      return () => {
-        latest = false;
-      };
-    }, [System.lang, status, JSON.stringify(Program.changeData)]);
+        };
+        validation(Program.changeData[name]);
+      },
+      [System.lang, status, JSON.stringify(Program.changeData)]
+    );
 
     useEffect(() => {
       try {
@@ -285,6 +292,13 @@ export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
       }
     }
 
+    const CalendarContainer = ({ children }) => {
+      let handle = Math.floor(Math.random() * 10000);
+      const el = document.getElementById("calendar-portal" + handle);
+
+      return <Portal container={el}>{children}</Portal>;
+    };
+
     return (
       <>
         {display ? (
@@ -306,6 +320,7 @@ export const BindDatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
                   {...props}
                 />
               }
+              popperContainer={CalendarContainer}
             />
           </>
         ) : (
