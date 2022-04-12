@@ -1,3 +1,4 @@
+import axios from "axios";
 import moment from "moment";
 
 const CENTER_IP = "http://localhost:80";
@@ -139,6 +140,7 @@ export default new (class PublicMethod {
       console.log(error);
     }
   }
+
   /**
    * 給於兩個陣列，比較兩陣列若相同則回傳True 不同為false
    */
@@ -161,6 +163,7 @@ export default new (class PublicMethod {
     }
     return true;
   }
+
   /**
    * 判斷兩個陣列裡的項目(不比較順序)
    */

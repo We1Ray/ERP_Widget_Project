@@ -36,7 +36,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       text,
       label,
       result,
-      hideButton,
       callbackRef,
       ...props
     },
@@ -332,22 +331,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                     {labelValue}
                   </Label>
                 </Col>
-              ) : (
-                <None />
-              )}
-
-              {(PublicMethod.checkValue(hideButton) ? hideButton : false) ? (
-                <div>
-                  <Button disabled={objectDisable} onClick={() => clearValue()}>
-                    <em className="fa fa-trash"></em>
-                  </Button>
-                  <Button
-                    disabled={objectDisable}
-                    onClick={() => setDialogOn(!dialogOn)}
-                  >
-                    <em className="fa fa-search"></em>
-                  </Button>
-                </div>
               ) : (
                 <None />
               )}

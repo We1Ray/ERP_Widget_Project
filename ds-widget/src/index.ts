@@ -24,8 +24,7 @@ export { TextBox } from "./resource/widget/system-components/textbox/TextBox";
 export { TextQryBox } from "./resource/widget/system-components/textqryBox/TextQryBox";
 export { Tree } from "./resource/widget/system-components/treeview/TreeView";
 
-export { System } from "./resource/widget/system-control/System_Login";
-// export { System } from "./resource/widget/system-control/System";
+export { System } from "./resource/widget/system-control/System";
 export { Form } from "./resource/widget/system-control/Form";
 export {
   SystemContext,
@@ -47,5 +46,6 @@ export {
   CENTER_FACTORY,
   CENTER_IP,
 } from "./resource/methods/PublicMethod";
+export { default as useLatest } from "./resource/methods/useLatest/index";
 export { default as SystemFunc } from "./resource/methods/SystemFunc";
 export { default as CallApi } from "./resource/api/CallApi";

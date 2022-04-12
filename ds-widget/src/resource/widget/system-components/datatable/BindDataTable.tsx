@@ -36,6 +36,8 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
       multipleSelection,
       sizePerPageList,
       callbackRef,
+      pageSize,
+      onDoubleClick,
       ...props
     },
     forwardedRef
@@ -51,7 +53,7 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
     const [padOptions, setPadOptions] = useState(
       paginationFactory({
         pageStartIndex: 1,
-        sizePerPage: PublicMethod.checkValue(sizePerPageList)
+        sizePerPage: PublicMethod.checkValue(pageSize) ? pageSize : PublicMethod.checkValue(sizePerPageList)
           ? sizePerPageList[0]
           : 5,
         sizePerPageList: PublicMethod.checkValue(sizePerPageList)
@@ -77,8 +79,11 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
       },
       onDoubleClick: (e, row, rowIndex) => {
         if (checkStatus()) {
-          if (PublicMethod.checkValue(dialog) && !Expand) {
-            setDialogOn(true);
+          if(PublicMethod.checkValue(onDoubleClick)) {
+            onDoubleClick();
+          } else 
+          if (PublicMethod.checkValue(dialog) && !Expand && !PublicMethod.checkValue(onDoubleClick)) {
+           setDialogOn(true);
           }
         }
       },
@@ -151,7 +156,7 @@ export const BindDataTable: React.FC<DataTableProps> = forwardRef(
       setPadOptions(
         paginationFactory({
           pageStartIndex: 1,
-          sizePerPage: PublicMethod.checkValue(sizePerPageList)
+          sizePerPage: PublicMethod.checkValue(pageSize) ? pageSize : PublicMethod.checkValue(sizePerPageList)
             ? sizePerPageList[0]
             : 5,
           sizePerPageList: PublicMethod.checkValue(sizePerPageList)
