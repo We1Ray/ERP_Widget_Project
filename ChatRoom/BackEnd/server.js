@@ -9,6 +9,9 @@ const port = 81;
 app.use(cors());
 app.use(express.json());
 
+const chatRouter = require("./routes/chat");
+app.use("/chat", chatRouter);
+
 const socketio = require("socket.io");
 const http = require("http");
 

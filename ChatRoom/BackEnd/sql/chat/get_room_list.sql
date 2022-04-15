@@ -1,7 +1,11 @@
-select
-		row_number() over() as row_num_id,
-	cr.*
+ select
+	distinct cr.*
 from
-		chat_room cr
+	(
+	select
+		row_number() over() as row_num_id,
+		cr2.*
+	from
+		chat_room cr2) cr 
 where
-		$1::varchar = any(string_to_array(room_member, ';') )
+	:account_uid = any(string_to_array(cr.room_member, ';'))

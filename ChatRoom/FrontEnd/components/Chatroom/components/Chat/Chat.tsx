@@ -4,70 +4,119 @@ import io from "socket.io-client";
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
 import Messages from "../Messages/Messages";
-import TextContainer from "../TextContainer/TextContainer";
+// import TextContainer from "../TextContainer/TextContainer";
 
-import { SystemContext } from "../../../../resource/index";
+import {
+  CallApi,
+  CENTER_FACTORY,
+  CENTER_IP,
+  SystemContext,
+} from "../../../../resource/index";
 import "./Chat.css";
 
 let socket = null;
 
-{
-  /*Notes on what I needed to import
-    We are using hooks so we need useState/Effect that is important for life cycle emthods in hooks
-    We use query-string module to retrieve data from the url
-    We need io from socket.io-client
-*/
-}
-
-{
-  /* The important of socket.io is placed in here below
-    THIS IS ABOUT USE EFFECT HOOK
-        The first useEffect is the first call, and runs when the component renders. 
-        We need to retrieve the data users entered while joining, which is what we get from location.search and location comes from the react router
-        For useEffect we stopped it from having two instances of socket by passing an array with endpoint and location.search.  
-        If those two things change we re render our useeffect(this stops unneccesary side effects)   
-    Things about Socket
-        Emit allows you to pass in data, you pass in a string that the backend recognizes
-        {name, room} is an object and it has the same syntax as {room:room }
-        emit has a third parameter, which is a call back function, which executes the arrow function when socket.on's callbackis called, 
-*/
-}
-
-const Chat = ({ name, room }) => {
+const Chat = ({ room }) => {
   const { System } = useContext(SystemContext);
+  const [user, setUser] = useState(null);
   const [users, setUsers] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const ENDPOINT = "http://localhost:81";
+  const ENDPOINT = "http://10.1.50.59:81";
+
+  useEffect(() => {
+    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_userInfo", {
+      access_token: System.token,
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setUser(res.data.rows[0]);
+        }
+      })
+      .catch((error) => {
+        console.log("EROOR: Chat: /chat/get_userInfo");
+        console.log(error);
+      });
+
+    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_room_message", {
+      room_id: room,
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setMessages(res.data.rows);
+        }
+      })
+      .catch((error) => {
+        console.log("EROOR: Chat: /chat/get_room_message");
+        console.log(error);
+      });
+  }, []);
 
   useEffect(() => {
     socket = io(ENDPOINT);
-
-    socket.emit("join", { name, room }, (error) => {
-      if (error) {
-        alert(error);
-      }
-    });
-  }, [ENDPOINT, name, room]);
+    if (user) {
+      socket.emit("join", { room, userInfo: user }, (error) => {
+        if (error) {
+          alert(error);
+        }
+      });
+    }
+  }, [ENDPOINT, JSON.stringify(user), room]);
 
   //this useEffect is for handeling messages and only runs when messages array changes
   useEffect(() => {
-    socket.on("message", (message) => {
-      setMessages((messages) => [...messages, message]); //add new messages to our messages array the ... copies the old messages and all we do is append the new
-    });
+    if (user) {
+      socket.on("message", ({ text, userInfo }) => {
+        CallApi.ExecuteApi(
+          CENTER_FACTORY,
+          ENDPOINT + "/chat/insert_room_message",
+          {
+            room_id: room,
+            message_content: text,
+            send_member: userInfo.account_uid,
+          }
+        )
+          .then((res) => {
+            if (res.status === 200) {
+              setMessages((messages) => [
+                ...messages,
+                {
+                  room_id: room,
+                  message_content: text,
+                  send_member: userInfo.account_uid,
+                  send_member_name: userInfo.name,
+                  create_date: new Date().toISOString(),
+                },
+              ]);
+            } else {
+              console.log(res);
+            }
+          })
+          .catch((error) => {
+            console.log("EROOR: Chat: /chat/insert_room_message");
+            console.log(error);
+          });
 
-    socket.on("roomData", ({ users }) => {
-      setUsers(users);
-    });
-  }, []);
+        //add new messages to our messages array the ... copies the old messages and all we do is append the new
+      });
+
+      socket.on("roomData", ({ users }) => {
+        setUsers(users);
+      });
+    }
+  }, [JSON.stringify(user)]);
 
   //functioning for sending messages (its a functional component hence why its a function)
   const sendMessage = (event) => {
     event.preventDefault(); // full browser refreshes aren't good
 
     if (message) {
-      socket.emit("sendMessage", message, () => setMessage("")); //on the callback from index.js our input field clears
+      socket.emit(
+        "sendMessage",
+        { room: room, message: message, userInfo: user },
+        () => setMessage("")
+      ); //on the callback from index.js our input field clears
     }
   };
   // console.log(message, messages);
@@ -75,7 +124,7 @@ const Chat = ({ name, room }) => {
   return (
     <div className="container">
       <InfoBar room={room} />
-      <Messages messages={messages} name={name} />
+      <Messages messages={messages} user={user} />
       <Input
         message={message}
         setMessage={setMessage}

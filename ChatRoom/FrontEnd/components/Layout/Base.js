@@ -14,7 +14,7 @@ export default function Base({ ...props }) {
     <System system_uid="SYS-1620285176">
       <ThemesProvider>
         <SettingsProvider>
-          <BaseContent props={props} />
+          <BaseContent>{props.children}</BaseContent>
         </SettingsProvider>
       </ThemesProvider>
     </System>
@@ -43,7 +43,7 @@ function BaseContent({ ...props }) {
           props.props.children
         )}
       </section> */}
-      <section className="section-container">{props.props.children}</section>
+      <section className="section-container">{props.children}</section>
       <Footer />
     </div>
   );

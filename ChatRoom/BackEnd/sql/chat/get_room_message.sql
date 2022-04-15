@@ -1,25 +1,23 @@
-insert
-	into
-	public.chat_message
-(room_id,
-	message_id,
-	message_content,
-	send_member,
-	read_member,
-	create_date)
 select
-	$1::varchar,
+	*
+from
 	(
 	select
-		coalesce (max(message_id),
-		0)+ 1 message_id
+		cm.room_id ,
+		cm.message_content, 
+		cm.send_member, 
+		a."name" send_member_name,
+		cm.read_member ,
+		cm.create_date
 	from
-		chat_message cm
+		chat_message cm ,
+		accounts a
 	where
-		room_id = $1::varchar) as message_id,
-	$2::varchar,
-	$3::varchar,
-	'',
-	now()
-	
-	
+		cm.send_member = a.account_uid
+		and
+	:room_id = room_id
+	order by
+		create_date desc
+	limit 50) x
+order by
+	create_date asc

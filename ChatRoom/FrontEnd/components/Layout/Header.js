@@ -74,7 +74,7 @@ function Header(props) {
               item: {
                 uid: res.data[index]["factory_uid"],
                 // ip: res.data[index]['WS_URL'],
-                ip: "http://localhost:80",
+                ip: "http://10.1.50.59:80",
                 name: res.data[index]["ws_datasource"],
               },
             });

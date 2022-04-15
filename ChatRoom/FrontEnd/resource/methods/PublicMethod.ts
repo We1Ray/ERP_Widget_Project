@@ -1,6 +1,6 @@
 import moment from "moment";
 
-const CENTER_IP = "http://localhost:80";
+const CENTER_IP = "http://10.1.50.59:80";
 const CENTER_FACTORY = "DS";
 
 export default new (class PublicMethod {
