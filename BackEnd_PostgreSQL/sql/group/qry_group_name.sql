@@ -5,4 +5,4 @@ select
 from
 	GROUP_LIST
 where
-	GROUP_UID = $1::varchar
+	GROUP_UID = ${group_uid}

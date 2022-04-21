@@ -10,14 +10,14 @@ from
 		where
 			Y.ENABLED = 'Y'
 			and(
-				X.ACCOUNT_UID = $1::varchar
+				X.ACCOUNT_UID = ${systemadmin_ACCOUNT_UID}
 				or X.ACCOUNT_UID =(
 					select
 						ACCOUNT_UID
 					from
 						ACCOUNT_TOKEN
 					where
-						ACCESS_TOKEN = $2::varchar
+						ACCESS_TOKEN = ${systemadmin_ACCESS_TOKEN}
 						and EXPIRATION_DATE >= DATE_TRUNC(
 							'day',
 							now()
@@ -37,12 +37,12 @@ from
 			)
 	) A
 where
-	upper( SYSTEM_NAME ) like concat( '%', upper( $3::varchar ), '%' )
+	upper( SYSTEM_NAME ) like concat( '%', upper( ${systemadmin_SYSTEM_NAME} ), '%' )
 	and SYSTEM_TYPE = coalesce(
-		$4::varchar,
+		${systemadmin_SYSTEM_TYPE},
 		SYSTEM_TYPE
 	)
 	and SYSTEM_UID = coalesce(
-		$5::varchar,
+		${systemadmin_SYSTEM_UID},
 		SYSTEM_UID
 	)

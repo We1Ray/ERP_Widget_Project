@@ -6,11 +6,11 @@ const lib = require("../library");
 
 router.route("/get_system_administrator").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["administrator_SYSTEM_UID"]
+  let parameter = {
+    administrator_SYSTEM_UID: req.body["administrator_SYSTEM_UID"]
       ? req.body["administrator_SYSTEM_UID"]
       : null,
-  ];
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -30,12 +30,12 @@ router.route("/get_system_administrator").post(async (req, res) => {
 
 router.route("/get_accounts_not_in_system").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["account_not_in_system_KEY"]
+  let parameter = {
+    account_not_in_system_KEY: req.body["account_not_in_system_KEY"]
       ? req.body["account_not_in_system_KEY"]
       : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-  ];
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -55,10 +55,10 @@ router.route("/get_accounts_not_in_system").post(async (req, res) => {
 
 router.route("/get_account_info").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["key"] ? req.body["key"] : null,
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-  ];
+  let parameter = {
+    key: req.body["key"] ? req.body["key"] : null,
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -72,12 +72,14 @@ router.route("/get_account_info").post(async (req, res) => {
 
 router.route("/create_system_administrator").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-    req.body["expiration_date"] ? req.body["expiration_date"] : null,
-    req.body["access_token"] ? req.body["access_token"] : null,
-  ];
+  let parameter = {
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    expiration_date: req.body["expiration_date"]
+      ? req.body["expiration_date"]
+      : null,
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -97,12 +99,14 @@ router.route("/create_system_administrator").post(async (req, res) => {
 
 router.route("/update_system_administrator").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["expiration_date"] ? req.body["expiration_date"] : null,
-    req.body["access_token"] ? req.body["access_token"] : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-  ];
+  let parameter = {
+    expiration_date: req.body["expiration_date"]
+      ? req.body["expiration_date"]
+      : null,
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -135,34 +139,27 @@ router.route("/delete_system_administrator").post(async (req, res) => {
     await Promise.all(
       req.body.map(async (element) => {
         try {
-          parameter.push([
-            element["account_uid"] ? element["account_uid"] : null,
-            element["system_uid"] ? element["system_uid"] : null,
-          ]);
+          parameter.push({
+            account_uid: element["account_uid"] ? element["account_uid"] : null,
+            system_uid: element["system_uid"] ? element["system_uid"] : null,
+          });
         } catch (error) {
           console.log("error" + error);
         }
       })
     );
-    await lib.executeAPI(
-      "/delete_system_administrator",
-      DBConfig,
-      sql,
-      parameter,
-      res
-    );
   } else {
-    let parameter = [
-      req.body["account_uid"] ? req.body["account_uid"] : null,
-      req.body["system_uid"] ? req.body["system_uid"] : null,
-    ];
-    await lib.executeAPI(
-      "/delete_system_administrator",
-      DBConfig,
-      sql,
-      parameter,
-      res
-    );
+    parameter = {
+      account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+      system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    };
   }
+  await lib.executeAPI(
+    "/delete_system_administrator",
+    DBConfig,
+    sql,
+    parameter,
+    res
+  );
 });
 module.exports = router;

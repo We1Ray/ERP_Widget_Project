@@ -8,4 +8,4 @@ from
 	from
 		chat_room cr2) cr 
 where
-	:account_uid = any(string_to_array(cr.room_member, ';'))
+	${account_uid} = any(string_to_array(cr.room_member, ';'))

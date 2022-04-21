@@ -14,14 +14,14 @@ with recursive CTE as(
 				Y.GROUP_UID = X.GROUP_UID
 				and Y.ENABLED = 'Y'
 			where
-				X.ACCOUNT_UID = $1::varchar
+				X.ACCOUNT_UID = ${account_uid}
 				or X.ACCOUNT_UID =(
 					select
 						ACCOUNT_UID
 					from
 						ACCOUNT_TOKEN
 					where
-						ACCESS_TOKEN = $2::varchar
+						ACCESS_TOKEN = ${access_token}
 						and EXPIRATION_DATE >= DATE_TRUNC(
 							'day',
 							now()
@@ -78,23 +78,23 @@ from
 			) B on
 			A.GROUP_UID = B.GROUP_UID
 		where
-			A.FACTORY_UID = $3::varchar
+			A.FACTORY_UID = ${factory_uid}
 		group by
 			A.FUNCTION_UID
 	) B on
 	A.FUNCTION_UID = B.FUNCTION_UID left join PROGRAM_LIST C on
 	C.PROGRAM_UID = A.PROGRAM_UID left join UI_CAPTION_PROPERTIES L on
 	LANGUAGE = coalesce(
-		$4::varchar,
+		${language},
 		'TW'
 	)
 	and upper( L.SOURCE || '.' || L.WORD )= upper( C.I18N )
 where
 	C.IS_DIR = 'Y'
 	and A.FUNCTION_CODE = 'read'
-	and A.SYSTEM_UID = $5::varchar
+	and A.SYSTEM_UID = ${system_uid}
 	and A.PROGRAM_UID = coalesce(
-		$6::varchar,
+		${program_uid},
 		A.PROGRAM_UID
 	)
 order by

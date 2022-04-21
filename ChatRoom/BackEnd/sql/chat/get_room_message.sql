@@ -1,5 +1,7 @@
 select
-	*
+	x.*,
+	to_char(create_date, 'yyyy-mm-dd') d,
+	to_char(create_date, 'hh24:mi') hm
 from
 	(
 	select
@@ -8,14 +10,27 @@ from
 		cm.send_member, 
 		a."name" send_member_name,
 		cm.read_member ,
-		cm.create_date
+		cm.create_date,
+		case
+			when (cm.read_member is not null)
+			then (
+			select
+				count(*)
+			from
+				unnest (string_to_array(read_member, ';')))
+			else 0
+		end
+		as isread,
+		cr.is_group
 	from
 		chat_message cm ,
+		chat_room cr ,
 		accounts a
 	where
 		cm.send_member = a.account_uid
+		and cm.room_id = cr.room_id
 		and
-	:room_id = room_id
+	${room_id} = cm.room_id
 	order by
 		create_date desc
 	limit 50) x

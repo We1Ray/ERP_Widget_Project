@@ -8,13 +8,13 @@ from
 	ACCOUNTS
 where
 	(
-		upper( ACCOUNT ) like concat( '%', upper( $1::varchar ), '%' )
-		or upper( name ) like concat( '%', upper( $1::varchar ), '%' )
-		or upper( ACCOUNT_UID ) like concat( '%', upper( $1::varchar ), '%' )
+		upper( ACCOUNT ) like concat( '%', upper( ${key} ), '%' )
+		or upper( name ) like concat( '%', upper( ${key} ), '%' )
+		or upper( ACCOUNT_UID ) like concat( '%', upper( ${key} ), '%' )
 	)
 	and(
 		ACCOUNT_UID = coalesce(
-			$2::varchar,
+			${account_uid},
 			ACCOUNT_UID
 		)
 	)

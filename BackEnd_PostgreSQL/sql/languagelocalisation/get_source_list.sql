@@ -1,3 +1,6 @@
-  SELECT DISTINCT source
-    FROM UI_CAPTION_PROPERTIES
-ORDER BY source ASC
+select
+	distinct source
+from
+	UI_CAPTION_PROPERTIES
+order by
+	source asc

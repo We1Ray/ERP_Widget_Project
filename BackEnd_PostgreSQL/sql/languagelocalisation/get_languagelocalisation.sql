@@ -5,33 +5,33 @@ from
 	UI_CAPTION_PROPERTIES A
 where
 	(
-		WORD like concat( '%', coalesce( $1::varchar, WORD ), '%' )
-		or DISPLAY like concat( '%', coalesce( $1::varchar, DISPLAY ), '%' )
+		WORD like concat( '%', coalesce( ${languagelocalisation_KEY}, WORD ), '%' )
+		or DISPLAY like concat( '%', coalesce( ${languagelocalisation_KEY}, DISPLAY ), '%' )
 	)
 	and(
-		$2::varchar is null
+		${languagelocalisation_SOURCE} is null
 		or(
 			"source" = any(
 				string_to_array(
-					$2::varchar,
+					${languagelocalisation_SOURCE},
 					','
 				)
 			)
 		)
 	)
 	and(
-		$3::varchar is null
+		${languagelocalisation_LANGUAGE} is null
 		or(
 			language = any(
 				string_to_array(
-					$3::varchar,
+					${languagelocalisation_LANGUAGE},
 					','
 				)
 			)
 		)
 	)
 	and(
-		$4::varchar is null
+		${languagelocalisation_UP_DATE1} is null
 		or(
 			to_timestamp(
 				TO_CHAR(
@@ -40,13 +40,13 @@ where
 				),
 				'yyyy-MM-dd'
 			)>= to_timestamp(
-				$4::varchar,
+				${languagelocalisation_UP_DATE1},
 				'YYYY/MM/DD'
 			)
 		)
 	)
 	and(
-		$5::varchar is null
+		${languagelocalisation_UP_DATE2} is null
 		or(
 			to_timestamp(
 				TO_CHAR(
@@ -55,18 +55,18 @@ where
 				),
 				'yyyy-MM-dd'
 			)<= to_timestamp(
-				$5::varchar,
+				${languagelocalisation_UP_DATE2},
 				'YYYY/MM/DD'
 			)
 		)
 	)
 	and(
-		$6::varchar is null
+		${languagelocalisation_UP_USER} is null
 		or(
-			up_user = $6::varchar
+			up_user = ${languagelocalisation_UP_USER}
 		)
 	)
 order by
 	source,
 	WORD,
-	LANGUAGE
+	language

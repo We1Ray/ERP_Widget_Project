@@ -8,7 +8,7 @@ insert
 	read_member,
 	create_date)
 select
-	:room_id,
+	${room_id},
 	(
 	select
 		coalesce (max(message_id),
@@ -16,8 +16,8 @@ select
 	from
 		chat_message cm
 	where
-		room_id = :room_id_1) as message_id,
-	:message_content ,	
-	:send_member,
-	'',
+		room_id = ${room_id}) as message_id,
+	${message_content} ,	
+	${send_member},
+	null,
 	now()

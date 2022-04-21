@@ -9,9 +9,9 @@ from
 	ACCOUNTS
 where
 	(
-		upper( ACCOUNT ) like concat( '%', upper( $1::varchar ), '%' )
-		or upper( name ) like concat( '%', upper( $1::varchar ), '%' )
-		or upper( ACCOUNT_UID ) like concat( '%', upper( $1::varchar ), '%' )
+		upper( ACCOUNT ) like concat( '%', upper( ${account_not_in_system_KEY} ), '%' )
+		or upper( name ) like concat( '%', upper( ${account_not_in_system_KEY} ), '%' )
+		or upper( ACCOUNT_UID ) like concat( '%', upper( ${account_not_in_system_KEY} ), '%' )
 	)
 	and locked = coalesce(
 		'N',
@@ -23,5 +23,5 @@ where
 		from
 			ACCOUNT_AVAILABLE_SYSTEMS
 		where
-			SYSTEM_UID = $2::varchar
+			SYSTEM_UID = ${system_uid}
 	)

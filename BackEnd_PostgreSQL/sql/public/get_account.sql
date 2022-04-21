@@ -4,11 +4,11 @@ select
 from
 	ACCOUNTS A
 where
-	($1::varchar is null
-		or (upper(account) like concat( '%', upper( $1::varchar ), '%' )))
+	(${account} is null
+		or (upper(account) like concat( '%', upper( ${account} ), '%' )))
 	and(
-		$2::varchar is null
+		${account_uid} is null
 		or(
-			account_uid = $2::varchar
+			account_uid = ${account_uid}
 		)
 	)

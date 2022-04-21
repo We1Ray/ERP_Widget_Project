@@ -6,20 +6,20 @@ const lib = require("../library");
 
 router.route("/get_group_permissions").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["group_permission_GROUP_UID"]
+  let parameter = {
+    group_permission_GROUP_UID: req.body["group_permission_GROUP_UID"]
       ? req.body["group_permission_GROUP_UID"]
       : null,
-    req.body["group_permission_FACTORY_UID"]
+    group_permission_FACTORY_UID: req.body["group_permission_FACTORY_UID"]
       ? req.body["group_permission_FACTORY_UID"]
       : null,
-    req.body["group_permission_SYSTEM_UID"]
+    group_permission_SYSTEM_UID: req.body["group_permission_SYSTEM_UID"]
       ? req.body["group_permission_SYSTEM_UID"]
       : null,
-    req.body["group_permission_PROGRAM_UID"]
+    group_permission_PROGRAM_UID: req.body["group_permission_PROGRAM_UID"]
       ? req.body["group_permission_PROGRAM_UID"]
       : null,
-  ];
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -33,14 +33,14 @@ router.route("/get_group_permissions").post(async (req, res) => {
 
 router.route("/update_group_permission").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["group_uid"] ? req.body["group_uid"] : null,
-    req.body["function_uid"] ? req.body["function_uid"] : null,
-    req.body["factory_uid"] ? req.body["factory_uid"] : null,
-    req.body["access_token"] ? req.body["access_token"] : null,
-    req.body["editable"] ? req.body["editable"] : null,
-    req.body["is_open"] ? req.body["is_open"] : null,
-  ];
+  let parameter = {
+    group_uid: req.body["group_uid"] ? req.body["group_uid"] : null,
+    function_uid: req.body["function_uid"] ? req.body["function_uid"] : null,
+    factory_uid: req.body["factory_uid"] ? req.body["factory_uid"] : null,
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    editable: req.body["editable"] ? req.body["editable"] : null,
+    is_open: req.body["is_open"] ? req.body["is_open"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(

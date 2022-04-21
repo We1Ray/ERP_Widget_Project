@@ -1,65 +1,67 @@
 with cte_dual as(
-	select
+select
 		C.ACCOUNT,
-		$1::varchar as LANGUAGE,
-		$2::varchar as SOURCE,
-		$3::varchar as WORD
-	from
+		${language} as language,
+		${source} as source,
+		${word} as WORD
+from
 		ACCOUNT_TOKEN A,
 		ACCOUNTS C
-	where
-		A.ACCESS_TOKEN = $4::varchar
-		and EXPIRATION_DATE >= DATE_TRUNC(
+where
+		A.ACCESS_TOKEN = ${access_token}
+	and EXPIRATION_DATE >= DATE_TRUNC(
 			'day',
 			now()
 		)
-		and IS_EFFECTIVE = 'Y'
-		and A.ACCOUNT_UID = C.ACCOUNT_UID
+	and IS_EFFECTIVE = 'Y'
+	and A.ACCOUNT_UID = C.ACCOUNT_UID
 ),
 cte_update as(
-	update
+update
 		UI_CAPTION_PROPERTIES as a
 	set
-		DISPLAY = $5::varchar,
+		DISPLAY = ${display},
 		UP_DATE = now(),
 		UP_USER = b.ACCOUNT
-	from
+from
 		cte_dual as b
-	where
+where
 		b.LANGUAGE = a.LANGUAGE
-		and b.SOURCE = a.SOURCE
-		and b.WORD = a.WORD returning b.*
-) insert
+	and b.SOURCE = a.SOURCE
+	and b.WORD = a.WORD returning b.*
+)
+insert
 	into
 		UI_CAPTION_PROPERTIES(
-			LANGUAGE,
-			SOURCE,
+			language,
+			source,
 			WORD,
 			DISPLAY,
 			UP_USER,
 			UP_DATE,
 			CREATE_USER,
 			CREATE_DATE
-		) select
+		)
+select
 			d.LANGUAGE,
 			d.SOURCE,
 			d.WORD,
-			$5::varchar,
+			${display},
 			d.ACCOUNT,
 			now(),
 			d.ACCOUNT,
 			now()
-		from
+from
 			cte_dual as d
-		where
+where
 			not exists(
-				select
+	select
 					*
-				from
+	from
 					cte_update as u,
 					cte_dual as d
-				where
+	where
 					u.LANGUAGE = d.LANGUAGE
-					and u.SOURCE = d.SOURCE
-					and u.WORD = d.WORD
+		and u.SOURCE = d.SOURCE
+		and u.WORD = d.WORD
 			)

@@ -1,8 +1,8 @@
 select
 	row_number() over() as ROW_NUM_ID,
 	case
-		when $1::varchar is null then 'N'
-		when A.GROUP_NAME like concat( '%', $1::varchar, '%' ) then 'Y'
+		when ${group_GROUP_NAME} is null then 'N'
+		when A.GROUP_NAME like concat( '%', ${group_GROUP_NAME}, '%' ) then 'Y'
 		else 'N'
 	end UNFOLD,
 	A.GROUP_UID,

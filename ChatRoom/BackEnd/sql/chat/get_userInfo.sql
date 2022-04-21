@@ -8,4 +8,4 @@ from
 	accounts a
 where
 	a.account_uid = at2.account_uid
-	and at2 .access_token = :token
+	and at2 .access_token = ${token}

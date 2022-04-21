@@ -6,14 +6,14 @@ const lib = require("../library");
 
 router.route("/get_account_available_menu").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-    req.body["access_token"] ? req.body["access_token"] : null,
-    req.body["factory_uid"] ? req.body["factory_uid"] : null,
-    req.body["language"] ? req.body["language"] : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-    req.body["program_uid"] ? req.body["program_uid"] : null,
-  ];
+  let parameter = {
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    factory_uid: req.body["factory_uid"] ? req.body["factory_uid"] : null,
+    language: req.body["language"] ? req.body["language"] : null,
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    program_uid: req.body["program_uid"] ? req.body["program_uid"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/sidebar/get_account_available_menu.sql")
