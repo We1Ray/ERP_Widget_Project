@@ -1,9 +1,4 @@
-const DataBaseInfo = require("../DataBaseInfo.json");
-const fs = require("fs");
-const path = require("path");
-const lib = require("../library");
 const logger = require("../../../BackEnd_PostgreSQL/logger");
-const { Pool } = require("pg");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require("./users");
 
@@ -19,25 +14,6 @@ const chatSever = (io) => {
       if (!user || error) {
         return callback(error); //error handeling
       } else {
-        // const pool = new Pool(DataBaseInfo["DS"]);
-        // let sql = fs
-        //   .readFileSync(
-        //     path.resolve(__dirname, "../sql/chat/get_room_list.sql")
-        //   )
-        //   .toString();
-        // pool.query(
-        //   lib.queryConvert(sql, {
-        //     token: user.info.account_uid,
-        //   }),
-        //   (err, res) => {
-        //     socket.emit("message", {
-        //       user: "admin",
-        //       text: `${user.info.name}, welcome to the the room ${user.room}`,
-        //     });
-        //   }
-        // );
-        // pool.end();
-
         // socket.broadcast.to(user.room).emit("message", {
         //   user: "admin",
         //   text: `${user.name}, has joined!`,
@@ -64,7 +40,6 @@ const chatSever = (io) => {
         if (error) {
           return callback(error); //error handeling
         } else {
-          socket.join(user.room);
           io.to(room).emit("message", {
             userInfo: userInfo,
             text: message,
@@ -78,6 +53,7 @@ const chatSever = (io) => {
         io.to(user.room).emit("message", {
           userInfo: user.info,
           text: message,
+          socket_user: socket.id,
         });
 
         callback();

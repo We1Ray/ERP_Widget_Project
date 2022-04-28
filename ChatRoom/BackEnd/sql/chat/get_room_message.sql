@@ -11,6 +11,7 @@ from
 		a."name" send_member_name,
 		cm.read_member ,
 		cm.create_date,
+		cm.message_id,
 		case
 			when (cm.read_member is not null)
 			then (
@@ -33,6 +34,6 @@ from
 	${room_id} = cm.room_id
 	order by
 		create_date desc
-	limit 50) x
+	limit 50 * ${page}) x
 order by
 	create_date asc

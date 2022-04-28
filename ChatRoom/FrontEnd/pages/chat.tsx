@@ -58,7 +58,18 @@ function ChatRoom_Content() {
 
   return (
     <div style={{ height: "87vh", padding: "10px" }}>
-      <Chat room={"123456"} />
+      <Chat
+        room={{
+          room_id: "123456",
+          is_group: "N",
+        }}
+      />
+      {/* <Chat
+        room={{
+          room_id: "654321",
+          is_group: "N",
+        }}
+      /> */}
     </div>
   );
 }
