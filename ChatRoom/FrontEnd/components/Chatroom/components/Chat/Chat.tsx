@@ -152,9 +152,9 @@ const Chat: React.FC<Props> = ({ room }) => {
     const onScroll = (e: any) => {
       setScrollTop(e.target.scrollTop);
 
-      // if (e.target.scrollTop == 0) {
-      //   setPage(page + 1);
-      // }
+      if (e.target.scrollTop == 0) {
+        setPage(page + 1);
+      }
 
       if (
         e.target.scrollHeight - e.target.scrollTop ===
@@ -300,7 +300,7 @@ const Chat: React.FC<Props> = ({ room }) => {
     )
       .then((res) => {
         if (res.status === 200 && latest) {
-          // setMessages(res.data);
+          setMessages(res.data);
         }
       })
       .catch((error) => {
