@@ -1,17 +1,9 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import io from "socket.io-client";
 
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
 import Message from "../Message/Message";
-import Messages from "../Messages/Messages";
-// import TextContainer from "../TextContainer/TextContainer";
 
 import {
   CallApi,
@@ -20,7 +12,6 @@ import {
   SystemContext,
 } from "../../../../resource/index";
 import "./Chat.css";
-import useMessagesSearch from "../hooks/useMessagesSearch";
 
 let socket = null;
 
@@ -69,20 +60,18 @@ const DateMessage = ({ date }) => (
 const Chat: React.FC<Props> = ({ room }) => {
   const ENDPOINT = "http://10.1.50.59:81";
   const { System } = useContext(SystemContext);
+  const [init, setInit] = useState(true);
   const [user, setUser] = useState<user>(null);
-  const [users, setUsers] = useState("");
+  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<messageProps[]>([]);
-  const [newMsg, setNewMsg] = useState(null);
+  const [pastScroll, setPastScroll] = useState(0);
+  const [scrollPage, setScrollPage] = useState(false);
   const [scrollTop, setScrollTop] = useState(null);
   const [scrollBottom, setScrollBottom] = useState(true);
-  const [init, setInit] = useState(true);
+  const [messages, setMessages] = useState<messageProps[]>([]);
+  const [newMsg, setNewMsg] = useState(null);
+  const [message, setMessage] = useState("");
   const scrollRef = useRef<any>(null);
-  // const { messages, hasMore, loading, error } = useMessagesSearch(
-  //   page,
-  //   room.room_id
-  // );
 
   /**
    * 取得使用者資訊
@@ -131,7 +120,7 @@ const Chat: React.FC<Props> = ({ room }) => {
     ) {
       if (
         messages[messages.length - 1].send_member === user.account_uid &&
-        scrollBottom
+        !scrollBottom
       ) {
         scrollToBottom();
       } else if (init) {
@@ -141,6 +130,20 @@ const Chat: React.FC<Props> = ({ room }) => {
     }
   }, [JSON.stringify(messages), init, scrollBottom]);
 
+  /**
+   * 增加Srollbar 長度 回復原scrollbar位置
+   */
+  useEffect(() => {
+    if (!scrollBottom && scrollPage) {
+      const currentScroll = scrollRef.current.scrollHeight - pastScroll;
+      scrollRef.current.scrollTo(0, currentScroll);
+      setScrollPage(false);
+    }
+  }, [JSON.stringify(messages), scrollPage]);
+
+  /**
+   * 設定初始置底、自己發訊息也置底
+   */
   function scrollToBottom() {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }
@@ -154,6 +157,8 @@ const Chat: React.FC<Props> = ({ room }) => {
 
       if (e.target.scrollTop == 0) {
         setPage(page + 1);
+
+        setPastScroll(e.target.scrollHeight);
       }
 
       if (
@@ -172,22 +177,6 @@ const Chat: React.FC<Props> = ({ room }) => {
         ? scrollRef.current.removeEventListener("scroll", onScroll)
         : null;
   }, [scrollTop]);
-
-  // const observer = useRef<any>();
-  // const lastMessageElementRef = useCallback(
-  //   (node) => {
-  //     if (loading) return;
-  //     if (observer.current) observer.current.disconnect();
-  //     observer.current = new IntersectionObserver((entries) => {
-  //       if (entries[0].isIntersecting && hasMore) {
-  //         setPage((prevPageNumber) => prevPageNumber + 1);
-  //       }
-  //     });
-  //     if (node) observer.current.observe(node);
-  //     console.log(node);
-  //   },
-  //   [loading, hasMore]
-  // );
 
   /**
    * 聊天室新訊息更新
@@ -275,6 +264,7 @@ const Chat: React.FC<Props> = ({ room }) => {
         .then((res) => {
           if (res.status === 200 && loading) {
             setMessages((prev) => [...res.data, ...prev]);
+            setScrollPage(true);
             loading = false;
           }
         })
@@ -345,17 +335,13 @@ const Chat: React.FC<Props> = ({ room }) => {
     }
   };
 
-  // i need another component that will display the users
   return (
     <div className="container">
       <InfoBar room={room.room_id} />
       <div className="messages" ref={scrollRef}>
         {user && socket ? (
           messages.map((message, i) => (
-            <div
-              key={i}
-              // ref={i === 25 ? lastMessageElementRef : null}
-            >
+            <div key={i}>
               {i == 0 ? (
                 <DateMessage date={message.d} />
               ) : messages[i - 1].d !== message.d ? (
