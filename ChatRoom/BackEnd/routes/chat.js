@@ -43,6 +43,26 @@ router.route("/get_room_message").post(async (req, res) => {
   );
 });
 
+router.route("/get_room_page_message").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_room_page_message.sql")
+    )
+    .toString();
+
+  await lib.requestAPI(
+    "/get_room_page_message",
+    DBConfig,
+    sql,
+    {
+      room_id: req.body["room_id"] ? req.body["room_id"] : null,
+      page: req.body["page"] ? req.body["page"] : null,
+    },
+    res
+  );
+});
+
 router.route("/get_message_state").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs

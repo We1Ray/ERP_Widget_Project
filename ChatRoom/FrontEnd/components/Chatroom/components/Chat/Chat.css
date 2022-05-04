@@ -24,3 +24,9 @@
     width: 60%;
   }
 }
+
+.messages {
+  padding: 5% 0;
+  overflow: auto;
+  flex: auto;
+}
