@@ -63,13 +63,14 @@ const Chat: React.FC<Props> = ({ room }) => {
   const [init, setInit] = useState(true);
   const [user, setUser] = useState<user>(null);
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pastScroll, setPastScroll] = useState(0);
   const [scrollPage, setScrollPage] = useState(false);
   const [scrollTop, setScrollTop] = useState(null);
   const [scrollBottom, setScrollBottom] = useState(true);
   const [messages, setMessages] = useState<messageProps[]>([]);
-  const [newMsg, setNewMsg] = useState(null);
+  const [newMsg, setNewMsg] = useState(false);
+  const [notReadMsg, setNotReadMsg] = useState<messageProps>(null);
   const [message, setMessage] = useState("");
   const scrollRef = useRef<any>(null);
 
@@ -84,7 +85,23 @@ const Chat: React.FC<Props> = ({ room }) => {
       .then((res) => {
         if (res.status === 200) {
           setUser(res.data[0]);
-          getMessages();
+          CallApi.ExecuteApi(
+            CENTER_FACTORY,
+            ENDPOINT + "/chat/get_room_page_message",
+            {
+              room_id: room.room_id,
+              page: page,
+            }
+          )
+            .then((res) => {
+              if (res.status === 200) {
+                setMessages((prev) => [...res.data, ...prev]);
+              }
+            })
+            .catch((error) => {
+              console.log("EROOR: Chat: /chat/get_room_page_message");
+              console.log(error);
+            });
         }
       })
       .catch((error) => {
@@ -114,21 +131,23 @@ const Chat: React.FC<Props> = ({ room }) => {
    * 設定初始置底、自己發訊息也置底
    */
   useEffect(() => {
-    if (
-      scrollRef.current.clientHeight < scrollRef.current.scrollHeight &&
-      messages
-    ) {
-      if (
-        messages[messages.length - 1].send_member === user.account_uid &&
-        !scrollBottom
-      ) {
+    if (scrollRef.current.clientHeight < scrollRef.current.scrollHeight) {
+      if (newMsg) {
+        setNewMsg(false);
         scrollToBottom();
       } else if (init) {
-        scrollToBottom();
         setInit(false);
+        scrollToBottom();
       }
     }
-  }, [JSON.stringify(messages), init, scrollBottom]);
+  }, [JSON.stringify(messages), init, newMsg, scrollBottom]);
+
+  /**
+   * 設定訊息置底
+   */
+  function scrollToBottom() {
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }
 
   /**
    * 增加Srollbar 長度 回復原scrollbar位置
@@ -142,13 +161,6 @@ const Chat: React.FC<Props> = ({ room }) => {
   }, [JSON.stringify(messages), scrollPage]);
 
   /**
-   * 設定初始置底、自己發訊息也置底
-   */
-  function scrollToBottom() {
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }
-
-  /**
    * 判斷聊天室scrollbar是否滑動和判斷scrollbar置底
    */
   useEffect(() => {
@@ -156,7 +168,7 @@ const Chat: React.FC<Props> = ({ room }) => {
       setScrollTop(e.target.scrollTop);
 
       if (e.target.scrollTop == 0) {
-        setPage(page + 1);
+        setPage((page) => page + 1);
 
         setPastScroll(e.target.scrollHeight);
       }
@@ -185,11 +197,11 @@ const Chat: React.FC<Props> = ({ room }) => {
     if (user) {
       socket.on("message", ({ text, userInfo, socket_user }) => {
         if (
-          user.account_uid === userInfo.account_uid &&
-          socket.id === socket_user
+          !(
+            user.account_uid === userInfo.account_uid &&
+            socket.id === socket_user
+          )
         ) {
-          getMessages();
-        } else {
           CallApi.ExecuteApi(
             CENTER_FACTORY,
             ENDPOINT + "/chat/update_message_read",
@@ -207,11 +219,49 @@ const Chat: React.FC<Props> = ({ room }) => {
               console.log("EROOR: Chat: /chat/update_message_read");
               console.log(error);
             });
-
+          let today = new Date();
           if (scrollBottom) {
-            getMessages();
+            setMessages((prev) => [
+              ...prev,
+              ...[
+                {
+                  d:
+                    today.getFullYear() +
+                    "-" +
+                    (today.getMonth() + 1 < 10
+                      ? "0" + (today.getMonth() + 1)
+                      : today.getMonth() + 1) +
+                    "-" +
+                    (today.getDate() < 10
+                      ? "0" + today.getDate()
+                      : today.getDate()),
+                  hm: today.getHours() + ":" + today.getMinutes(),
+                  isread: "0",
+                  message_id: "0",
+                  message_content: text,
+                  room_id: room.room_id,
+                  send_member: userInfo.account_uid,
+                  send_member_name: userInfo.name,
+                },
+              ],
+            ]);
+            setNewMsg(true);
           } else {
-            setNewMsg(text);
+            setNotReadMsg({
+              d:
+                today.getFullYear() +
+                "-" +
+                (today.getMonth() + 1) +
+                "-" +
+                today.getDate(),
+              hm: today.getHours() + ":" + today.getMinutes(),
+              isread: "0",
+              message_id: "0",
+              message_content: text,
+              room_id: room.room_id,
+              send_member: userInfo.account_uid,
+              send_member_name: userInfo.name,
+            });
           }
         }
       });
@@ -219,7 +269,7 @@ const Chat: React.FC<Props> = ({ room }) => {
         setUsers(users);
       });
     }
-  }, [JSON.stringify(user), scrollBottom]);
+  }, [JSON.stringify(user)]);
 
   /**
    * 更新訊息已讀狀態
@@ -250,9 +300,7 @@ const Chat: React.FC<Props> = ({ room }) => {
    * 往上滾抓取以前的訊息
    */
   useEffect(() => {
-    let loading = false;
     const get_room_page_message = async () => {
-      loading = true;
       CallApi.ExecuteApi(
         CENTER_FACTORY,
         ENDPOINT + "/chat/get_room_page_message",
@@ -262,10 +310,9 @@ const Chat: React.FC<Props> = ({ room }) => {
         }
       )
         .then((res) => {
-          if (res.status === 200 && loading) {
+          if (res.status === 200) {
             setMessages((prev) => [...res.data, ...prev]);
             setScrollPage(true);
-            loading = false;
           }
         })
         .catch((error) => {
@@ -273,34 +320,34 @@ const Chat: React.FC<Props> = ({ room }) => {
           console.log(error);
         });
     };
-    if (user) {
+    if (user && page > 0) {
       get_room_page_message();
     }
   }, [page]);
 
-  async function getMessages() {
-    let latest = true;
-    await CallApi.ExecuteApi(
-      CENTER_FACTORY,
-      ENDPOINT + "/chat/get_room_message",
-      {
-        room_id: room.room_id,
-        page: page,
-      }
-    )
-      .then((res) => {
-        if (res.status === 200 && latest) {
-          setMessages(res.data);
-        }
-      })
-      .catch((error) => {
-        console.log("EROOR: Chat: /chat/get_room_message");
-        console.log(error);
-      });
-    return () => {
-      latest = false;
-    };
-  }
+  // async function getMessages() {
+  //   let latest = true;
+  //   await CallApi.ExecuteApi(
+  //     CENTER_FACTORY,
+  //     ENDPOINT + "/chat/get_room_message",
+  //     {
+  //       room_id: room.room_id,
+  //       page: page,
+  //     }
+  //   )
+  //     .then((res) => {
+  //       if (res.status === 200 && latest) {
+  //         setMessages(res.data);
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log("EROOR: Chat: /chat/get_room_message");
+  //       console.log(error);
+  //     });
+  //   return () => {
+  //     latest = false;
+  //   };
+  // }
 
   const sendMessage = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // full browser refreshes aren't good
@@ -321,7 +368,33 @@ const Chat: React.FC<Props> = ({ room }) => {
               "sendMessage",
               { room: room.room_id, message: message, userInfo: user },
               () => {
+                let today = new Date();
                 setMessage("");
+                setMessages((prev) => [
+                  ...prev,
+                  ...[
+                    {
+                      d:
+                        today.getFullYear() +
+                        "-" +
+                        (today.getMonth() + 1 < 10
+                          ? "0" + (today.getMonth() + 1)
+                          : today.getMonth() + 1) +
+                        "-" +
+                        (today.getDate() < 10
+                          ? "0" + today.getDate()
+                          : today.getDate()),
+                      hm: today.getHours() + ":" + today.getMinutes(),
+                      isread: "0",
+                      message_id: "0",
+                      message_content: message,
+                      room_id: room.room_id,
+                      send_member: user.account_uid,
+                      send_member_name: user.name,
+                    },
+                  ],
+                ]);
+                setNewMsg(true);
               }
             );
           } else {
