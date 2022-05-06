@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import io from "socket.io-client";
-
+import ReactEmoji from "react-emoji";
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
 import Message from "../Message/Message";
@@ -10,15 +10,16 @@ import {
   CENTER_FACTORY,
   None,
   SystemContext,
+  SystemFunc,
 } from "../../../../resource/index";
 import "./Chat.css";
 
 let socket = null;
 
 interface Props {
-  room: room;
+  room: roomProps;
 }
-interface room {
+interface roomProps {
   room_id: string;
   is_group: string;
 }
@@ -34,7 +35,20 @@ interface messageProps {
   send_member_name: string;
 }
 
-interface user {
+interface userProps {
+  account: string;
+  account_uid: string;
+  email: string;
+  name: string;
+}
+
+interface usersProps {
+  id: string;
+  info: userProps;
+  room: roomProps;
+}
+
+interface userProps {
   account: string;
   account_uid: string;
   email: string;
@@ -61,15 +75,15 @@ const Chat: React.FC<Props> = ({ room }) => {
   const ENDPOINT = "http://10.1.50.59:81";
   const { System } = useContext(SystemContext);
   const [init, setInit] = useState(true);
-  const [user, setUser] = useState<user>(null);
-  const [users, setUsers] = useState([]);
+  const [user, setUser] = useState<userProps>(null);
+  const [users, setUsers] = useState<usersProps[]>([]);
   const [page, setPage] = useState(0);
   const [pastScroll, setPastScroll] = useState(0);
   const [scrollPage, setScrollPage] = useState(false);
   const [scrollTop, setScrollTop] = useState(null);
   const [scrollBottom, setScrollBottom] = useState(true);
   const [messages, setMessages] = useState<messageProps[]>([]);
-  const [newMsg, setNewMsg] = useState(false);
+  const [newMsg, setNewMsg] = useState<messageProps>(null);
   const [notReadMsg, setNotReadMsg] = useState<messageProps>(null);
   const [message, setMessage] = useState("");
   const scrollRef = useRef<any>(null);
@@ -115,15 +129,11 @@ const Chat: React.FC<Props> = ({ room }) => {
    */
   useEffect(() => {
     if (user) {
-      socket.emit(
-        "join",
-        { room: room.room_id, userInfo: user },
-        (error: any) => {
-          if (error) {
-            alert(error);
-          }
+      socket.emit("join", { room: room, userInfo: user }, (error: any) => {
+        if (error) {
+          alert(error);
         }
-      );
+      });
     }
   }, [ENDPOINT, JSON.stringify(user), JSON.stringify(room)]);
 
@@ -133,14 +143,28 @@ const Chat: React.FC<Props> = ({ room }) => {
   useEffect(() => {
     if (scrollRef.current.clientHeight < scrollRef.current.scrollHeight) {
       if (newMsg) {
-        setNewMsg(false);
-        scrollToBottom();
+        if (newMsg.send_member === user.account_uid) {
+          setNewMsg(null);
+          scrollToBottom();
+        }
       } else if (init) {
         setInit(false);
         scrollToBottom();
       }
     }
-  }, [JSON.stringify(messages), init, newMsg, scrollBottom]);
+
+    if (newMsg) {
+      if (newMsg.send_member !== user.account_uid) {
+        if (scrollBottom) {
+          setNewMsg(null);
+          setNotReadMsg(null);
+          scrollToBottom();
+        } else {
+          setNotReadMsg(newMsg);
+        }
+      }
+    }
+  }, [init, JSON.stringify(messages), JSON.stringify(newMsg), scrollBottom]);
 
   /**
    * 設定訊息置底
@@ -195,7 +219,7 @@ const Chat: React.FC<Props> = ({ room }) => {
    */
   useEffect(() => {
     if (user) {
-      socket.on("message", ({ text, userInfo, socket_user }) => {
+      socket.on("message", ({ sendMessage, userInfo, socket_user }) => {
         if (
           !(
             user.account_uid === userInfo.account_uid &&
@@ -220,49 +244,32 @@ const Chat: React.FC<Props> = ({ room }) => {
               console.log(error);
             });
           let today = new Date();
-          if (scrollBottom) {
-            setMessages((prev) => [
-              ...prev,
-              ...[
-                {
-                  d:
-                    today.getFullYear() +
-                    "-" +
-                    (today.getMonth() + 1 < 10
-                      ? "0" + (today.getMonth() + 1)
-                      : today.getMonth() + 1) +
-                    "-" +
-                    (today.getDate() < 10
-                      ? "0" + today.getDate()
-                      : today.getDate()),
-                  hm: today.getHours() + ":" + today.getMinutes(),
-                  isread: "0",
-                  message_id: "0",
-                  message_content: text,
-                  room_id: room.room_id,
-                  send_member: userInfo.account_uid,
-                  send_member_name: userInfo.name,
-                },
-              ],
-            ]);
-            setNewMsg(true);
-          } else {
-            setNotReadMsg({
-              d:
-                today.getFullYear() +
-                "-" +
-                (today.getMonth() + 1) +
-                "-" +
-                today.getDate(),
-              hm: today.getHours() + ":" + today.getMinutes(),
-              isread: "0",
-              message_id: "0",
-              message_content: text,
-              room_id: room.room_id,
-              send_member: userInfo.account_uid,
-              send_member_name: userInfo.name,
-            });
-          }
+          let msg = {
+            d:
+              today.getFullYear() +
+              "-" +
+              (today.getMonth() + 1 < 10
+                ? "0" + (today.getMonth() + 1)
+                : today.getMonth() + 1) +
+              "-" +
+              (today.getDate() < 10 ? "0" + today.getDate() : today.getDate()),
+            hm:
+              (today.getHours() < 10
+                ? "0" + today.getHours()
+                : today.getHours()) +
+              ":" +
+              (today.getMinutes() < 10
+                ? "0" + today.getMinutes()
+                : today.getMinutes()),
+            isread: "0",
+            message_id: sendMessage.message_id,
+            message_content: sendMessage.message_content,
+            room_id: room.room_id,
+            send_member: userInfo.account_uid,
+            send_member_name: userInfo.name,
+          };
+          setMessages((prev) => [...prev, ...[msg]]);
+          setNewMsg(msg);
         }
       });
       socket.on("roomData", ({ users }) => {
@@ -325,76 +332,58 @@ const Chat: React.FC<Props> = ({ room }) => {
     }
   }, [page]);
 
-  // async function getMessages() {
-  //   let latest = true;
-  //   await CallApi.ExecuteApi(
-  //     CENTER_FACTORY,
-  //     ENDPOINT + "/chat/get_room_message",
-  //     {
-  //       room_id: room.room_id,
-  //       page: page,
-  //     }
-  //   )
-  //     .then((res) => {
-  //       if (res.status === 200 && latest) {
-  //         setMessages(res.data);
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log("EROOR: Chat: /chat/get_room_message");
-  //       console.log(error);
-  //     });
-  //   return () => {
-  //     latest = false;
-  //   };
-  // }
-
   const sendMessage = (event: { preventDefault: () => void }) => {
     event.preventDefault(); // full browser refreshes aren't good
 
     if (message) {
+      let message_id = "Msg-" + SystemFunc.uuid();
       CallApi.ExecuteApi(
         CENTER_FACTORY,
         ENDPOINT + "/chat/insert_room_message",
         {
           room_id: room.room_id,
+          message_id: message_id,
           message_content: message,
           send_member: user.account_uid,
         }
       )
         .then((res) => {
           if (res.status === 200) {
+            let today = new Date();
+            let send_msg = {
+              d:
+                today.getFullYear() +
+                "-" +
+                (today.getMonth() + 1 < 10
+                  ? "0" + (today.getMonth() + 1)
+                  : today.getMonth() + 1) +
+                "-" +
+                (today.getDate() < 10
+                  ? "0" + today.getDate()
+                  : today.getDate()),
+              hm:
+                (today.getHours() < 10
+                  ? "0" + today.getHours()
+                  : today.getHours()) +
+                ":" +
+                (today.getMinutes() < 10
+                  ? "0" + today.getMinutes()
+                  : today.getMinutes()),
+              isread: "0",
+              message_id: message_id,
+              message_content: message,
+              room_id: room.room_id,
+              send_member: user.account_uid,
+              send_member_name: user.name,
+            };
+
             socket.emit(
               "sendMessage",
-              { room: room.room_id, message: message, userInfo: user },
+              { room: room, message: send_msg, userInfo: user },
               () => {
-                let today = new Date();
                 setMessage("");
-                setMessages((prev) => [
-                  ...prev,
-                  ...[
-                    {
-                      d:
-                        today.getFullYear() +
-                        "-" +
-                        (today.getMonth() + 1 < 10
-                          ? "0" + (today.getMonth() + 1)
-                          : today.getMonth() + 1) +
-                        "-" +
-                        (today.getDate() < 10
-                          ? "0" + today.getDate()
-                          : today.getDate()),
-                      hm: today.getHours() + ":" + today.getMinutes(),
-                      isread: "0",
-                      message_id: "0",
-                      message_content: message,
-                      room_id: room.room_id,
-                      send_member: user.account_uid,
-                      send_member_name: user.name,
-                    },
-                  ],
-                ]);
-                setNewMsg(true);
+                setMessages((prev) => [...prev, ...[send_msg]]);
+                setNewMsg(send_msg);
               }
             );
           } else {
@@ -426,9 +415,18 @@ const Chat: React.FC<Props> = ({ room }) => {
             </div>
           ))
         ) : (
-          <></>
+          <None />
         )}
       </div>
+      {notReadMsg ? (
+        <div className="notReadMsg">
+          {ReactEmoji.emojify(
+            notReadMsg.send_member_name + ": " + notReadMsg.message_content
+          )}
+        </div>
+      ) : (
+        <None />
+      )}
       <Input
         message={message}
         setMessage={setMessage}
@@ -439,3 +437,4 @@ const Chat: React.FC<Props> = ({ room }) => {
 };
 
 export default Chat;
+export type { messageProps, userProps, usersProps };

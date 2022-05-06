@@ -94,6 +94,7 @@ router.route("/insert_room_message").post(async (req, res) => {
     sql,
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
+      message_id: req.body["message_id"] ? req.body["message_id"] : null,
       message_content: req.body["message_content"]
         ? req.body["message_content"]
         : null,

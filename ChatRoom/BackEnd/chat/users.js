@@ -4,13 +4,13 @@ const users = []; //users  is an empty array, as when initialized there are none
 const addUser = ({ id, room, userInfo }) => {
   try {
     info = userInfo;
-    room = room.trim().toLowerCase();
-    //we check if the new user is trying to signup for the same room and the same user name, which cant be allowed
-    //we do this by going through the user array and checking every single user to see if there is any match
-    const existingUser = users.find(
-      (user) => user.room === room && user.info.name === userInfo.name
-    );
-    //if the user does already exist, return an error
+    room.room_id = room.room_id.trim().toLowerCase();
+
+    // const existingUser = users.find(
+    //   (user) =>
+    //     user.room.room_id === room.room_id && user.info.name === userInfo.name
+    // );
+
     const user = { id, info: userInfo, room };
 
     users.push(user);
@@ -43,7 +43,7 @@ const getUser = (id) => {
 //we return an array with all the users in the room
 const getUsersInRoom = (room) => {
   try {
-    return users.filter((user) => user.room === room);
+    return users.filter((user) => user.room.room_id === room.room_id);
   } catch (error) {
     console.log(error);
   }

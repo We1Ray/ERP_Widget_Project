@@ -30,3 +30,12 @@
   overflow: auto;
   flex: auto;
 }
+
+.notReadMsg {
+  width: 100%;
+  letter-spacing: 0;
+  float: left;
+  font-size: 1.1em;
+  word-wrap: break-word;
+  align-items: center;
+}

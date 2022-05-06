@@ -18,9 +18,9 @@ const chatSever = (io) => {
         //   user: "admin",
         //   text: `${user.name}, has joined!`,
         // });
-        socket.join(user.room);
+        socket.join(user.room.room_id);
 
-        io.to(user.room).emit("roomData", {
+        io.to(user.room.room_id).emit("roomData", {
           room: user.room,
           users: getUsersInRoom(user.room),
         });
@@ -40,9 +40,9 @@ const chatSever = (io) => {
         if (error) {
           return callback(error); //error handeling
         } else {
-          io.to(room).emit("message", {
+          io.to(room.room_id).emit("message", {
             userInfo: userInfo,
-            text: message,
+            sendMessage: message,
           });
 
           callback();
@@ -50,9 +50,9 @@ const chatSever = (io) => {
       } else {
         //when the user leaves we send a new message to roomData
         //we also send users since we need to know the new state of the users in the room;
-        io.to(user.room).emit("message", {
+        io.to(user.room.room_id).emit("message", {
           userInfo: user.info,
-          text: message,
+          sendMessage: message,
           socket_user: socket.id,
         });
 
@@ -69,7 +69,7 @@ const chatSever = (io) => {
         //   user: "Admin",
         //   text: `${user.info.name} has left.`,
         // });
-        io.to(user.room).emit("roomData", {
+        io.to(user.room.room_id).emit("roomData", {
           room: user.room,
           users: getUsersInRoom(user.room),
         });
