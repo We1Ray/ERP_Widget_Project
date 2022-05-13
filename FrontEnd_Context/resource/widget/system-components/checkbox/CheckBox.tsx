@@ -61,6 +61,8 @@ interface CheckBoxProps {
    * 元件的Reference
    */
   ref?: React.Ref<any>;
+
+  [x: string]: any;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
 const CheckBox: React.FC<CheckBoxProps> = forwardRef(

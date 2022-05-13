@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import ReactEmoji from "react-emoji";
+// import ReactEmoji from "react-emoji";
 import {
   CallApi,
   CENTER_FACTORY,
@@ -27,8 +27,49 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
     isSentByCurrentUser = true;
   }
 
+  const TRANSPARENT_GIF =
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
+  function getAllEmojisFromText(text) {
+    return text.match(
+      /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*/g
+    );
+  }
+
+  function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, "g"), replace);
+  }
+
+  function replaceAllTextEmojis(text) {
+    let allEmojis = getAllEmojisFromText(text);
+
+    // TODO: get all emoji style
+    const allEmojiStyle = {};
+
+    if (allEmojis) {
+      allEmojis = Array.from(new Set(allEmojis));
+
+      allEmojis.forEach((emoji) => {
+        const style = allEmojiStyle[emoji];
+
+        if (!style) return;
+
+        text = replaceAll(
+          text,
+          emoji,
+          `<img
+              style="${style}"
+              data-emoji="${emoji}"
+              src="${TRANSPARENT_GIF}"
+            />`
+        );
+      });
+    }
+
+    return text;
+  }
+
   useEffect(() => {
-    console.log(users);
     if (users.length > 1 && users[0].room.is_group === "N") {
       setIsRead(true);
     } else {
@@ -71,7 +112,8 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
       &emsp;
       <div className="messageBox backgroundBlue">
         <p className="messageText colorWhite">
-          {ReactEmoji.emojify(message.message_content)}
+          {replaceAllTextEmojis(message.message_content)}
+          {/* {ReactEmoji.emojify(message.message_content)} */}
         </p>
       </div>
       &emsp;
@@ -83,7 +125,8 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
       &emsp;
       <div className="messageBox backgroundLight">
         <p className="messageText colorDark">
-          {ReactEmoji.emojify(message.message_content)}
+          {replaceAllTextEmojis(message.message_content)}
+          {/* {ReactEmoji.emojify(message.message_content)} */}
         </p>
       </div>
       &emsp;

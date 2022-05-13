@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import io from "socket.io-client";
-import ReactEmoji from "react-emoji";
+// import ReactEmoji from "react-emoji";
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
 import Message from "../Message/Message";
@@ -16,12 +16,15 @@ import "./Chat.css";
 
 let socket = null;
 
-interface Props {
+interface ChatProps {
   room: roomProps;
+  user: userProps;
 }
 interface roomProps {
+  room_name: string;
   room_id: string;
   is_group: string;
+  member: userProps[];
 }
 
 interface messageProps {
@@ -30,6 +33,7 @@ interface messageProps {
   isread: string;
   message_id: string;
   message_content: string;
+  message_seq?: number;
   room_id: string;
   send_member: string;
   send_member_name: string;
@@ -71,70 +75,66 @@ const DateMessage = ({ date }) => (
   </p>
 );
 
-const Chat: React.FC<Props> = ({ room }) => {
+const Chat: React.FC<ChatProps> = ({ room, user }) => {
   const ENDPOINT = "http://10.1.50.59:81";
   const { System } = useContext(SystemContext);
-  const [init, setInit] = useState(true);
-  const [user, setUser] = useState<userProps>(null);
-  const [users, setUsers] = useState<usersProps[]>([]);
-  const [page, setPage] = useState(0);
-  const [pastScroll, setPastScroll] = useState(0);
-  const [scrollPage, setScrollPage] = useState(false);
-  const [scrollTop, setScrollTop] = useState(null);
-  const [scrollBottom, setScrollBottom] = useState(true);
-  const [messages, setMessages] = useState<messageProps[]>([]);
-  const [newMsg, setNewMsg] = useState<messageProps>(null);
-  const [notReadMsg, setNotReadMsg] = useState<messageProps>(null);
-  const [message, setMessage] = useState("");
+  const [init, setInit] = useState(true); /** 是否初始化 */
+  const [users, setUsers] = useState<usersProps[]>(
+    []
+  ); /** 目前聊天室內的人員 */
+  const [page, setPage] = useState(0); /** 目前訊息的頁數 */
+  const [pastScroll, setPastScroll] =
+    useState(0); /** 延展scrollbar前 scrollbar的位置 */
+  const [scrollPage, setScrollPage] = useState(false); /** 判斷延展scrollbar*/
+  const [scrollTop, setScrollTop] =
+    useState(null); /** 是否滑到scrollbar 頂部 */
+  const [scrollBottom, setScrollBottom] =
+    useState(true); /** 是否滑到srollbar底部 */
+  const [messages, setMessages] = useState<messageProps[]>(
+    []
+  ); /** 目前抓取的所有訊息 */
+  const [newMsg, setNewMsg] = useState<messageProps>(null); /** 新訊息 */
+  const [notReadMsg, setNotReadMsg] =
+    useState<messageProps>(null); /** 未讀訊息 */
+  const [message, setMessage] = useState(""); /** 目前打字的訊息 */
+  const [searchedMessage, setSearchedMessage] =
+    useState<messageProps>(null); /** 目前查詢指定的訊息 */
   const scrollRef = useRef<any>(null);
 
   /**
-   * 取得使用者資訊
+   * 取得聊天紀錄
    */
   useEffect(() => {
     socket = io(ENDPOINT);
-    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_userInfo", {
-      access_token: System.token,
-    })
+
+    CallApi.ExecuteApi(
+      CENTER_FACTORY,
+      ENDPOINT + "/chat/get_room_page_message",
+      {
+        room_id: room.room_id,
+        page: page,
+      }
+    )
       .then((res) => {
         if (res.status === 200) {
-          setUser(res.data[0]);
-          CallApi.ExecuteApi(
-            CENTER_FACTORY,
-            ENDPOINT + "/chat/get_room_page_message",
-            {
-              room_id: room.room_id,
-              page: page,
-            }
-          )
-            .then((res) => {
-              if (res.status === 200) {
-                setMessages((prev) => [...res.data, ...prev]);
-              }
-            })
-            .catch((error) => {
-              console.log("EROOR: Chat: /chat/get_room_page_message");
-              console.log(error);
-            });
+          setMessages((prev) => [...res.data, ...prev]);
         }
       })
       .catch((error) => {
-        console.log("EROOR: Chat: /chat/get_userInfo");
+        console.log("EROOR: Chat: /chat/get_room_page_message");
         console.log(error);
       });
   }, []);
 
   /**
-   * 更新聊天室所有使用者資訊
+   *  進入聊天室
    */
   useEffect(() => {
-    if (user) {
-      socket.emit("join", { room: room, userInfo: user }, (error: any) => {
-        if (error) {
-          alert(error);
-        }
-      });
-    }
+    socket.emit("join", { room: room, userInfo: user }, (error: any) => {
+      if (error) {
+        alert(error);
+      }
+    });
   }, [ENDPOINT, JSON.stringify(user), JSON.stringify(room)]);
 
   /**
@@ -163,6 +163,10 @@ const Chat: React.FC<Props> = ({ room }) => {
           setNotReadMsg(newMsg);
         }
       }
+    }
+
+    if (page === 0) {
+      scrollToBottom();
     }
   }, [init, JSON.stringify(messages), JSON.stringify(newMsg), scrollBottom]);
 
@@ -218,89 +222,80 @@ const Chat: React.FC<Props> = ({ room }) => {
    * 聊天室新訊息更新
    */
   useEffect(() => {
-    if (user) {
-      socket.on("message", ({ sendMessage, userInfo, socket_user }) => {
-        if (
-          !(
-            user.account_uid === userInfo.account_uid &&
-            socket.id === socket_user
-          )
-        ) {
-          CallApi.ExecuteApi(
-            CENTER_FACTORY,
-            ENDPOINT + "/chat/update_message_read",
-            {
-              room_id: room.room_id,
-              account_uid: user.account_uid,
-            }
-          )
-            .then((res) => {
-              if (res.status !== 200) {
-                console.log(res);
-              }
-            })
-            .catch((error) => {
-              console.log("EROOR: Chat: /chat/update_message_read");
-              console.log(error);
-            });
-          let today = new Date();
-          let msg = {
-            d:
-              today.getFullYear() +
-              "-" +
-              (today.getMonth() + 1 < 10
-                ? "0" + (today.getMonth() + 1)
-                : today.getMonth() + 1) +
-              "-" +
-              (today.getDate() < 10 ? "0" + today.getDate() : today.getDate()),
-            hm:
-              (today.getHours() < 10
-                ? "0" + today.getHours()
-                : today.getHours()) +
-              ":" +
-              (today.getMinutes() < 10
-                ? "0" + today.getMinutes()
-                : today.getMinutes()),
-            isread: "0",
-            message_id: sendMessage.message_id,
-            message_content: sendMessage.message_content,
+    socket.on("message", ({ sendMessage, userInfo, socket_user }) => {
+      if (
+        !(
+          user.account_uid === userInfo.account_uid && socket.id === socket_user
+        )
+      ) {
+        CallApi.ExecuteApi(
+          CENTER_FACTORY,
+          ENDPOINT + "/chat/update_message_read",
+          {
             room_id: room.room_id,
-            send_member: userInfo.account_uid,
-            send_member_name: userInfo.name,
-          };
-          setMessages((prev) => [...prev, ...[msg]]);
-          setNewMsg(msg);
-        }
-      });
-      socket.on("roomData", ({ users }) => {
-        setUsers(users);
-      });
-    }
+            account_uid: user.account_uid,
+          }
+        )
+          .then((res) => {
+            if (res.status !== 200) {
+              console.log(res);
+            }
+          })
+          .catch((error) => {
+            console.log("EROOR: Chat: /chat/update_message_read");
+            console.log(error);
+          });
+        let today = new Date();
+        let msg = {
+          d:
+            today.getFullYear() +
+            "-" +
+            (today.getMonth() + 1 < 10
+              ? "0" + (today.getMonth() + 1)
+              : today.getMonth() + 1) +
+            "-" +
+            (today.getDate() < 10 ? "0" + today.getDate() : today.getDate()),
+          hm:
+            (today.getHours() < 10
+              ? "0" + today.getHours()
+              : today.getHours()) +
+            ":" +
+            (today.getMinutes() < 10
+              ? "0" + today.getMinutes()
+              : today.getMinutes()),
+          isread: "0",
+          message_id: sendMessage.message_id,
+          message_content: sendMessage.message_content,
+          room_id: room.room_id,
+          send_member: userInfo.account_uid,
+          send_member_name: userInfo.name,
+        };
+        setMessages((prev) => [...prev, ...[msg]]);
+        setNewMsg(msg);
+      }
+    });
+    socket.on("roomData", ({ users }) => {
+      setUsers(users);
+    });
   }, [JSON.stringify(user)]);
 
   /**
    * 更新訊息已讀狀態
    */
   useEffect(() => {
-    if (user) {
-      CallApi.ExecuteApi(
-        CENTER_FACTORY,
-        ENDPOINT + "/chat/update_message_read",
-        {
-          room_id: room.room_id,
-          account_uid: user.account_uid,
+    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/update_message_read", {
+      room_id: room.room_id,
+      account_uid: user.account_uid,
+    })
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log(res);
         }
-      )
-        .then((res) => {
-          if (res.status !== 200) {
-            console.log(res);
-          }
-        })
-        .catch((error) => {
-          console.log("EROOR: Chat: /chat/update_message_read");
-          console.log(error);
-        });
-    }
+      })
+      .catch((error) => {
+        console.log("EROOR: Chat: /chat/update_message_read");
+        console.log(error);
+      });
   }, [JSON.stringify(users)]);
 
   /**
@@ -327,13 +322,61 @@ const Chat: React.FC<Props> = ({ room }) => {
           console.log(error);
         });
     };
-    if (user && page > 0) {
+    if (page > 0) {
       get_room_page_message();
+    } else {
+      CallApi.ExecuteApi(
+        CENTER_FACTORY,
+        ENDPOINT + "/chat/get_room_page_message",
+        {
+          room_id: room.room_id,
+          page: page,
+        }
+      )
+        .then((res) => {
+          if (res.status === 200) {
+            setMessages(res.data);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/get_room_page_message");
+          console.log(error);
+        });
     }
   }, [page]);
 
-  const sendMessage = (event: { preventDefault: () => void }) => {
-    event.preventDefault(); // full browser refreshes aren't good
+  /**
+   * 設定scrollbar到查詢指定的訊息的位置
+   */
+  useEffect(() => {
+    if (searchedMessage) {
+      CallApi.ExecuteApi(
+        CENTER_FACTORY,
+        ENDPOINT + "/chat/get_room_keyword_seq_message",
+        {
+          room_id: room.room_id,
+          message_seq: searchedMessage.message_seq,
+        }
+      )
+        .then((res) => {
+          if (res.status === 200) {
+            setMessages(res.data);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/get_room_keyword_seq_message");
+          console.log(error);
+        });
+    } else {
+      setPage(0);
+    }
+  }, [JSON.stringify(searchedMessage)]);
+
+  /**
+   * 發送訊息
+   */
+  const sendMessage = (event?: { preventDefault: () => void }) => {
+    if (event.preventDefault) event.preventDefault();
 
     if (message) {
       let message_id = "Msg-" + SystemFunc.uuid();
@@ -399,9 +442,15 @@ const Chat: React.FC<Props> = ({ room }) => {
 
   return (
     <div className="container">
-      <InfoBar room={room.room_id} />
+      <InfoBar
+        room={room}
+        user={user}
+        searchedMessage={(searchedMessage) => {
+          setSearchedMessage(searchedMessage);
+        }}
+      />
       <div className="messages" ref={scrollRef}>
-        {user && socket ? (
+        {socket ? (
           messages.map((message, i) => (
             <div key={i}>
               {i == 0 ? (
@@ -420,9 +469,10 @@ const Chat: React.FC<Props> = ({ room }) => {
       </div>
       {notReadMsg ? (
         <div className="notReadMsg">
-          {ReactEmoji.emojify(
+          {/* {ReactEmoji.emojify(
             notReadMsg.send_member_name + ": " + notReadMsg.message_content
-          )}
+          )} */}
+          {notReadMsg.send_member_name + ": " + notReadMsg.message_content}
         </div>
       ) : (
         <None />
@@ -437,4 +487,4 @@ const Chat: React.FC<Props> = ({ room }) => {
 };
 
 export default Chat;
-export type { messageProps, userProps, usersProps };
+export type { messageProps, userProps, usersProps, roomProps };

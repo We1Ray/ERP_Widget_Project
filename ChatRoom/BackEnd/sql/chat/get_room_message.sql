@@ -6,6 +6,7 @@ from
 	(
 	select
 		cm.room_id ,
+		cm.message_seq,
 		cm.message_content, 
 		cm.send_member, 
 		a."name" send_member_name,

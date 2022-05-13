@@ -70,12 +70,52 @@ router.route("/get_message_state").post(async (req, res) => {
     .toString();
 
   await lib.requestAPI(
-    "/get_room_message",
+    "/get_message_state",
     DBConfig,
     sql,
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
       message_id: req.body["message_id"] ? req.body["message_id"] : null,
+    },
+    res
+  );
+});
+
+router.route("/get_room_search_keyword").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_room_search_keyword.sql")
+    )
+    .toString();
+
+  await lib.requestAPI(
+    "/get_room_search_keyword",
+    DBConfig,
+    sql,
+    {
+      room_id: req.body["room_id"] ? req.body["room_id"] : null,
+      keyWord: req.body["keyWord"] ? req.body["keyWord"] : null,
+    },
+    res
+  );
+});
+
+router.route("/get_room_keyword_seq_message").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_room_keyword_seq_message.sql")
+    )
+    .toString();
+
+  await lib.requestAPI(
+    "/get_room_keyword_seq_message",
+    DBConfig,
+    sql,
+    {
+      room_id: req.body["room_id"] ? req.body["room_id"] : null,
+      message_seq: req.body["message_seq"] ? req.body["message_seq"] : null,
     },
     res
   );

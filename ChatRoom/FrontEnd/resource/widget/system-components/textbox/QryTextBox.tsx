@@ -246,12 +246,15 @@ export const QryTextBox: React.FC<TextBoxProps> = forwardRef(
                 maxLength={maxLength}
                 style={
                   style
-                    ? Object.assign({
-                      minHeight: "40px",
-                    }, style)
+                    ? Object.assign(
+                        {
+                          minHeight: "40px",
+                        },
+                        style
+                      )
                     : {
-                      minHeight: "40px",
-                    }
+                        minHeight: "40px",
+                      }
                 }
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}

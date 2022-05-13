@@ -85,12 +85,6 @@ export const CommonRadioButton: React.FC<RadioButtonProps> = forwardRef(
     }, [radioButtonValue]);
 
     useEffect(() => {
-      if (result) {
-        result(radioButtonValue);
-      }
-    }, [radioButtonValue]);
-
-    useEffect(() => {
       try {
         checkDisable();
       } catch (error) {
