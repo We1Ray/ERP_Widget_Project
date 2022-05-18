@@ -114,9 +114,11 @@
     "webpack": "4.44.2",
     "whirl": "github:themicon/whirl",
     "xlsx": "0.17.1",
-    "xmlhttprequest-ssl": "2.0.0"
+    "xmlhttprequest-ssl": "2.0.0",
+    "@types/emoji-mart": "^3.0.4"
   },
   "devDependencies": {
+    "emoji-mart": "3.0.1",
     "@babel/core": "^7.12.13",
     "@types/node": "^14.14.37",
     "@zeit/next-css": "^1.0.1",

@@ -60,6 +60,11 @@
   color: #353535;
 }
 
+.colorYellow {
+  background-color: yellow;
+  color: red;
+}
+
 .backgroundBlue {
   background: #2979ff;
 }

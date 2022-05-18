@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-// import ReactEmoji from "react-emoji";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   CallApi,
   CENTER_FACTORY,
@@ -13,19 +12,78 @@ interface Props {
   message: messageProps;
   user: userProps;
   users: usersProps[];
+  searchedMessage?: messageProps;
+  searchedMessagesList?: messageProps[];
 }
 
-const Message: React.FC<Props> = ({ message, user, users }) => {
+const Message: React.FC<Props> = ({
+  message,
+  user,
+  users,
+  searchedMessage,
+  searchedMessagesList,
+}) => {
   const ENDPOINT = "http://10.1.50.59:81";
   const { System } = useContext(SystemContext);
   const [isRead, setIsRead] = useState(
     message ? parseInt(message.isread) > 0 : false
   );
-  let isSentByCurrentUser = false;
+  const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
 
-  if (message.send_member_name === user.name) {
-    isSentByCurrentUser = true;
-  }
+  const [messageClassType, setMessageClassType] = useState({});
+
+  const messageRef = useRef(null);
+
+  useEffect(() => {
+    if (message.send_member === user.account_uid) {
+      setIsSentByCurrentUser(true);
+    }
+  }, [JSON.stringify(message), JSON.stringify(user)]);
+
+  useEffect(() => {
+    if (searchedMessage) {
+      if (message.message_id === searchedMessage.message_id) {
+        setMessageClassType({
+          backgroundColor: "red",
+          color: "white",
+        });
+        messageRef.current.scrollIntoView(); /** 設定scrollbar至被查詢的訊息 */
+      } else if (
+        searchedMessagesList.find(
+          (element) => element.message_id === message.message_id
+        )
+      ) {
+        setMessageClassType({
+          backgroundColor: "orange",
+          color: "white",
+        });
+      } else {
+        if (isSentByCurrentUser) {
+          setMessageClassType({
+            color: "white",
+          });
+        } else {
+          setMessageClassType({
+            color: "#353535",
+          });
+        }
+      }
+    } else {
+      if (isSentByCurrentUser) {
+        setMessageClassType({
+          color: "white",
+        });
+      } else {
+        setMessageClassType({
+          color: "#353535",
+        });
+      }
+    }
+  }, [
+    JSON.stringify(message),
+    JSON.stringify(searchedMessage),
+    isSentByCurrentUser,
+  ]);
 
   const TRANSPARENT_GIF =
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
@@ -81,6 +139,9 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
           if (res.status !== 200) {
             console.log(res);
           } else {
+            if (parseInt(res.data[0].isread) > 0) {
+              console.log(777);
+            }
             setIsRead(parseInt(res.data[0].isread) > 0);
           }
         })
@@ -92,7 +153,7 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
   }, [JSON.stringify(users)]);
 
   return isSentByCurrentUser ? (
-    <div className="messageContainer justifyEnd">
+    <div className="messageContainer justifyEnd" ref={messageRef}>
       <p
         style={{
           display: "flex",
@@ -111,22 +172,19 @@ const Message: React.FC<Props> = ({ message, user, users }) => {
       </p>
       &emsp;
       <div className="messageBox backgroundBlue">
-        <p className="messageText colorWhite">
+        <p className={"messageText"} style={messageClassType}>
           {replaceAllTextEmojis(message.message_content)}
-          {/* {ReactEmoji.emojify(message.message_content)} */}
         </p>
       </div>
       &emsp;
-      {/* <p className="sentText pr-12">{user.name}</p> */}
     </div>
   ) : (
-    <div className="messageContainer justifyStart">
+    <div className="messageContainer justifyStart" ref={messageRef}>
       <p className="sentText pl-10">{message.send_member_name}</p>
       &emsp;
       <div className="messageBox backgroundLight">
-        <p className="messageText colorDark">
+        <p className={"messageText"} style={messageClassType}>
           {replaceAllTextEmojis(message.message_content)}
-          {/* {ReactEmoji.emojify(message.message_content)} */}
         </p>
       </div>
       &emsp;

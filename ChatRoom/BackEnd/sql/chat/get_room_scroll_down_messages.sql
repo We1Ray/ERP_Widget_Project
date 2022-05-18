@@ -1,3 +1,12 @@
+with cte as(
+select
+		*
+from
+	chat_message cm
+where
+	room_id = ${room_id}
+	and message_id = ${message_id}
+)
 select
 	x.*,
 	to_char(create_date, 'yyyy-mm-dd') d,
@@ -10,7 +19,7 @@ from
 		cm.message_content, 
 		cm.send_member, 
 		a."name" send_member_name,
-		cm.read_member ,
+		cm.read_member,
 		cm.create_date,
 		cm.message_id,
 		case
@@ -19,13 +28,14 @@ from
 			select
 				count(*)
 			from
-				unnest (string_to_array(read_member, ';')))
+				unnest (string_to_array(cm.read_member, ';')))
 			else 0
 		end
 		as isread,
 		cr.is_group
 	from
 		chat_message cm ,
+		cte,
 		chat_room cr ,
 		accounts a
 	where
@@ -33,8 +43,9 @@ from
 		and cm.room_id = cr.room_id
 		and
 	${room_id} = cm.room_id
+		and cm.message_seq -15 <= cte.message_seq
+		and cm.message_seq > cte.message_seq
 	order by
-		create_date desc
-	limit 50 offset 50 * ${page} )x
+		create_date desc )x
 order by
 	create_date asc

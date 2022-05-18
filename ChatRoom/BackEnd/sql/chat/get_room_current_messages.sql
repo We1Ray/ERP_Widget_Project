@@ -35,6 +35,6 @@ from
 	${room_id} = cm.room_id
 	order by
 		create_date desc
-	limit 50 * ${page}) x
+	limit 15) x
 order by
 	create_date asc

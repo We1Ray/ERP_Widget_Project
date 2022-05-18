@@ -14,10 +14,16 @@ import { roomProps, userProps, messageProps } from "../Chat/Chat";
 interface InfoBarProps {
   room: roomProps;
   user: userProps;
-  searchedMessage: (searchedMessage: messageProps) => any;
+  searchedMessage?: (searchedMessage: messageProps) => any;
+  searchedMessagesList?: (searchedMessagesList: messageProps[]) => any;
 }
 
-const InfoBar: React.FC<InfoBarProps> = ({ room, user, searchedMessage }) => {
+const InfoBar: React.FC<InfoBarProps> = ({
+  room,
+  user,
+  searchedMessage,
+  searchedMessagesList,
+}) => {
   const ENDPOINT = "http://10.1.50.59:81";
   const [onSearch, setOnSearch] = useState(false);
   const [keyWord, setKeyWord] = useState("");
@@ -42,7 +48,16 @@ const InfoBar: React.FC<InfoBarProps> = ({ room, user, searchedMessage }) => {
 
   useEffect(() => {
     searchedMessage(searchedMessageList[searchedMessageNumber - 1]);
+    searchedMessagesList(searchedMessageList);
   }, [searchedMessageNumber, searchedMessageList]);
+
+  useEffect(() => {
+    if (!onSearch) {
+      searchedMessage(null);
+      setSearchedMessageList([]);
+      setSearchedMessageNumber(null);
+    }
+  }, [onSearch]);
 
   function searchValue(event: { preventDefault: () => void }) {
     if (event.preventDefault) event.preventDefault();

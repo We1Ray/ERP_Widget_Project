@@ -25,39 +25,60 @@ router.route("/get_userInfo").post(async (req, res) => {
   );
 });
 
-router.route("/get_room_message").post(async (req, res) => {
+router.route("/get_room_current_messages").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs
-    .readFileSync(path.resolve(__dirname, "../sql/chat/get_room_message.sql"))
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_room_current_messages.sql")
+    )
     .toString();
 
   await lib.requestAPI(
-    "/get_room_message",
+    "/get_room_current_messages",
     DBConfig,
     sql,
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
-      page: req.body["page"] ? req.body["page"] : null,
     },
     res
   );
 });
 
-router.route("/get_room_page_message").post(async (req, res) => {
+router.route("/get_room_scroll_up_messages").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs
     .readFileSync(
-      path.resolve(__dirname, "../sql/chat/get_room_page_message.sql")
+      path.resolve(__dirname, "../sql/chat/get_room_scroll_up_messages.sql")
     )
     .toString();
 
   await lib.requestAPI(
-    "/get_room_page_message",
+    "/get_room_scroll_up_messages",
     DBConfig,
     sql,
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
-      page: req.body["page"] ? req.body["page"] : null,
+      message_id: req.body["message_id"] ? req.body["message_id"] : null,
+    },
+    res
+  );
+});
+
+router.route("/get_room_scroll_down_messages").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_room_scroll_down_messages.sql")
+    )
+    .toString();
+
+  await lib.requestAPI(
+    "/get_room_scroll_down_messages",
+    DBConfig,
+    sql,
+    {
+      room_id: req.body["room_id"] ? req.body["room_id"] : null,
+      message_id: req.body["message_id"] ? req.body["message_id"] : null,
     },
     res
   );
@@ -101,21 +122,24 @@ router.route("/get_room_search_keyword").post(async (req, res) => {
   );
 });
 
-router.route("/get_room_keyword_seq_message").post(async (req, res) => {
+router.route("/get_room_keyword_seq_messages").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs
     .readFileSync(
-      path.resolve(__dirname, "../sql/chat/get_room_keyword_seq_message.sql")
+      path.resolve(__dirname, "../sql/chat/get_room_keyword_seq_messages.sql")
     )
     .toString();
 
   await lib.requestAPI(
-    "/get_room_keyword_seq_message",
+    "/get_room_keyword_seq_messages",
     DBConfig,
     sql,
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
-      message_seq: req.body["message_seq"] ? req.body["message_seq"] : null,
+      message_id: req.body["message_id"] ? req.body["message_id"] : null,
+      current_firsy_message_id: req.body["current_firsy_message_id"]
+        ? req.body["current_firsy_message_id"]
+        : null,
     },
     res
   );
