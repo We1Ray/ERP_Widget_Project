@@ -24,7 +24,7 @@ const InfoBar: React.FC<InfoBarProps> = ({
   searchedMessage,
   searchedMessagesList,
 }) => {
-  const ENDPOINT = "http://10.1.50.59:81";
+  const ENDPOINT = "http://localhost:81";
   const [onSearch, setOnSearch] = useState(false);
   const [keyWord, setKeyWord] = useState("");
   const [searchedMessageList, setSearchedMessageList] = useState<

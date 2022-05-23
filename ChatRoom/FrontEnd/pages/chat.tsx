@@ -52,7 +52,7 @@ export default function ChatRoom() {
 }
 
 function ChatRoom_Content() {
-  const ENDPOINT = "http://10.1.50.59:81";
+  const ENDPOINT = "http://localhost:81";
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
   const { Program } = useContext(ProgramContext);

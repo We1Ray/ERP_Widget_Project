@@ -23,7 +23,7 @@ const Message: React.FC<Props> = ({
   searchedMessage,
   searchedMessagesList,
 }) => {
-  const ENDPOINT = "http://10.1.50.59:81";
+  const ENDPOINT = "http://localhost:81";
   const { System } = useContext(SystemContext);
   const [isRead, setIsRead] = useState(
     message ? parseInt(message.isread) > 0 : false

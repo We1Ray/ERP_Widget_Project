@@ -76,7 +76,7 @@ const DateMessage = ({ date }) => (
 );
 
 const Chat: React.FC<ChatProps> = ({ room, user }) => {
-  const ENDPOINT = "http://10.1.50.59:81";
+  const ENDPOINT = "http://localhost:81";
   const { System } = useContext(SystemContext);
   const [init, setInit] = useState(true); /** 是否初始化 */
   const [users, setUsers] = useState<usersProps[]>(
