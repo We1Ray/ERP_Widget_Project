@@ -141,7 +141,7 @@ select:focus {
   display: flex;
   align-items: center;
   position: relative;
-  width: 100%;
+  /* width: 100%; */
 }
 
 .react-emoji-picker--container {
