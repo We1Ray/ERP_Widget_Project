@@ -28,6 +28,13 @@ select:focus {
   width: 20%;
 }
 
+.upload {
+  font-size: 18px;
+  border-width: 2px;
+  margin: 5px 10px;
+  cursor: pointer;
+}
+
 .react-input-emoji--container {
   color: #4b4b4b;
   text-rendering: optimizeLegibility;

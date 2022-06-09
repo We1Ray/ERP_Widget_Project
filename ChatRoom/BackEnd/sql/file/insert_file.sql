@@ -1,0 +1,13 @@
+insert
+	into
+	file
+(file_id,
+	"name",
+	"path",
+	url,
+	"type")
+values(${file_id},
+${name},
+${path},
+${url},
+${type});

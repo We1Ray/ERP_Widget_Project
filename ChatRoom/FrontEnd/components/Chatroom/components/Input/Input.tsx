@@ -1,30 +1,26 @@
-// import React from "react";
-// import InputEmoji from "react-input-emoji";
-// import "./Input.css";
-
-// const Input = ({ message, setMessage, sendMessage }) => (
-//   <form className="form">
-//     <InputEmoji
-//       value={message}
-//       onChange={(event) => {
-//         setMessage(event);
-//       }}
-//       cleanOnEnter
-//       onEnter={sendMessage}
-//       placeholder="Type a message"
-//     />
-//     <button className="sendButton" onClick={(event) => sendMessage(event)}>
-//       Send
-//     </button>
-//   </form>
-// );
-
 import React, { useEffect, useState } from "react";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 import "./Input.css";
+import { CallApi, CENTER_FACTORY } from "../../../../resource";
+import { fileMessageProps, roomProps } from "../Chat/Chat";
 
-const Input = ({ message, setMessage, sendMessage }) => {
+interface inputProps {
+  message: string;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+  sendMessage: (event?: { preventDefault: () => void }) => void;
+  sendFileMessage: (fileMessage: fileMessageProps) => Promise<void>;
+  room: roomProps;
+}
+
+const Input: React.FC<inputProps> = ({
+  message,
+  setMessage,
+  sendMessage,
+  sendFileMessage,
+  room,
+}) => {
+  const ENDPOINT = "http://localhost:81";
   const [showPicker, setShowPicker] = useState(false);
   useEffect(() => {
     /**
@@ -55,19 +51,52 @@ const Input = ({ message, setMessage, sendMessage }) => {
 
   function addEmoji(e: any) {
     let emoji = e.native;
-    setMessage((prev: any) => prev + emoji);
+    setMessage((prev) => prev + emoji);
   }
 
   /**
    *
    * @param {React.MouseEvent} event
    */
-  function toggleShowPicker(event) {
+  function toggleShowPicker(event: React.MouseEvent) {
     event.stopPropagation();
     event.preventDefault();
 
     setShowPicker((currentShowPicker) => !currentShowPicker);
   }
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let formData = new FormData();
+    let files = e.target.files;
+    for (let index = 0; index < e.target.files.length; index++) {
+      formData.append(index.toLocaleString(), files[index], files[index].name);
+    }
+    formData.append("room_id", room.room_id);
+    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/upload_file", formData)
+      .then(async (res) => {
+        if (res.status === 200) {
+          for (let index = 0; index < res.data.length; index++) {
+            await sendFileMessage({
+              file_id: res.data[index].file_id,
+              name: res.data[index].name,
+              type: res.data[index].type,
+              url: res.data[index].url,
+              path: res.data[index].path,
+            });
+          }
+        } else {
+          console.log(res);
+        }
+      })
+      .catch((error) => {
+        console.log("EROOR: Chat: /chat/upload_file");
+        console.log(error);
+      })
+      .finally(() => {
+        e.target.value = null;
+      });
+  };
+
   return (
     <form className="form">
       <input
@@ -118,6 +147,17 @@ const Input = ({ message, setMessage, sendMessage }) => {
             <path d="M8 7a2 2 0 1 0-.001 3.999A2 2 0 0 0 8 7M16 7a2 2 0 1 0-.001 3.999A2 2 0 0 0 16 7M15.232 15c-.693 1.195-1.87 2-3.349 2-1.477 0-2.655-.805-3.347-2H15m3-2H6a6 6 0 1 0 12 0" />
           </svg>
         </button>
+        <label className="fas fa-cloud-upload-alt upload">
+          <input
+            type="file"
+            multiple={true}
+            id="upload-button"
+            style={{ display: "none" }}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              handleUpload(event)
+            }
+          />
+        </label>
       </div>
       <button className="sendButton" onClick={(event) => sendMessage(event)}>
         Send

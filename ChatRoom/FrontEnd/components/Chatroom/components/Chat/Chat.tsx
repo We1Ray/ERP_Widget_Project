@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import io from "socket.io-client";
-// import ReactEmoji from "react-emoji";
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
 import Message from "../Message/Message";
@@ -34,7 +33,9 @@ interface messageProps {
   message_id: string;
   message_content: string;
   message_seq?: number;
+  message_type: string;
   room_id: string;
+  file_id: string;
   send_member: string;
   send_member_name: string;
 }
@@ -57,6 +58,14 @@ interface userProps {
   account_uid: string;
   email: string;
   name: string;
+}
+
+interface fileMessageProps {
+  file_id: string;
+  name: string;
+  path: string;
+  url: string;
+  type: string;
 }
 
 const DateMessage = ({ date }) => (
@@ -265,8 +274,10 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
               : today.getMinutes()),
           isread: "0",
           message_id: sendMessage.message_id,
+          message_type: sendMessage.type,
           message_content: sendMessage.message_content,
           room_id: room.room_id,
+          file_id: sendMessage.file_id,
           send_member: userInfo.account_uid,
           send_member_name: userInfo.name,
         };
@@ -381,6 +392,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
         {
           room_id: room.room_id,
           message_id: message_id,
+          message_type: "string",
           message_content: message,
           send_member: user.account_uid,
         }
@@ -409,8 +421,10 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
                   : today.getMinutes()),
               isread: "0",
               message_id: message_id,
+              message_type: "string",
               message_content: message,
               room_id: room.room_id,
+              file_id: null,
               send_member: user.account_uid,
               send_member_name: user.name,
             };
@@ -420,6 +434,72 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
               { room: room, message: send_msg, userInfo: user },
               () => {
                 setMessage("");
+                setMessages((prev) => [...prev, ...[send_msg]]);
+                setNewMsg(send_msg);
+              }
+            );
+          } else {
+            console.log(res);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/insert_room_message");
+          console.log(error);
+        });
+    }
+  };
+
+  const sendFileMessage = async (fileMessage: fileMessageProps) => {
+    if (sendFileMessage) {
+      let message_id = "Msg-" + SystemFunc.uuid();
+      CallApi.ExecuteApi(
+        CENTER_FACTORY,
+        ENDPOINT + "/chat/insert_room_message",
+        {
+          room_id: room.room_id,
+          message_id: message_id,
+          message_type: fileMessage.type,
+          message_content: fileMessage.name,
+          send_member: user.account_uid,
+          file_id: fileMessage.file_id,
+        }
+      )
+        .then((res) => {
+          if (res.status === 200) {
+            let today = new Date();
+            let send_msg = {
+              d:
+                today.getFullYear() +
+                "-" +
+                (today.getMonth() + 1 < 10
+                  ? "0" + (today.getMonth() + 1)
+                  : today.getMonth() + 1) +
+                "-" +
+                (today.getDate() < 10
+                  ? "0" + today.getDate()
+                  : today.getDate()),
+              hm:
+                (today.getHours() < 10
+                  ? "0" + today.getHours()
+                  : today.getHours()) +
+                ":" +
+                (today.getMinutes() < 10
+                  ? "0" + today.getMinutes()
+                  : today.getMinutes()),
+              isread: "0",
+              message_id: message_id,
+              message_type: fileMessage.type,
+              message_content: fileMessage.name,
+              room_id: room.room_id,
+              file_id: fileMessage.file_id,
+              send_member: user.account_uid,
+              send_member_name: user.name,
+            };
+
+            socket.emit(
+              "sendMessage",
+              { room: room, message: send_msg, userInfo: user },
+              () => {
                 setMessages((prev) => [...prev, ...[send_msg]]);
                 setNewMsg(send_msg);
               }
@@ -479,13 +559,21 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
         <None />
       )}
       <Input
+        room={room}
         message={message}
         setMessage={setMessage}
         sendMessage={sendMessage}
+        sendFileMessage={sendFileMessage}
       />
     </div>
   );
 };
 
 export default Chat;
-export type { messageProps, userProps, usersProps, roomProps };
+export type {
+  messageProps,
+  userProps,
+  usersProps,
+  roomProps,
+  fileMessageProps,
+};

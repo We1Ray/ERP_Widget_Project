@@ -6,7 +6,12 @@ import {
   SystemContext,
 } from "../../../../resource";
 import "./Message.css";
-import { messageProps, userProps, usersProps } from "../Chat/Chat";
+import {
+  messageProps,
+  userProps,
+  usersProps,
+  fileMessageProps,
+} from "../Chat/Chat";
 
 interface Props {
   message: messageProps;
@@ -29,8 +34,9 @@ const Message: React.FC<Props> = ({
     message ? parseInt(message.isread) > 0 : false
   );
   const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
-
   const [messageClassType, setMessageClassType] = useState({});
+  const [file, setFile] = useState<fileMessageProps>(null);
+  const [isImage, setIsImage] = useState(false);
 
   const messageRef = useRef(null);
 
@@ -107,7 +113,7 @@ const Message: React.FC<Props> = ({
     if (allEmojis) {
       allEmojis = Array.from(new Set(allEmojis));
 
-      allEmojis.forEach((emoji) => {
+      allEmojis.forEach((emoji: string | number) => {
         const style = allEmojiStyle[emoji];
 
         if (!style) return;
@@ -139,9 +145,6 @@ const Message: React.FC<Props> = ({
           if (res.status !== 200) {
             console.log(res);
           } else {
-            if (parseInt(res.data[0].isread) > 0) {
-              console.log(777);
-            }
             setIsRead(parseInt(res.data[0].isread) > 0);
           }
         })
@@ -151,6 +154,29 @@ const Message: React.FC<Props> = ({
         });
     }
   }, [JSON.stringify(users)]);
+
+  useEffect(() => {
+    if (message.file_id) {
+      CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/file/get_file", {
+        file_id: message.file_id,
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setFile(res.data[0]);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /file/get_file");
+          console.log(error);
+        });
+
+      if (message.message_type.indexOf("image") > -1) {
+        setIsImage(true);
+      } else {
+        setIsImage(false);
+      }
+    }
+  }, [JSON.stringify(message)]);
 
   return isSentByCurrentUser ? (
     <div className="messageContainer justifyEnd" ref={messageRef}>
@@ -171,22 +197,50 @@ const Message: React.FC<Props> = ({
         {message.hm}
       </p>
       &emsp;
-      <div className="messageBox backgroundBlue">
-        <p className={"messageText"} style={messageClassType}>
-          {replaceAllTextEmojis(message.message_content)}
-        </p>
-      </div>
+      {file ? (
+        <div className="messageBox backgroundBlue">
+          <a
+            className="messageText fileMessage"
+            style={messageClassType}
+            href={file.url + "/download"}
+            download={file.name}
+          >
+            <i className="fas fa-file" />
+            &ensp;
+            {replaceAllTextEmojis(message.message_content)}
+          </a>
+        </div>
+      ) : (
+        <div className="messageBox backgroundBlue">
+          <p className={"messageText"} style={messageClassType}>
+            {replaceAllTextEmojis(message.message_content)}
+          </p>
+        </div>
+      )}
       &emsp;
     </div>
   ) : (
     <div className="messageContainer justifyStart" ref={messageRef}>
       <p className="sentText pl-10">{message.send_member_name}</p>
       &emsp;
-      <div className="messageBox backgroundLight">
-        <p className={"messageText"} style={messageClassType}>
-          {replaceAllTextEmojis(message.message_content)}
-        </p>
-      </div>
+      {file ? (
+        <div className="messageBox backgroundLight">
+          <a
+            className="messageText"
+            style={messageClassType}
+            href={file.url + "/download"}
+            download={file.name}
+          >
+            {replaceAllTextEmojis(message.message_content)}
+          </a>
+        </div>
+      ) : (
+        <div className="messageBox backgroundLight">
+          <p className={"messageText"} style={messageClassType}>
+            {replaceAllTextEmojis(message.message_content)}
+          </p>
+        </div>
+      )}
       &emsp;
       <p
         style={{

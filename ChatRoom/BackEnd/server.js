@@ -6,11 +6,17 @@ require("dotenv").config();
 const app = express();
 const port = 81;
 
+const fileupload = require("express-fileupload");
+app.use(fileupload(), cors());
+
 app.use(cors());
 app.use(express.json());
 
 const chatRouter = require("./routes/chat");
 app.use("/chat", chatRouter);
+
+const fileRouter = require("./routes/file");
+app.use("/file", fileRouter);
 
 const socketio = require("socket.io");
 const http = require("http");

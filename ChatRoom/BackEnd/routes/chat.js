@@ -3,9 +3,16 @@ const router = require("express").Router();
 const fs = require("fs");
 const path = require("path");
 const lib = require("../library");
+const Server = require("nextcloud-node-client").Server;
+const Client = require("nextcloud-node-client").Client;
+const utf8 = require("utf8");
 
 router.route("/hello").get(async (req, res) => {
-  res.send("hello!");
+  try {
+    res.send("hello!");
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 router.route("/get_userInfo").post(async (req, res) => {
@@ -159,10 +166,12 @@ router.route("/insert_room_message").post(async (req, res) => {
     {
       room_id: req.body["room_id"] ? req.body["room_id"] : null,
       message_id: req.body["message_id"] ? req.body["message_id"] : null,
+      message_type: req.body["message_type"] ? req.body["message_type"] : null,
       message_content: req.body["message_content"]
         ? req.body["message_content"]
         : null,
       send_member: req.body["send_member"] ? req.body["send_member"] : null,
+      file_id: req.body["file_id"] ? req.body["file_id"] : null,
     },
     res
   );
@@ -185,6 +194,62 @@ router.route("/update_message_read").post(async (req, res) => {
     },
     res
   );
+});
+
+router.route("/upload_file").post(async (req, res) => {
+  try {
+    let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+    let sql = fs
+      .readFileSync(path.resolve(__dirname, "../sql/file/insert_file.sql"))
+      .toString();
+
+    const server = new Server({
+      basicAuth: { password: "deanshoes.dsit.rd", username: "dsit.rd" },
+      url: "http://10.1.1.231/",
+    });
+    const client = new Client(server);
+    const folder = await client.createFolder(
+      "/ChatRoom/" + req.body["room_id"]
+    );
+    let filelink = [];
+    for (let index = 0; index < Object.keys(req.files).length; index++) {
+      let sourceFileName = utf8.decode(req.files[index.toLocaleString()].name);
+      let fileName = sourceFileName;
+      let exits_file = true;
+      let exits_count = 0;
+      while (exits_file) {
+        if (await folder.getFile(fileName)) {
+          exits_count++;
+          fileName = "(" + exits_count + ")" + sourceFileName;
+        } else {
+          exits_file = false;
+        }
+      }
+
+      const file = await folder.createFile(
+        fileName,
+        req.files[index.toLocaleString()].data
+      );
+      const share = await client.createShare({ fileSystemElement: file });
+      const shareLink = share.url;
+
+      let fileInfo = {
+        file_id: "file-" + lib.uuid(),
+        name: sourceFileName,
+        path: req.body["room_id"]
+          ? "/ChatRoom/" + req.body["room_id"] + "/" + fileName
+          : "/ChatRoom/" + fileName,
+        url: shareLink,
+        type: req.files[index.toLocaleString()].mimetype,
+      };
+      filelink.push(fileInfo);
+      await lib.requestAPI("/insert_file", DBConfig, sql, fileInfo, null);
+    }
+
+    res.send(filelink);
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 module.exports = router;

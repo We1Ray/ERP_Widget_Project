@@ -1,41 +1,13 @@
 import { Chat } from "../components/Chatroom";
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  TabContent,
-  TabPane,
-  Nav,
-  NavItem,
-  NavLink,
-} from "reactstrap";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import {
-  Row,
-  Column,
-  Label,
   None,
-  TextBox,
-  CheckBox,
-  SelectionBox,
-  DraggableDialog,
   ProgramContext,
   ProgramProvider,
   SystemContext,
   statusContext,
-  STATUS,
   ComponentContext,
   ComponentProvider,
-  Form,
-  BtnQuery,
-  BtnSave,
-  BtnCancel,
-  BtnUpdate,
-  BtnCreate,
-  PublicMethod,
   CallApi,
   CENTER_FACTORY,
 } from "../resource/index";
@@ -59,6 +31,7 @@ function ChatRoom_Content() {
   const { status } = useContext(statusContext);
 
   const [user, setUser] = useState(null);
+  // const [logo, setLogo] = useState<Buffer>(null);
 
   /**
    * 取得使用者資訊
@@ -76,10 +49,21 @@ function ChatRoom_Content() {
         console.log("EROOR: Chat: /chat/get_userInfo");
         console.log(error);
       });
+    // axios
+    //   .get(ENDPOINT + "/chat/hello")
+    //   .then((res) => {
+    //     console.log(res);
+    //     setLogo(res.data);
+    //   })
+    //   .catch((error) => {
+    //     console.log("EROOR: Chat: /chat/hello");
+    //     console.log(error);
+    //   });
   }, []);
-
   return (
     <div style={{ height: "87vh", padding: "10px" }}>
+      {/* <img src={`data:image/png;base64,${logo}`} alt="" /> */}
+      {/* <img src="http://10.1.1.231/index.php/s/WzPd6NgiwsAxYYN/download"/> */}
       {user ? (
         <Chat
           user={user}

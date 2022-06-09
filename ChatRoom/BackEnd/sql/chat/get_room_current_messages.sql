@@ -7,12 +7,14 @@ from
 	select
 		cm.room_id ,
 		cm.message_seq,
+		cm.message_type,
 		cm.message_content, 
 		cm.send_member, 
 		a."name" send_member_name,
 		cm.read_member ,
 		cm.create_date,
 		cm.message_id,
+		cm.file_id,
 		case
 			when (cm.read_member is not null)
 			then (
