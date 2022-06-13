@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 import "./Input.css";
-import { CallApi, CENTER_FACTORY } from "../../../../resource";
+import { CallApi, CENTER_FACTORY, TextBox } from "../../../../resource";
 import { fileMessageProps, roomProps } from "../Chat/Chat";
 
 interface inputProps {
@@ -82,6 +82,7 @@ const Input: React.FC<inputProps> = ({
               type: res.data[index].type,
               url: res.data[index].url,
               path: res.data[index].path,
+              size: res.data[index].size,
             });
           }
         } else {
@@ -99,15 +100,19 @@ const Input: React.FC<inputProps> = ({
 
   return (
     <form className="form">
-      <input
+      <TextBox
+        area={true}
         className="input"
-        type="text"
         placeholder="Type a message..."
         value={message}
         onChange={(event) => setMessage(event.target.value)}
-        onKeyPress={(event) =>
-          event.key === "Enter" ? sendMessage(event) : null
-        }
+        onKeyPress={(event) => {
+          event.key === "Enter"
+            ? event.shiftKey
+              ? setMessage((prev) => prev)
+              : sendMessage(event)
+            : null;
+        }}
       />
       <div className="react-emoji">
         <div className="react-emoji-picker--container">
@@ -160,7 +165,7 @@ const Input: React.FC<inputProps> = ({
         </label>
       </div>
       <button className="sendButton" onClick={(event) => sendMessage(event)}>
-        Send
+        <i className="fas fa-paper-plane" />
       </button>
     </form>
   );

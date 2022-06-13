@@ -241,6 +241,7 @@ router.route("/upload_file").post(async (req, res) => {
           : "/ChatRoom/" + fileName,
         url: shareLink,
         type: req.files[index.toLocaleString()].mimetype,
+        size: req.files[index.toLocaleString()].size,
       };
       filelink.push(fileInfo);
       await lib.requestAPI("/insert_file", DBConfig, sql, fileInfo, null);

@@ -4,6 +4,9 @@ import {
   CENTER_FACTORY,
   None,
   SystemContext,
+  Row,
+  Column,
+  DraggableDialog,
 } from "../../../../resource";
 import "./Message.css";
 import {
@@ -12,6 +15,8 @@ import {
   usersProps,
   fileMessageProps,
 } from "../Chat/Chat";
+import Crypto from "crypto-js";
+import { Button, DialogActions } from "@material-ui/core";
 
 interface Props {
   message: messageProps;
@@ -33,18 +38,13 @@ const Message: React.FC<Props> = ({
   const [isRead, setIsRead] = useState(
     message ? parseInt(message.isread) > 0 : false
   );
-  const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
+  // const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
   const [messageClassType, setMessageClassType] = useState({});
   const [file, setFile] = useState<fileMessageProps>(null);
   const [isImage, setIsImage] = useState(false);
+  const [dialogOn, setDialogOn] = useState(false);
 
   const messageRef = useRef(null);
-
-  useEffect(() => {
-    if (message.send_member === user.account_uid) {
-      setIsSentByCurrentUser(true);
-    }
-  }, [JSON.stringify(message), JSON.stringify(user)]);
 
   useEffect(() => {
     if (searchedMessage) {
@@ -64,7 +64,7 @@ const Message: React.FC<Props> = ({
           color: "white",
         });
       } else {
-        if (isSentByCurrentUser) {
+        if (message.send_member === user.account_uid) {
           setMessageClassType({
             color: "white",
           });
@@ -75,7 +75,7 @@ const Message: React.FC<Props> = ({
         }
       }
     } else {
-      if (isSentByCurrentUser) {
+      if (message.send_member === user.account_uid) {
         setMessageClassType({
           color: "white",
         });
@@ -88,7 +88,7 @@ const Message: React.FC<Props> = ({
   }, [
     JSON.stringify(message),
     JSON.stringify(searchedMessage),
-    isSentByCurrentUser,
+    JSON.stringify(user),
   ]);
 
   const TRANSPARENT_GIF =
@@ -156,7 +156,7 @@ const Message: React.FC<Props> = ({
   }, [JSON.stringify(users)]);
 
   useEffect(() => {
-    if (message.file_id) {
+    if (message.message_type !== "string") {
       CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/file/get_file", {
         file_id: message.file_id,
       })
@@ -170,15 +170,21 @@ const Message: React.FC<Props> = ({
           console.log(error);
         });
 
-      if (message.message_type.indexOf("image") > -1) {
-        setIsImage(true);
+      if (message.message_type) {
+        if (message.message_type.indexOf("image") > -1) {
+          setIsImage(true);
+        } else {
+          setIsImage(false);
+        }
       } else {
         setIsImage(false);
       }
+    } else {
+      setFile(null);
     }
   }, [JSON.stringify(message)]);
 
-  return isSentByCurrentUser ? (
+  return message.send_member === user.account_uid ? (
     <div className="messageContainer justifyEnd" ref={messageRef}>
       <p
         style={{
@@ -198,18 +204,70 @@ const Message: React.FC<Props> = ({
       </p>
       &emsp;
       {file ? (
-        <div className="messageBox backgroundBlue">
-          <a
-            className="messageText fileMessage"
-            style={messageClassType}
-            href={file.url + "/download"}
-            download={file.name}
-          >
-            <i className="fas fa-file" />
-            &ensp;
-            {replaceAllTextEmojis(message.message_content)}
-          </a>
-        </div>
+        isImage ? (
+          <>
+            <img
+              src={file.url + "/download"}
+              alt={file.name}
+              style={{
+                backgroundColor: "black",
+                height: "100px",
+                width: "100px",
+                cursor: "pointer",
+              }}
+              onClick={(e) => setDialogOn(true)}
+            />
+
+            <DraggableDialog open={dialogOn}>
+              <DialogActions>
+                <Button
+                  onClick={() => setDialogOn(false)}
+                  style={{
+                    backgroundColor: "rgb(171, 219, 241)",
+                  }}
+                >
+                  <i className="fas fa-times" />
+                </Button>
+              </DialogActions>
+              <img
+                src={file.url + "/download"}
+                alt={file.name}
+                style={{
+                  backgroundColor: "black",
+                }}
+              />
+            </DraggableDialog>
+          </>
+        ) : (
+          <div className="messageBox backgroundBlue">
+            <a
+              className="messageText fileMessage"
+              style={messageClassType}
+              href={file.url + "/download"}
+              download={file.name}
+            >
+              <Column>
+                <Row>
+                  <i className="fas fa-file-alt" style={{ fontSize: "20px" }} />
+                  &ensp;
+                  {replaceAllTextEmojis(message.message_content)}
+                </Row>
+                <Row>
+                  <p>
+                    {System.getLocalization("CHAT", "FILE_SIZE")} &nbsp;{" "}
+                    {file.size > 1024
+                      ? file.size > 1048576
+                        ? file.size > 1073741824
+                          ? Math.round(file.size / 1073741824) + "GB"
+                          : Math.round(file.size / 1048576) + "MB"
+                        : Math.round(file.size / 1024) + "KB"
+                      : file.size + "B"}
+                  </p>
+                </Row>
+              </Column>
+            </a>
+          </div>
+        )
       ) : (
         <div className="messageBox backgroundBlue">
           <p className={"messageText"} style={messageClassType}>
@@ -224,16 +282,54 @@ const Message: React.FC<Props> = ({
       <p className="sentText pl-10">{message.send_member_name}</p>
       &emsp;
       {file ? (
-        <div className="messageBox backgroundLight">
-          <a
-            className="messageText"
-            style={messageClassType}
-            href={file.url + "/download"}
-            download={file.name}
-          >
-            {replaceAllTextEmojis(message.message_content)}
-          </a>
-        </div>
+        isImage ? (
+          <>
+            <img
+              src={file.url + "/download"}
+              alt={file.name}
+              style={{
+                backgroundColor: "black",
+                height: "100px",
+                width: "100px",
+                cursor: "pointer",
+              }}
+              onClick={(e) => setDialogOn(true)}
+            />
+
+            <DraggableDialog open={dialogOn}>
+              <DialogActions>
+                <Button
+                  onClick={() => setDialogOn(false)}
+                  style={{
+                    backgroundColor: "rgb(171, 219, 241)",
+                  }}
+                >
+                  <i className="fas fa-times" />
+                </Button>
+              </DialogActions>
+              <img
+                src={file.url + "/download"}
+                alt={file.name}
+                style={{
+                  backgroundColor: "black",
+                }}
+              />
+            </DraggableDialog>
+          </>
+        ) : (
+          <div className="messageBox backgroundLight">
+            <a
+              className="messageText fileMessage"
+              style={messageClassType}
+              href={file.url + "/download"}
+              download={file.name}
+            >
+              <i className="fas fa-file-alt" />
+              &ensp;
+              {replaceAllTextEmojis(message.message_content)}
+            </a>
+          </div>
+        )
       ) : (
         <div className="messageBox backgroundLight">
           <p className={"messageText"} style={messageClassType}>

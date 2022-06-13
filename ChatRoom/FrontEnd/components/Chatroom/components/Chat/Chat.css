@@ -35,7 +35,10 @@
   width: 100%;
   letter-spacing: 0;
   float: left;
-  font-size: 1.1em;
+  font-size: 1.2em;
   word-wrap: break-word;
   align-items: center;
+  background-color: #cfcdcd;
+  padding: 3px 3px;
+  cursor: pointer;
 }

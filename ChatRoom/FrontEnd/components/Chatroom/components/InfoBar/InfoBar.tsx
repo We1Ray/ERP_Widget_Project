@@ -4,7 +4,6 @@ import {
   CallApi,
   CENTER_FACTORY,
   Column,
-  None,
   Row,
   TextBox,
 } from "../../../../resource";

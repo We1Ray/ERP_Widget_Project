@@ -1,13 +1,15 @@
 insert
 	into
-	file
+	public.file
 (file_id,
 	"name",
 	"path",
 	url,
-	"type")
+	"type",
+	"size")
 values(${file_id},
 ${name},
 ${path},
 ${url},
-${type});
+${type},
+${size}::numeric)

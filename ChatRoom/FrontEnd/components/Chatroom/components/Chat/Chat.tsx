@@ -66,6 +66,7 @@ interface fileMessageProps {
   path: string;
   url: string;
   type: string;
+  size: number;
 }
 
 const DateMessage = ({ date }) => (
@@ -168,7 +169,11 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
             setNotReadMsg(null);
             scrollToBottom();
           } else {
-            setNotReadMsg(newMsg);
+            if (
+              scrollRef.current.clientHeight < scrollRef.current.scrollHeight
+            ) {
+              setNotReadMsg(newMsg);
+            }
           }
         }
       }
@@ -552,7 +557,13 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
         )}
       </div>
       {notReadMsg ? (
-        <div className="notReadMsg">
+        <div
+          className="notReadMsg"
+          onClick={(e) => {
+            scrollToBottom();
+          }}
+        >
+          &ensp;
           {notReadMsg.send_member_name + ": " + notReadMsg.message_content}
         </div>
       ) : (
