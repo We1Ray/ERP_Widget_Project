@@ -14,7 +14,7 @@
   align-items: center;
   margin-left: 5%;
   color: white;
-  height: 60px;
+  height: 35px;
 }
 
 .rightInnerContainer {
@@ -34,8 +34,15 @@
   margin-bottom: 30%;
 }
 
+.btn-secondary {
+  padding: 7px;
+  background-color: #2979ff;
+  color: white;
+  border: none;
+}
+
 .a {
-  color: white !important;
+  /* color: white !important; */
   font-size: 20px;
 }
 

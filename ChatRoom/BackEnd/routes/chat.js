@@ -32,6 +32,23 @@ router.route("/get_userInfo").post(async (req, res) => {
   );
 });
 
+router.route("/get_room_info").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(path.resolve(__dirname, "../sql/chat/get_room_info.sql"))
+    .toString();
+
+  await lib.requestAPI(
+    "/get_room_info",
+    DBConfig,
+    sql,
+    {
+      account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    },
+    res
+  );
+});
+
 router.route("/get_room_current_messages").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs

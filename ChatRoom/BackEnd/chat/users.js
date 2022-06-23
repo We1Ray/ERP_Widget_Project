@@ -12,14 +12,17 @@ const addUser = ({ id, room, userInfo }) => {
     // );
 
     const user = { id, info: userInfo, room };
-
-    users.push(user);
-
+    if (
+      !users.includes((e) => e.room.room_id === room.room_id && e.id === id)
+    ) {
+      users.push(user);
+    }
     return { user }; //return the user so we know which one was pushed
   } catch (error) {
     return error;
   }
 };
+
 //function to remove user, only takes in a single parameter(id of the user to remove)
 const removeUser = (id) => {
   try {
@@ -49,4 +52,9 @@ const getUsersInRoom = (room) => {
   }
 };
 
-module.exports = { addUser, removeUser, getUser, getUsersInRoom };
+module.exports = {
+  addUser,
+  removeUser,
+  getUser,
+  getUsersInRoom,
+};

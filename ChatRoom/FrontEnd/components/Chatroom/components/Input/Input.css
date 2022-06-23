@@ -1,12 +1,13 @@
 .form {
   display: flex;
   border-top: 2px solid #d3d3d3;
+  height: 90px;
 }
 
 .input {
   border: none;
   border-radius: 0;
-  padding: 5%;
+  padding: 2%;
   width: 80%;
   font-size: 1.2em;
   resize: none;
@@ -26,7 +27,7 @@ select:focus {
   padding: 20px;
   display: inline-block;
   border: none;
-  width: 20%;
+  width: 10%;
 }
 
 .upload {

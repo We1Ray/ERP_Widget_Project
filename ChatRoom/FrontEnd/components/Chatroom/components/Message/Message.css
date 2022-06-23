@@ -5,10 +5,11 @@
   color: white;
   display: inline-block;
   max-width: 80%;
+  align-items: center;
 }
 
 .messageText {
-  width: 100%;
+  width: 100%; 
   letter-spacing: 0;
   float: left;
   font-size: 1.1em;

@@ -45,12 +45,24 @@ const chatSever = (io) => {
             sendMessage: message,
           });
 
+          io.to("public").emit("message", {
+            userInfo: user.info,
+            sendMessage: message,
+            socket_user: socket.id,
+          });
+
           callback();
         }
       } else {
         //when the user leaves we send a new message to roomData
         //we also send users since we need to know the new state of the users in the room;
         io.to(user.room.room_id).emit("message", {
+          userInfo: user.info,
+          sendMessage: message,
+          socket_user: socket.id,
+        });
+
+        io.to("public").emit("message", {
           userInfo: user.info,
           sendMessage: message,
           socket_user: socket.id,

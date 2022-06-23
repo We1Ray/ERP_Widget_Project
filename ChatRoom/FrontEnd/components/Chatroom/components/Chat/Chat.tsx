@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import Input from "../Input/Input";
 import InfoBar from "../InfoBar/InfoBar";
@@ -8,10 +8,12 @@ import {
   CallApi,
   CENTER_FACTORY,
   None,
-  SystemContext,
   SystemFunc,
+  useLatest,
 } from "../../../../resource/index";
 import "./Chat.css";
+import "loaders.css/loaders.css";
+import "spinkit/css/spinkit.css";
 
 let socket = null;
 
@@ -23,7 +25,6 @@ interface roomProps {
   room_name: string;
   room_id: string;
   is_group: string;
-  member: userProps[];
 }
 
 interface messageProps {
@@ -87,8 +88,7 @@ const DateMessage = ({ date }) => (
 
 const Chat: React.FC<ChatProps> = ({ room, user }) => {
   const ENDPOINT = "http://localhost:81";
-  const { System } = useContext(SystemContext);
-  const [init, setInit] = useState(true); /** 是否初始化 */
+  const [init, setInit] = useState(false); /** 是否初始化 */
   const [users, setUsers] = useState<usersProps[]>(
     []
   ); /** 目前聊天室內的人員 */
@@ -109,10 +109,15 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
   const [notReadMsg, setNotReadMsg] =
     useState<messageProps>(null); /** 未讀訊息 */
   const [message, setMessage] = useState(""); /** 目前打字的訊息 */
+  const [searchedValue, setSearchedValue] =
+    useState(""); /** 目前查詢的關鍵字 */
   const [searchedMessage, setSearchedMessage] =
     useState<messageProps>(null); /** 目前查詢指定的訊息 */
   const [searchedMessagesList, setSearchedMessagesList] =
     useState<messageProps[]>(null); /** 目前查詢指定的訊息列表 */
+
+  const [messageLoading, setMessageLoading] =
+    useState(false); /** 是否要抓取新訊息 */
   const scrollRef = useRef<any>(null);
 
   /**
@@ -120,6 +125,21 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
    */
   useEffect(() => {
     socket = io(ENDPOINT);
+    socket.emit("join", { room: room, userInfo: user }, (error: any) => {
+      if (error) {
+        alert(error);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [ENDPOINT]);
+
+  /**
+   *  初始取得聊天紀錄
+   */
+  useEffect(() => {
     CallApi.ExecuteApi(
       CENTER_FACTORY,
       ENDPOINT + "/chat/get_room_current_messages",
@@ -136,54 +156,33 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
         console.log("EROOR: Chat: /chat/get_room_current_messages");
         console.log(error);
       });
-  }, []);
 
-  /**
-   *  進入聊天室
-   */
-  useEffect(() => {
-    socket.emit("join", { room: room, userInfo: user }, (error: any) => {
-      if (error) {
-        alert(error);
-      }
-    });
-  }, [ENDPOINT, JSON.stringify(user), JSON.stringify(room)]);
+    setInit(true);
+  }, [JSON.stringify(room)]);
 
   /**
    * 設定初始置底、自己發訊息也置底
    */
   useEffect(() => {
     if (newMsg) {
-      if (init) {
-        setInit(false);
-        scrollToBottom();
+      if (newMsg.send_member === user.account_uid) {
+        if (scrollRef.current.clientHeight < scrollRef.current.scrollHeight) {
+          setNewMsg(null);
+          scrollToBottom();
+        }
       } else {
-        if (newMsg.send_member === user.account_uid) {
-          if (scrollRef.current.clientHeight < scrollRef.current.scrollHeight) {
-            setNewMsg(null);
-            scrollToBottom();
-          }
+        if (!isScrollingBottom) {
+          setNewMsg(null);
+          setNotReadMsg(null);
+          scrollToBottom();
         } else {
-          if (!isScrollingBottom) {
-            setNewMsg(null);
-            setNotReadMsg(null);
-            scrollToBottom();
-          } else {
-            if (
-              scrollRef.current.clientHeight < scrollRef.current.scrollHeight
-            ) {
-              setNotReadMsg(newMsg);
-            }
+          if (scrollRef.current.clientHeight < scrollRef.current.scrollHeight) {
+            setNotReadMsg(newMsg);
           }
         }
       }
     }
-  }, [
-    init,
-    JSON.stringify(messages),
-    JSON.stringify(newMsg),
-    isScrollingBottom,
-  ]);
+  }, [JSON.stringify(messages), JSON.stringify(newMsg), isScrollingBottom]);
 
   /**
    * 設定訊息置底
@@ -196,7 +195,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
    * 增加Srollbar 長度 回復原scrollbar位置
    */
   useEffect(() => {
-    if (isScrollingBottom && setExtendScrollbar) {
+    if (isScrollingBottom && extendScrollbar) {
       const currentScroll = scrollRef.current.scrollHeight - pastScroll;
       scrollRef.current.scrollTo(0, currentScroll);
       setExtendScrollbar(false);
@@ -212,6 +211,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
 
       if (e.target.scrollTop == 0) {
         setNeedGetMoreMsg(true);
+        setMessageLoading(true);
         setPastScroll(e.target.scrollHeight);
       }
 
@@ -239,7 +239,9 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
     socket.on("message", ({ sendMessage, userInfo, socket_user }) => {
       if (
         !(
-          user.account_uid === userInfo.account_uid && socket.id === socket_user
+          user.account_uid === userInfo.account_uid &&
+          socket.id === socket_user &&
+          sendMessage.room_id === room.room_id
         )
       ) {
         CallApi.ExecuteApi(
@@ -279,7 +281,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
               : today.getMinutes()),
           isread: "0",
           message_id: sendMessage.message_id,
-          message_type: sendMessage.type,
+          message_type: sendMessage.message_type,
           message_content: sendMessage.message_content,
           room_id: room.room_id,
           file_id: sendMessage.file_id,
@@ -318,25 +320,30 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
    * 獲得更多聊天紀錄
    */
   function get_room_scroll_up_messages() {
-    CallApi.ExecuteApi(
-      CENTER_FACTORY,
-      ENDPOINT + "/chat/get_room_scroll_up_messages",
-      {
-        room_id: room.room_id,
-        message_id: messages[0].message_id,
-      }
-    )
-      .then((res) => {
-        if (res.status === 200) {
-          setMessages((prev) => [...res.data, ...prev]);
-          setExtendScrollbar(true);
-          setNeedGetMoreMsg(false);
+    if (messages.length > 0) {
+      CallApi.ExecuteApi(
+        CENTER_FACTORY,
+        ENDPOINT + "/chat/get_room_scroll_up_messages",
+        {
+          room_id: room.room_id,
+          message_id: messages[0].message_id,
         }
-      })
-      .catch((error) => {
-        console.log("EROOR: Chat: /chat/get_room_scroll_up_messages");
-        console.log(error);
-      });
+      )
+        .then((res) => {
+          if (res.status === 200) {
+            setMessages((prev) => [...res.data, ...prev]);
+            setExtendScrollbar(true);
+            setNeedGetMoreMsg(false);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/get_room_scroll_up_messages");
+          console.log(error);
+        })
+        .finally(() => setMessageLoading(false));
+    } else {
+      setMessageLoading(false);
+    }
   }
   /**
    * 往上滾抓取以前的訊息
@@ -347,41 +354,48 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
     }
   }, [needGetMoreMsg]);
 
-  /**
-   * 設定messages為查詢指定的訊息
-   */
-  function get_room_keyword_seq_messages() {
-    CallApi.ExecuteApi(
-      CENTER_FACTORY,
-      ENDPOINT + "/chat/get_room_keyword_seq_messages",
-      {
-        room_id: room.room_id,
-        message_id: searchedMessage.message_id,
-        current_firsy_message_id: messages[0].message_id,
-      }
-    )
-      .then((res) => {
-        if (res.status === 200) {
-          setMessages((prev) => [...res.data, ...prev]);
-        }
-      })
-      .catch((error) => {
-        console.log("EROOR: Chat: /chat/get_room_keyword_seq_messages");
-        console.log(error);
-      });
-  }
-
-  useEffect(() => {
-    if (searchedMessage) {
-      if (
-        !messages.find(
-          (element) => element.message_id === searchedMessage.message_id
+  useLatest(
+    (latest) => {
+      /**
+       * 設定messages為查詢指定的訊息
+       */
+      async function get_room_keyword_seq_messages() {
+        await CallApi.ExecuteApi(
+          CENTER_FACTORY,
+          ENDPOINT + "/chat/get_room_keyword_seq_messages",
+          {
+            room_id: room.room_id,
+            message_id: searchedMessage.message_id,
+            current_firsy_message_id: messages[0].message_id,
+          }
         )
-      ) {
-        get_room_keyword_seq_messages();
+          .then((res) => {
+            if (res.status === 200 && latest()) {
+              setMessages((prev) => [...res.data, ...prev]);
+            }
+          })
+          .catch((error) => {
+            console.log("EROOR: Chat: /chat/get_room_keyword_seq_messages");
+            console.log(error);
+          })
+          .finally(() => setMessageLoading(false));
       }
-    }
-  }, [JSON.stringify(searchedMessage)]);
+      if (searchedMessage) {
+        if (
+          !messages.find(
+            (element) => element.message_id === searchedMessage.message_id
+          )
+        ) {
+          get_room_keyword_seq_messages();
+        } else {
+          setMessageLoading(false);
+        }
+      } else {
+        setMessageLoading(false);
+      }
+    },
+    [JSON.stringify(searchedMessage)]
+  );
 
   /**
    * 發送訊息
@@ -520,18 +534,43 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
     }
   };
 
+  /**
+   * 設定初始置底、自己發訊息也置底
+   */
+  useEffect(() => {
+    if (init && messages.length > 0) {
+      setInit(false);
+      scrollToBottom();
+    }
+  }, [init, JSON.stringify(messages)]);
+
   return (
     <div className="container">
       <InfoBar
         room={room}
         user={user}
+        searchedValue={(value) => {
+          setSearchedValue(value);
+        }}
         searchedMessage={(searchedMessage) => {
+          setMessageLoading(true);
           setSearchedMessage(searchedMessage);
         }}
         searchedMessagesList={(searchedMessagesList) => {
           setSearchedMessagesList(searchedMessagesList);
         }}
       />
+      {messageLoading ? (
+        <div className="message-loading">
+          <div className="ball-beat">
+            <div />
+            <div />
+            <div />
+          </div>
+        </div>
+      ) : (
+        <None />
+      )}
       <div className="messages" ref={scrollRef}>
         {socket ? (
           messages.map((message, i) => (
@@ -547,6 +586,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
                 message={message}
                 user={user}
                 users={users}
+                searchedValue={searchedValue}
                 searchedMessage={searchedMessage}
                 searchedMessagesList={searchedMessagesList}
               />

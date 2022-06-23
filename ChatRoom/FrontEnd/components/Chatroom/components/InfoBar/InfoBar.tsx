@@ -1,18 +1,27 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import "./InfoBar.css";
 import {
   CallApi,
   CENTER_FACTORY,
   Column,
   Row,
+  SystemContext,
   TextBox,
 } from "../../../../resource";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { roomProps, userProps, messageProps } from "../Chat/Chat";
+import {
+  Dropdown,
+  DropdownMenu,
+  DropdownToggle,
+  DropdownItem,
+} from "reactstrap";
 
 interface InfoBarProps {
   room: roomProps;
   user: userProps;
+  searchedValue?: (searchedValue: string) => any;
   searchedMessage?: (searchedMessage: messageProps) => any;
   searchedMessagesList?: (searchedMessagesList: messageProps[]) => any;
 }
@@ -20,16 +29,19 @@ interface InfoBarProps {
 const InfoBar: React.FC<InfoBarProps> = ({
   room,
   user,
+  searchedValue,
   searchedMessage,
   searchedMessagesList,
 }) => {
   const ENDPOINT = "http://localhost:81";
+  const { System } = useContext(SystemContext);
   const [onSearch, setOnSearch] = useState(false);
   const [keyWord, setKeyWord] = useState("");
   const [searchedMessageList, setSearchedMessageList] = useState<
     messageProps[]
   >([]);
   const [searchedMessageNumber, setSearchedMessageNumber] = useState(null);
+  const [ddOpen, setDdOpen] = useState(false);
 
   const escFunction = useCallback((event) => {
     if (event.key === "Escape") {
@@ -58,6 +70,10 @@ const InfoBar: React.FC<InfoBarProps> = ({
     }
   }, [onSearch]);
 
+  useEffect(() => {
+    searchedValue(keyWord);
+  }, [keyWord]);
+
   function searchValue(event: { preventDefault: () => void }) {
     if (event.preventDefault) event.preventDefault();
 
@@ -73,6 +89,12 @@ const InfoBar: React.FC<InfoBarProps> = ({
         if (res.status === 200) {
           setSearchedMessageList(res.data);
           setSearchedMessageNumber(res.data.length);
+          if (res.data.length === 0) {
+            toast(System.getLocalization("CHAT", "NO_MATCH_DATA_FIND"), {
+              type: "error",
+              position: "top-right",
+            });
+          }
         }
       })
       .catch((error) => {
@@ -81,32 +103,62 @@ const InfoBar: React.FC<InfoBarProps> = ({
       });
   }
 
+  function toggle() {
+    setDdOpen((prev) => !prev);
+  }
+
   return (
     <>
       <div className="infoBar">
         <div className="leftInnerContainer">
-          <h3>
-            {room.is_group === "N"
-              ? room.member.filter(
-                  (otherSide) => otherSide.name != user.name
-                )[0].name
-              : room.room_name}
+          <h3
+            style={{
+              marginTop: "5%",
+              marginBottom: "5%",
+            }}
+          >
+            {room.room_name}
           </h3>
         </div>
         <div className="rightInnerContainer">
-          <div
-            onClick={() => {
-              setOnSearch((prev) => !prev);
-            }}
-          >
-            <em className="fab fa-sistrix a" title={"搜尋聊天"} />
-          </div>
+          <Dropdown isOpen={ddOpen} toggle={toggle}>
+            <DropdownToggle>
+              <i className="fas fa-bars a" />
+            </DropdownToggle>
+            <DropdownMenu className="fadeInLeft">
+              <DropdownItem>
+                <div
+                  onClick={() => {
+                    setOnSearch((prev) => !prev);
+                  }}
+                >
+                  <em className="fab fa-sistrix" />
+                  &ensp;
+                  {"搜尋關鍵字"}
+                </div>
+              </DropdownItem>
+              <DropdownItem>
+                <div onClick={() => {}}>
+                  <em className="fas fa-image" />
+                  &ensp;
+                  {"照片"}
+                </div>
+              </DropdownItem>
+              <DropdownItem>
+                <div onClick={() => {}}>
+                  <em className="fas fa-file-alt" />
+                  &ensp;
+                  {"檔案"}
+                </div>
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
       {onSearch ? (
         <div className="searchKeyword">
           <Row>
-            <Column md={10}>
+            <Column md={searchedMessageList.length > 0 ? 10 : 11}>
               <TextBox
                 placeholder="搜尋訊息..."
                 onKeyPress={(event: any) =>
@@ -115,40 +167,56 @@ const InfoBar: React.FC<InfoBarProps> = ({
                 onChange={(event: any) => setKeyWord(event.target.value)}
               />
             </Column>
-            <Column md={2} className="updown">
+            <Column
+              md={searchedMessageList.length > 0 ? 2 : 1}
+              className="updown"
+            >
               <Row>
                 {searchedMessageList.length > 0 ? (
                   <>
-                    {searchedMessageNumber + "/" + searchedMessageList.length}
-                    &emsp;
-                    <em
-                      className="fas fa-angle-up"
-                      onClick={() => {
-                        setSearchedMessageNumber((prev: number) =>
-                          prev > 1 ? prev - 1 : prev
-                        );
-                      }}
-                    />
-                    &emsp;
-                    <em
-                      className="fas fa-angle-down"
-                      onClick={() => {
-                        setSearchedMessageNumber((prev: number) =>
-                          prev < searchedMessageList.length ? prev + 1 : prev
-                        );
-                      }}
-                    />
+                    <Column>
+                      <span
+                        style={{
+                          fontSize: "16px",
+                        }}
+                      >
+                        {searchedMessageNumber +
+                          "/" +
+                          searchedMessageList.length}
+                      </span>
+                    </Column>
+                    <Column>
+                      <em
+                        className="fas fa-angle-up"
+                        onClick={() => {
+                          setSearchedMessageNumber((prev: number) =>
+                            prev > 1 ? prev - 1 : prev
+                          );
+                        }}
+                      />
+                    </Column>
+                    <Column>
+                      <em
+                        className="fas fa-angle-down"
+                        onClick={() => {
+                          setSearchedMessageNumber((prev: number) =>
+                            prev < searchedMessageList.length ? prev + 1 : prev
+                          );
+                        }}
+                      />
+                    </Column>
+                    <Column>
+                      <em
+                        className="fas fa-times-circle"
+                        title={"關閉"}
+                        onClick={() => {
+                          setOnSearch(false);
+                        }}
+                      />
+                    </Column>
                   </>
                 ) : (
                   <div className="backspace">
-                    <em
-                      className="fas fa-times-circle"
-                      title={"關閉"}
-                      onClick={() => {
-                        setOnSearch(false);
-                      }}
-                    />{" "}
-                    &emsp;{" "}
                     <em
                       className="fab fa-sistrix c"
                       title={"搜尋"}
@@ -156,10 +224,19 @@ const InfoBar: React.FC<InfoBarProps> = ({
                         searchValue(event);
                       }}
                     />
+                    &emsp; &ensp;
+                    <em
+                      className="fas fa-times-circle"
+                      title={"關閉"}
+                      onClick={() => {
+                        setOnSearch(false);
+                      }}
+                    />
                   </div>
                 )}
               </Row>
             </Column>
+            <ToastContainer />
           </Row>
         </div>
       ) : (

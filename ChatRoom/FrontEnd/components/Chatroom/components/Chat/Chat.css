@@ -5,7 +5,7 @@
   background: #ffffff;
   border-radius: 8px;
   height: 100%;
-  width: 35%;
+  width: 100%;
 }
 
 @media (min-width: 320px) and (max-width: 480px) {
@@ -29,6 +29,12 @@
   padding: 5% 0;
   overflow: auto;
   flex: auto;
+}
+
+.message-loading {
+  flex: auto;
+  align-items: center;
+  margin: 0px auto;
 }
 
 .notReadMsg {

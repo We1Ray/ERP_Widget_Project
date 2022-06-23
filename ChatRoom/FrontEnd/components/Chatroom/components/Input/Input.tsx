@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 import "./Input.css";
-import { CallApi, CENTER_FACTORY, TextBox } from "../../../../resource";
+import { CallApi, CENTER_FACTORY } from "../../../../resource";
 import { fileMessageProps, roomProps } from "../Chat/Chat";
 
 interface inputProps {
@@ -100,8 +100,7 @@ const Input: React.FC<inputProps> = ({
 
   return (
     <form className="form">
-      <TextBox
-        area={true}
+      <textarea
         className="input"
         placeholder="Type a message..."
         value={message}

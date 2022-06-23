@@ -22,6 +22,7 @@ interface Props {
   message: messageProps;
   user: userProps;
   users: usersProps[];
+  searchedValue: string;
   searchedMessage?: messageProps;
   searchedMessagesList?: messageProps[];
 }
@@ -30,15 +31,13 @@ const Message: React.FC<Props> = ({
   message,
   user,
   users,
+  searchedValue,
   searchedMessage,
   searchedMessagesList,
 }) => {
   const ENDPOINT = "http://localhost:81";
   const { System } = useContext(SystemContext);
-  const [isRead, setIsRead] = useState(
-    message ? parseInt(message.isread) > 0 : false
-  );
-  // const [isSentByCurrentUser, setIsSentByCurrentUser] = useState(false);
+  const [isRead, setIsRead] = useState(message ? parseInt(message.isread) : 0);
   const [messageClassType, setMessageClassType] = useState({});
   const [file, setFile] = useState<fileMessageProps>(null);
   const [isImage, setIsImage] = useState(false);
@@ -49,20 +48,7 @@ const Message: React.FC<Props> = ({
   useEffect(() => {
     if (searchedMessage) {
       if (message.message_id === searchedMessage.message_id) {
-        setMessageClassType({
-          backgroundColor: "red",
-          color: "white",
-        });
         messageRef.current.scrollIntoView(); /** 設定scrollbar至被查詢的訊息 */
-      } else if (
-        searchedMessagesList.find(
-          (element) => element.message_id === message.message_id
-        )
-      ) {
-        setMessageClassType({
-          backgroundColor: "orange",
-          color: "white",
-        });
       } else {
         if (message.send_member === user.account_uid) {
           setMessageClassType({
@@ -91,69 +77,88 @@ const Message: React.FC<Props> = ({
     JSON.stringify(user),
   ]);
 
-  const TRANSPARENT_GIF =
-    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  const searchListStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    color: "white",
+    backgroundColor: "orange",
+    marginBottom: "3%",
+  };
 
-  function getAllEmojisFromText(text) {
-    return text.match(
-      /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*/g
-    );
-  }
+  const searchValueStyle: React.CSSProperties = {
+    fontWeight: "bold",
+    color: "white",
+    backgroundColor: "red",
+    marginBottom: "3%",
+  };
 
-  function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(find, "g"), replace);
-  }
+  const commonMessageStyle: React.CSSProperties = { marginBottom: "3%" };
 
-  function replaceAllTextEmojis(text) {
-    let allEmojis = getAllEmojisFromText(text);
-
-    // TODO: get all emoji style
-    const allEmojiStyle = {};
-
-    if (allEmojis) {
-      allEmojis = Array.from(new Set(allEmojis));
-
-      allEmojis.forEach((emoji: string | number) => {
-        const style = allEmojiStyle[emoji];
-
-        if (!style) return;
-
-        text = replaceAll(
-          text,
-          emoji,
-          `<img
-              style="${style}"
-              data-emoji="${emoji}"
-              src="${TRANSPARENT_GIF}"
-            />`
-        );
-      });
+  function ReplaceSearchMessage(text) {
+    let replace_statement = [];
+    if (message && searchedMessage && searchedValue !== "") {
+      if (message.message_id === searchedMessage.message_id) {
+        if (text === searchedValue) {
+          replace_statement.push(
+            <span style={searchValueStyle}>{searchedValue}</span>
+          );
+        } else {
+          let statement = text.split(searchedValue);
+          for (let index = 0; index < statement.length; index++) {
+            replace_statement.push(<span>{statement[index]}</span>);
+            index + 1 === statement.length
+              ? replace_statement.push(<></>)
+              : replace_statement.push(
+                  <span style={searchValueStyle}>{searchedValue}</span>
+                );
+          }
+        }
+      } else if (
+        searchedMessagesList.find(
+          (element) => element.message_id === message.message_id
+        )
+      ) {
+        if (text === searchedValue) {
+          replace_statement.push(
+            <span style={searchListStyle}>{searchedValue}</span>
+          );
+        } else {
+          let statement = text.split(searchedValue);
+          for (let index = 0; index < statement.length; index++) {
+            replace_statement.push(<span>{statement[index]}</span>);
+            index + 1 === statement.length
+              ? replace_statement.push(<></>)
+              : replace_statement.push(
+                  <span style={searchListStyle}>{searchedValue}</span>
+                );
+          }
+        }
+      } else {
+        replace_statement.push(<p style={commonMessageStyle}>{text}</p>);
+      }
+    } else {
+      replace_statement.push(<p style={commonMessageStyle}>{text}</p>);
     }
 
-    return text;
+    return replace_statement;
   }
 
   useEffect(() => {
-    if (users.length > 1 && users[0].room.is_group === "N") {
-      setIsRead(true);
-    } else {
-      CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_message_state", {
-        room_id: message.room_id,
-        message_id: message.message_id,
+    CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_message_state", {
+      room_id: message.room_id,
+      message_id: message.message_id,
+    })
+      .then((res) => {
+        if (res.status !== 200) {
+          console.log(res);
+        } else {
+          setIsRead(parseInt(res.data[0].isread));
+        }
       })
-        .then((res) => {
-          if (res.status !== 200) {
-            console.log(res);
-          } else {
-            setIsRead(parseInt(res.data[0].isread) > 0);
-          }
-        })
-        .catch((error) => {
-          console.log("EROOR: Chat: /chat/get_message_state");
-          console.log(error);
-        });
-    }
-  }, [JSON.stringify(users)]);
+      .catch((error) => {
+        console.log("EROOR: Chat: /chat/get_message_state");
+        console.log(error);
+      });
+  }, [JSON.stringify(users), JSON.stringify(message)]);
 
   useEffect(() => {
     if (message.message_type !== "string") {
@@ -169,7 +174,6 @@ const Message: React.FC<Props> = ({
           console.log("EROOR: Chat: /file/get_file");
           console.log(error);
         });
-
       if (message.message_type) {
         if (message.message_type.indexOf("image") > -1) {
           setIsImage(true);
@@ -192,9 +196,10 @@ const Message: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        {isRead ? (
+        {isRead > 0 ? (
           <>
             {System.getLocalization("CHAT", "READ")}
+            {users[0].room.is_group === "Y" ? isRead : ""}
             <br />
           </>
         ) : (
@@ -211,8 +216,8 @@ const Message: React.FC<Props> = ({
               alt={file.name}
               style={{
                 backgroundColor: "black",
-                height: "100px",
-                width: "100px",
+                height: "50px",
+                width: "50px",
                 cursor: "pointer",
               }}
               onClick={(e) => setDialogOn(true)}
@@ -250,11 +255,11 @@ const Message: React.FC<Props> = ({
                 <Row>
                   <i className="fas fa-file-alt" style={{ fontSize: "20px" }} />
                   &ensp;
-                  {replaceAllTextEmojis(message.message_content)}
+                  {ReplaceSearchMessage(message.message_content)}
                 </Row>
                 <Row>
                   <p>
-                    {System.getLocalization("CHAT", "FILE_SIZE")} &nbsp;{" "}
+                    {System.getLocalization("CHAT", "FILE_SIZE")} &nbsp;
                     {file.size > 1024
                       ? file.size > 1048576
                         ? file.size > 1073741824
@@ -271,7 +276,7 @@ const Message: React.FC<Props> = ({
       ) : (
         <div className="messageBox backgroundBlue">
           <p className={"messageText"} style={messageClassType}>
-            {replaceAllTextEmojis(message.message_content)}
+            {ReplaceSearchMessage(message.message_content)}
           </p>
         </div>
       )}
@@ -289,8 +294,8 @@ const Message: React.FC<Props> = ({
               alt={file.name}
               style={{
                 backgroundColor: "black",
-                height: "100px",
-                width: "100px",
+                height: "50px",
+                width: "50px",
                 cursor: "pointer",
               }}
               onClick={(e) => setDialogOn(true)}
@@ -326,14 +331,14 @@ const Message: React.FC<Props> = ({
             >
               <i className="fas fa-file-alt" />
               &ensp;
-              {replaceAllTextEmojis(message.message_content)}
+              {ReplaceSearchMessage(message.message_content)}
             </a>
           </div>
         )
       ) : (
         <div className="messageBox backgroundLight">
           <p className={"messageText"} style={messageClassType}>
-            {replaceAllTextEmojis(message.message_content)}
+            {ReplaceSearchMessage(message.message_content)}
           </p>
         </div>
       )}
