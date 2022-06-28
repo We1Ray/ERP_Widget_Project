@@ -14,7 +14,7 @@ from
 		NG.room_id,
 		a.name room_name,
 		NG.create_date,
-		to_char(NG.create_date, 'yyyy-mm-dd') create_d,
+		to_char(NG.create_date, 'yyyy/mm/dd') create_d,
 		to_char(NG.create_date, 'hh24:mi') create_hm,
 		NG.is_group,
 		NG.create_user
@@ -38,7 +38,7 @@ union
 		cr3.room_id,
 		cr3.room_name,
 		cr3.create_date,
-		to_char(cr3.create_date, 'yyyy-mm-dd') create_d,
+		to_char(cr3.create_date, 'yyyy/mm/dd') create_d,
 		to_char(cr3.create_date, 'hh24:mi') create_hm,
 		cr3.is_group,
 		cr3.create_user
@@ -67,7 +67,7 @@ left outer join(
 		x.message_id ,
 		x.message_content last_message,
 		x.create_date last_date,
-		to_char(x.create_date, 'yyyy-mm-dd') last_d,
+		to_char(x.create_date, 'yyyy/mm/dd') last_d,
 		to_char(x.create_date, 'hh24:mi') last_hm
 	from
 		(

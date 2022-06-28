@@ -91,6 +91,10 @@ interface TextQryBoxProps {
      */
     api?: string;
     /**
+     * label查詢的api的初始參數
+     */
+    defaultParameters?: object;
+    /**
      * 給予label的值
      */
     value?: string;

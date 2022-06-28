@@ -25,6 +25,7 @@ interface roomProps {
   room_name: string;
   room_id: string;
   is_group: string;
+  room_member: string;
 }
 
 interface messageProps {
@@ -52,13 +53,6 @@ interface usersProps {
   id: string;
   info: userProps;
   room: roomProps;
-}
-
-interface userProps {
-  account: string;
-  account_uid: string;
-  email: string;
-  name: string;
 }
 
 interface fileMessageProps {
@@ -563,6 +557,7 @@ const Chat: React.FC<ChatProps> = ({ room, user }) => {
       {messageLoading ? (
         <div className="message-loading">
           <div className="ball-beat">
+            <br />
             <div />
             <div />
             <div />

@@ -91,7 +91,10 @@ const Message: React.FC<Props> = ({
     marginBottom: "3%",
   };
 
-  const commonMessageStyle: React.CSSProperties = { marginBottom: "3%" };
+  const commonMessageStyle: React.CSSProperties = {
+    marginBottom: "1%",
+    alignItems: "center",
+  };
 
   function ReplaceSearchMessage(text) {
     let replace_statement = [];
@@ -258,16 +261,14 @@ const Message: React.FC<Props> = ({
                   {ReplaceSearchMessage(message.message_content)}
                 </Row>
                 <Row>
-                  <p>
-                    {System.getLocalization("CHAT", "FILE_SIZE")} &nbsp;
-                    {file.size > 1024
-                      ? file.size > 1048576
-                        ? file.size > 1073741824
-                          ? Math.round(file.size / 1073741824) + "GB"
-                          : Math.round(file.size / 1048576) + "MB"
-                        : Math.round(file.size / 1024) + "KB"
-                      : file.size + "B"}
-                  </p>
+                  {System.getLocalization("CHAT", "FILE_SIZE") + ": "}
+                  {file.size > 1024
+                    ? file.size > 1048576
+                      ? file.size > 1073741824
+                        ? Math.round(file.size / 1073741824) + "GB"
+                        : Math.round(file.size / 1048576) + "MB"
+                      : Math.round(file.size / 1024) + "KB"
+                    : file.size + "B"}
                 </Row>
               </Column>
             </a>
@@ -275,7 +276,7 @@ const Message: React.FC<Props> = ({
         )
       ) : (
         <div className="messageBox backgroundBlue">
-          <p className={"messageText"} style={messageClassType}>
+          <p className="messageText" style={messageClassType}>
             {ReplaceSearchMessage(message.message_content)}
           </p>
         </div>
@@ -337,7 +338,7 @@ const Message: React.FC<Props> = ({
         )
       ) : (
         <div className="messageBox backgroundLight">
-          <p className={"messageText"} style={messageClassType}>
+          <p className="messageText" style={messageClassType}>
             {ReplaceSearchMessage(message.message_content)}
           </p>
         </div>

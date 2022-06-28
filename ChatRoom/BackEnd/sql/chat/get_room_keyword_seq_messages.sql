@@ -18,7 +18,7 @@ where
 )
 select
 	x.*,
-	to_char(create_date, 'yyyy-mm-dd') d,
+	to_char(create_date, 'yyyy/mm/dd') d,
 	to_char(create_date, 'hh24:mi') hm
 from
 	(

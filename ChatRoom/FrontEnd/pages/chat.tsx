@@ -12,6 +12,10 @@ import {
   Column,
   Row,
   SystemFunc,
+  DraggableDialog,
+  SelectionBox,
+  Label,
+  TextBox,
 } from "../resource/index";
 import "ds-widget/dist/index.css";
 import {
@@ -19,10 +23,16 @@ import {
   roomProps,
 } from "../components/Chatroom/components/Chat/Chat";
 import moment, { now } from "moment";
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@material-ui/core";
 
 let socket = null;
 
-interface RoomList {
+interface roomList {
   room_member: string;
   room_id: string;
   room_name: string;
@@ -56,8 +66,15 @@ function ChatRoom_Content() {
   const [user, setUser] = useState<userProps>(null);
   const [room, setRoom] = useState<roomProps>(null);
   const [key, setKey] = useState("");
-  const [roomList, setRoomList] = useState<RoomList[]>([]);
+  const [roomList, setRoomList] = useState<roomList[]>([]);
   const [newMessage, setNewMessage] = useState(null);
+  const [addGroupChatRoomOn, setAddGroupChatRoomOn] = useState(false);
+  const [addChatRoomOn, setAddChatRoomOn] = useState(false);
+  const [groupMemberList, setGroupMemberList] = useState([]);
+  const [memberList, setMemberList] = useState([]);
+  let groupName = "";
+  let groupMember = [];
+  let member = [];
 
   /**
    * 取得使用者資訊
@@ -84,7 +101,7 @@ function ChatRoom_Content() {
    */
   useEffect(() => {
     if (user) {
-      CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_room_info", {
+      CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_roomList_info", {
         account_uid: user.account_uid,
       })
         .then((res) => {
@@ -93,7 +110,55 @@ function ChatRoom_Content() {
           }
         })
         .catch((error) => {
-          console.log("EROOR: Chat: /chat/get_room_info");
+          console.log("EROOR: Chat: /chat/get_roomList_info");
+          console.log(error);
+        });
+
+      CallApi.ExecuteApi(CENTER_FACTORY, ENDPOINT + "/chat/get_memberList", {
+        account_uid: user.account_uid,
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            let member = [];
+            for (let index = 0; index < 1000; index++) {
+              // for (let index = 0; index < res.data.length; index++) {//要解決資料太大Lag問題
+              member.push({
+                value: res.data[index]["account_uid"],
+                label: res.data[index]["name"],
+                isFixed: false,
+              });
+            }
+            setMemberList(member);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/get_memberList");
+          console.log(error);
+        });
+
+      CallApi.ExecuteApi(
+        CENTER_FACTORY,
+        ENDPOINT + "/chat/get_groupMemberList",
+        {
+          account_uid: user.account_uid,
+        }
+      )
+        .then((res) => {
+          if (res.status === 200) {
+            let groupMember = [];
+            for (let index = 0; index < 1000; index++) {
+              // for (let index = 0; index < res.data.length; index++) {//要解決資料太大Lag問題
+              groupMember.push({
+                value: res.data[index]["account_uid"],
+                label: res.data[index]["name"],
+                isFixed: false,
+              });
+            }
+            setGroupMemberList(groupMember);
+          }
+        })
+        .catch((error) => {
+          console.log("EROOR: Chat: /chat/get_groupMemberList");
           console.log(error);
         });
 
@@ -115,12 +180,17 @@ function ChatRoom_Content() {
       );
     } else {
       setRoomList([]);
+      setMemberList([]);
+      setGroupMemberList([]);
     }
   }, [JSON.stringify(user)]);
 
+  /**
+   * 聊天室新訊息
+   */
   useEffect(() => {
     if (roomList.length > 0) {
-      socket.on("message", ({ sendMessage, userInfo, socket_user }) => {
+      socket.on("message", ({ sendMessage }) => {
         setNewMessage(sendMessage);
       });
     } else {
@@ -128,7 +198,7 @@ function ChatRoom_Content() {
     }
   }, [JSON.stringify(roomList), JSON.stringify(room)]);
 
-  function notInRoomUpdateMessageCount(originalRoom) {
+  function notInRoomUpdateMessageCount(originalRoom: roomList) {
     let messageRoom = originalRoom;
     messageRoom.last_message = newMessage.message_content;
     messageRoom.not_read_message_count = (
@@ -145,7 +215,7 @@ function ChatRoom_Content() {
     setRoomList(newRoomlist);
   }
 
-  function inRoomUpdateMessageCount(originalRoom: any) {
+  function inRoomUpdateMessageCount(originalRoom: roomProps) {
     let newRoomList = roomList;
     let index = roomList.findIndex(
       (value) => value.room_id === originalRoom.room_id
@@ -159,6 +229,9 @@ function ChatRoom_Content() {
     }
   }
 
+  /**
+   * 更新聊天室列表資訊
+   */
   useEffect(() => {
     if (newMessage) {
       let originalRoom = roomList.find(
@@ -191,6 +264,9 @@ function ChatRoom_Content() {
     }
   }, [JSON.stringify(newMessage)]);
 
+  /**
+   * 更新Key重置ChatRoom
+   */
   useEffect(() => {
     if (room) {
       setKey(SystemFunc.uuid());
@@ -199,6 +275,17 @@ function ChatRoom_Content() {
       setKey("");
     }
   }, [JSON.stringify(room)]);
+
+  async function creatGroupRoom() {
+    console.log(groupName);
+    console.log(groupMember);
+    setAddGroupChatRoomOn(false);
+  }
+
+  function createPrivateRoom() {
+    console.log(member);
+    setAddChatRoomOn(false);
+  }
 
   let Room = [];
   if (roomList) {
@@ -211,6 +298,7 @@ function ChatRoom_Content() {
               room_name: roomList[index].room_name,
               room_id: roomList[index].room_id,
               is_group: roomList[index].is_group,
+              room_member: roomList[index].room_member,
             });
           }}
           style={
@@ -252,7 +340,9 @@ function ChatRoom_Content() {
                     moment(now()).year() ===
                     moment(roomList[index].last_d).year() ? (
                       moment(now()).date() ===
-                      moment(roomList[index].last_d).date() ? (
+                        moment(roomList[index].last_d).date() &&
+                      moment(now()).month() ===
+                        moment(roomList[index].last_d).month() ? (
                         <span
                           className="ml-auto "
                           style={{
@@ -272,7 +362,10 @@ function ChatRoom_Content() {
                             fontSize: "16px",
                           }}
                         >
-                          {moment(roomList[index].last_d).date()}
+                          {moment(roomList[index].last_d).month() +
+                            1 +
+                            "/" +
+                            moment(roomList[index].last_d).date()}
                         </span>
                       )
                     ) : (
@@ -330,6 +423,134 @@ function ChatRoom_Content() {
 
   return (
     <div className="content-wrapper">
+      <DraggableDialog
+        open={addChatRoomOn}
+        style={{ width: "500px", height: "auto" }}
+      >
+        <Row>
+          <Column
+            style={{
+              justifyContent: "flex-start",
+            }}
+          >
+            <DialogTitle>建立聊天</DialogTitle>
+          </Column>
+          <DialogActions>
+            <Column
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <Button onClick={() => setAddChatRoomOn(false)}>
+                <i className="fas fa-times" />
+              </Button>
+            </Column>
+          </DialogActions>
+        </Row>
+        <DialogContent>
+          <Row>
+            <Column>
+              <Label>人員清單</Label>
+              <SelectionBox
+                multiple={false}
+                options={memberList}
+                result={(value) => {
+                  member = value;
+                }}
+              />
+            </Column>
+          </Row>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => createPrivateRoom()}
+            title="建立聊天室"
+            style={{
+              backgroundColor: "DeepSkyBlue",
+              alignItems: "center",
+              display: "flex",
+            }}
+          >
+            <i
+              className="fas fa-check"
+              style={{
+                color: "white",
+              }}
+            />
+          </Button>
+        </DialogActions>
+      </DraggableDialog>
+      <DraggableDialog
+        open={addGroupChatRoomOn}
+        style={{ width: "500px", height: "auto" }}
+      >
+        <Row>
+          <Column
+            style={{
+              justifyContent: "flex-start",
+            }}
+          >
+            <DialogTitle>建立群組</DialogTitle>
+          </Column>
+          <DialogActions>
+            <Column
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <Button onClick={() => setAddGroupChatRoomOn(false)}>
+                <i className="fas fa-times" />
+              </Button>
+            </Column>
+          </DialogActions>
+        </Row>
+        <DialogContent>
+          <Row>
+            <Column>
+              <Label>群組名稱</Label>
+              <TextBox
+                result={(value) => {
+                  groupName = value;
+                }}
+              />
+            </Column>
+          </Row>
+          <Row>
+            <Column>
+              <Label>群組人員</Label>
+              <SelectionBox
+                multiple={true}
+                options={groupMemberList}
+                result={(value) => {
+                  groupMember = value;
+                }}
+              />
+            </Column>
+          </Row>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => creatGroupRoom()}
+            title="建立群組"
+            style={{
+              backgroundColor: "DeepSkyBlue",
+              alignItems: "center",
+              display: "flex",
+            }}
+          >
+            <i
+              className="fas fa-check"
+              style={{
+                color: "white",
+              }}
+            />
+          </Button>
+        </DialogActions>
+      </DraggableDialog>
       <Row>
         <Column md={3}>
           <Collapse className="mb-boxes" isOpen={true}>
@@ -337,13 +558,49 @@ function ChatRoom_Content() {
               <div className="card-body">
                 <ul className="nav nav-pills flex-column">
                   <li className="nav-item p-2">
-                    <h3 className="text-muted">聊天室</h3>
+                    <h3 className="text-muted">
+                      <i className="fas fa-comments" />
+                      &ensp;聊天室
+                      <Button
+                        style={{
+                          float: "right",
+                        }}
+                        title="建立群組"
+                        onClick={() => {
+                          setAddGroupChatRoomOn(true);
+                        }}
+                      >
+                        <h4
+                          className="fas fa-user-plus"
+                          style={{
+                            color: "#a7a7a7",
+                            alignItems: "center",
+                          }}
+                        />
+                      </Button>
+                      <Button
+                        style={{
+                          float: "right",
+                        }}
+                        title="建立聊天"
+                        onClick={() => {
+                          setAddChatRoomOn(true);
+                        }}
+                      >
+                        <h4
+                          className="fas fa-user-alt"
+                          style={{
+                            color: "#a7a7a7",
+                            alignItems: "center",
+                          }}
+                        />
+                      </Button>
+                    </h3>
                   </li>
                   {Room}
                 </ul>
               </div>
             </div>
-            {/* END mailbox list */}
           </Collapse>
         </Column>
         <Column md={9}>

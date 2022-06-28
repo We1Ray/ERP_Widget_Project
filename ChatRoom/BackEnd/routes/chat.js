@@ -32,14 +32,50 @@ router.route("/get_userInfo").post(async (req, res) => {
   );
 });
 
-router.route("/get_room_info").post(async (req, res) => {
+router.route("/get_roomList_info").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
   let sql = fs
-    .readFileSync(path.resolve(__dirname, "../sql/chat/get_room_info.sql"))
+    .readFileSync(path.resolve(__dirname, "../sql/chat/get_roomList_info.sql"))
     .toString();
 
   await lib.requestAPI(
-    "/get_room_info",
+    "/get_roomList_info",
+    DBConfig,
+    sql,
+    {
+      account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    },
+    res
+  );
+});
+
+router.route("/get_memberList").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(path.resolve(__dirname, "../sql/chat/get_memberList.sql"))
+    .toString();
+
+  await lib.requestAPI(
+    "/get_memberList",
+    DBConfig,
+    sql,
+    {
+      account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    },
+    res
+  );
+});
+
+router.route("/get_groupMemberList").post(async (req, res) => {
+  let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
+  let sql = fs
+    .readFileSync(
+      path.resolve(__dirname, "../sql/chat/get_groupMemberList.sql")
+    )
+    .toString();
+
+  await lib.requestAPI(
+    "/get_groupMemberList",
     DBConfig,
     sql,
     {

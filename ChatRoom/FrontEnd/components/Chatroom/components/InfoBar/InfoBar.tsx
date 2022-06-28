@@ -117,7 +117,10 @@ const InfoBar: React.FC<InfoBarProps> = ({
               marginBottom: "5%",
             }}
           >
-            {room.room_name}
+            {room.room_name}{" "}
+            {room.is_group === "Y"
+              ? "(" + room.room_member.split(";").length + ")"
+              : ""}
           </h3>
         </div>
         <div className="rightInnerContainer">
