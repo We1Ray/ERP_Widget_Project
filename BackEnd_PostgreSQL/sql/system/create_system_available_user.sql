@@ -7,14 +7,14 @@ insert
 			CREATE_USER
 		) select
 			C.ACCOUNT_UID,
-			$1::varchar,
+			${system_uid},
 			C.ACCOUNT,
 			C.ACCOUNT
 		from
 			ACCOUNT_TOKEN A,
 			ACCOUNTS C
 		where
-			A.ACCESS_TOKEN =$2::varchar
+			A.ACCESS_TOKEN =${access_token}
 			and a.EXPIRATION_DATE >= DATE_TRUNC(
 				'day',
 				now()

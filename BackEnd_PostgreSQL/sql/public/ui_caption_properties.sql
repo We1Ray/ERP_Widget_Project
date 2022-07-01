@@ -1,5 +1,11 @@
-SELECT *
-  FROM UI_CAPTION_PROPERTIES
- WHERE     LANGUAGE = coalesce ( $1::VARCHAR, LANGUAGE)
-       AND SOURCE = coalesce ( $2::VARCHAR, SOURCE)
-       AND WORD = coalesce ( $3::VARCHAR, WORD)
+select
+	*
+from
+	UI_CAPTION_PROPERTIES
+where
+	language = coalesce ( ${language},
+	language)
+	and source = coalesce ( ${source},
+	source)
+	and WORD = coalesce ( ${word},
+	WORD)

@@ -52,11 +52,13 @@ interface DatetimeBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: Date) => any;
+  result?: (value: Date) => any | ((value: Date) => Promise<any>);
   /**
    * 元件的Reference
    */
   ref?: React.Ref<any>;
+
+  [x: string]: any;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
 const DatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
@@ -104,6 +106,7 @@ const DatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
             handleValidation={handleValidation}
             format={format}
             mask={mask}
+            result={result}
             ref={datetimeBoxRef}
             {...props}
           />
@@ -117,6 +120,7 @@ const DatetimeBox: React.FC<DatetimeBoxProps> = forwardRef(
             handleValidation={handleValidation}
             format={format}
             mask={mask}
+            result={result}
             ref={datetimeBoxRef}
             {...props}
           />

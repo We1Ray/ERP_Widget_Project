@@ -35,6 +35,14 @@ interface Props {
    * 設定其他畫面顯示
    */
   childObject?: React.AllHTMLAttributes<any>;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnQuery 查詢按鈕，按下後會改變狀態讓資料更新
@@ -46,6 +54,8 @@ export const BtnQuery: React.FC<Props> = ({
   defaultQueryParameters,
   doQuery,
   childObject,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
@@ -326,15 +336,24 @@ export const BtnQuery: React.FC<Props> = ({
     }
   }, [JSON.stringify(System.factory), queryPermission]);
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await ProgramDispatch({ type: "selectedData", value: {} });
+      await send(STATUS.QUERY);
+    } else {
+      await ProgramDispatch({ type: "selectedData", value: {} });
+      await send(STATUS.QUERY);
+    }
+  }
+
   return (
     <Button
       style={style}
       color="green"
       disabled={queryDisable}
-      onClick={() => {
-        ProgramDispatch({ type: "selectedData", value: {} });
-        send(STATUS.QUERY);
-      }}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

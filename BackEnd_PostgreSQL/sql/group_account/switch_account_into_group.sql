@@ -3,8 +3,8 @@ with cte as(
 		into
 			ACCOUNT_GROUPS(
 				select
-					$1::varchar as ACCOUNT_UID,
-					$2::varchar as GROUP_UID,
+					${account_uid} as ACCOUNT_UID,
+					${group_uid} as GROUP_UID,
 					C.ACCOUNT as up_user,
 					now() as up_date,
 					C.ACCOUNT as create_user,
@@ -14,14 +14,14 @@ with cte as(
 					ACCOUNTS C,
 					GROUP_LIST D
 				where
-					A.ACCESS_TOKEN = $3::varchar
+					A.ACCESS_TOKEN = ${access_token}
 					and EXPIRATION_DATE >= DATE_TRUNC(
 						'day',
 						now()
 					)
 					and IS_EFFECTIVE = 'Y'
 					and A.ACCOUNT_UID = C.ACCOUNT_UID
-					and D.GROUP_UID = $2::varchar
+					and D.GROUP_UID = ${group_uid}
 			) on
 			conflict(
 				ACCOUNT_UID,
@@ -52,8 +52,8 @@ where
 				from
 					ACCOUNT_GROUPS
 				where
-					ACCOUNT_UID = $1::varchar
-					and GROUP_UID = $2::varchar
+					ACCOUNT_UID = ${account_uid}
+					and GROUP_UID = ${group_uid}
 					and not exists(
 						select
 							1

@@ -2,26 +2,26 @@ with cte_dual as(
 	select
 		C.ACCOUNT,
 		case
-			when $6::varchar = 'Y' then 1
+			when ${is_open} = 'Y' then 1
 			else 0
 		end IS_OPEN,
-		$1::varchar GROUP_UID,
-		$2::varchar FUNCTION_UID,
-		$3::varchar FACTORY_UID
+		${group_uid} GROUP_UID,
+		${function_uid} FUNCTION_UID,
+		${factory_uid} FACTORY_UID
 	from
 		ACCOUNT_TOKEN A,
 		ACCOUNTS C
 	where
-		A.ACCESS_TOKEN = $4::varchar
+		A.ACCESS_TOKEN = ${access_token}
 		and EXPIRATION_DATE >= DATE_TRUNC(
 			'day',
 			now()
 		)
 		and IS_EFFECTIVE = 'Y'
 		and A.ACCOUNT_UID = C.ACCOUNT_UID
-		and $1::varchar is not null
-		and $2::varchar is not null
-		and $5::varchar = 'Y'
+		and ${group_uid} is not null
+		and ${function_uid} is not null
+		and ${editable} = 'Y'
 ),
 cte_update as(
 	update

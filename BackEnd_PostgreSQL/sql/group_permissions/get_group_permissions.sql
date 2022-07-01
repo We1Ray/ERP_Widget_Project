@@ -9,7 +9,7 @@ with recursive CTE as(
 	from
 		GROUP_LIST
 	where
-		GROUP_UID = $1::varchar
+		GROUP_UID = ${group_permission_GROUP_UID}
 union all select
 		t.GROUP_UID,
 		t.GROUP_NAME,
@@ -44,7 +44,7 @@ union all select
 	A.FUNCTION_DESC,
 	A.FUNCTION_CODE,
 	A.IS_CORE,
-	$1::varchar GROUP_UID
+	${group_permission_GROUP_UID} GROUP_UID
 from
 	FUNCTION_LIST A left join(
 		select
@@ -54,8 +54,8 @@ from
 		from
 			GROUP_FUNCTION_SETTING A
 		where
-			GROUP_UID = $1::varchar
-			and FACTORY_UID = $2::varchar
+			GROUP_UID = ${group_permission_GROUP_UID}
+			and FACTORY_UID = ${group_permission_FACTORY_UID}
 		group by
 			A.FUNCTION_UID
 	) B on
@@ -74,13 +74,13 @@ from
 				from
 					CTE
 				where
-					group_uid != $1::varchar
+					group_uid != ${group_permission_GROUP_UID}
 				order by
 					PARENT_GROUP_UID
 			) B on
 			A.GROUP_UID = B.GROUP_UID
 		where
-			A.FACTORY_UID = $2::varchar
+			A.FACTORY_UID = ${group_permission_FACTORY_UID}
 		group by
 			A.FUNCTION_UID
 	) D on
@@ -89,14 +89,14 @@ from
 	C.PROGRAM_UID = A.PROGRAM_UID
 where
 	A.SYSTEM_UID = coalesce(
-		$3::varchar,
+		${group_permission_SYSTEM_UID},
 		A.SYSTEM_UID
 	)
 	and A.PROGRAM_UID = coalesce(
-		$4::varchar,
+		${group_permission_PROGRAM_UID},
 		A.PROGRAM_UID
 	)
-	and $2::varchar is not null
+	and ${group_permission_FACTORY_UID} is not null
 order by
 	C.NODE_LEVEL,
 	C.SEQ,

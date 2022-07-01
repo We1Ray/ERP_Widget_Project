@@ -1,10 +1,10 @@
 with cte as(
 	select
-		$1::varchar,
-		$2::varchar,
-		$3::varchar,
-		$4::varchar,
-		$5::varchar,
+		${group_uid},
+		${group_name},
+		${is_core},
+		${enabled},
+		${parent_group_uid},
 		(
 			select
 				C.ACCOUNT
@@ -12,7 +12,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $6::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -28,7 +28,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $6::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -61,7 +61,7 @@ with cte as(
 					ACCOUNT_TOKEN A,
 					ACCOUNTS C
 				where
-					A.ACCESS_TOKEN = $6::varchar
+					A.ACCESS_TOKEN = ${access_token}
 					and a.EXPIRATION_DATE >= DATE_TRUNC(
 						'day',
 						now()

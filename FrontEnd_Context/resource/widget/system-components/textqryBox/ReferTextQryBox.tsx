@@ -22,7 +22,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DraggableDialog from "../../system-ui/DraggableDialog";
 
-export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
+export const ReferTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
   (
     {
       visible,
@@ -32,7 +32,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       value,
       handleValidation,
       delimiter,
-      dialog,
       text,
       label,
       result,
@@ -43,14 +42,13 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
   ) => {
     const { System } = useContext(SystemContext);
     const [display, setDisplay] = useState(true);
-    const [dialogOn, setDialogOn] = useState(false);
     const [objectDisable, setObjectDisable] = useState(false);
     const [labelValue, setLabelValue] = useState("");
     const [textboxValue, setTextboxValue] = useState("");
     const [selectedValue, setSelectedValue] = useState(
       PublicMethod.checkValue(defaultValue) ? defaultValue : ""
     );
-    const [dialogValue, setDialogValue] = useState({});
+
     const [textboxDisable, setTextboxDisable] = useState(false);
     const [valueDelimiter] = useState(
       PublicMethod.checkValue(delimiter) ? delimiter : ";"
@@ -95,88 +93,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log(error);
       }
     }, [value]);
-
-    function clearValue() {
-      try {
-        setSelectedValue("");
-      } catch (error) {
-        console.log("EROOR: CommonTextQryBox.clearValue");
-        console.log(error);
-      }
-    }
-
-    async function selectQryValue() {
-      try {
-        if (PublicMethod.checkValue(dialogValue)) {
-          if (Array.isArray(dialogValue)) {
-            let multipleValue = "";
-            for (let index = 0; index < dialogValue.length; index++) {
-              if (index === dialogValue.length - 1) {
-                multipleValue = multipleValue + dialogValue[index][text.name];
-              } else {
-                multipleValue =
-                  multipleValue +
-                  dialogValue[index][text.name] +
-                  valueDelimiter;
-              }
-            }
-            if (
-              PublicMethod.checkValue(maxLength)
-                ? multipleValue.length > maxLength
-                  ? true
-                  : false
-                : false
-            ) {
-              swal(
-                System.getLocalization("Public", "Fail"),
-                System.getLocalization("Public", "ExceededWordLengthLimit") +
-                  " " +
-                  System.getLocalization("Public", "Word") +
-                  System.getLocalization("Public", "Max") +
-                  ":" +
-                  maxLength +
-                  System.getLocalization("Public", "CurrentLength") +
-                  ":" +
-                  ":" +
-                  multipleValue.length,
-                "error"
-              );
-            } else {
-              setSelectedValue(multipleValue);
-            }
-          } else {
-            if (
-              PublicMethod.checkValue(maxLength)
-                ? dialogValue[text.name].length > maxLength
-                  ? true
-                  : false
-                : false
-            ) {
-              swal(
-                System.getLocalization("Public", "Fail"),
-                System.getLocalization("Public", "ExceededWordLengthLimit") +
-                  " " +
-                  System.getLocalization("Public", "Word") +
-                  System.getLocalization("Public", "Max") +
-                  ":" +
-                  maxLength +
-                  System.getLocalization("Public", "CurrentLength") +
-                  ":" +
-                  ":" +
-                  dialogValue[text.name].length,
-                "error"
-              );
-            } else {
-              setSelectedValue(dialogValue[text.name]);
-            }
-          }
-        }
-        setDialogOn(false);
-      } catch (error) {
-        console.log("EROOR: CommonTextQryBox.selectQryValue");
-        console.log(error);
-      }
-    }
 
     useEffect(() => {
       try {
@@ -259,12 +175,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 System.getLocalization("Public", "Data");
             }
             if (latest()) {
-              if (
-                PublicMethod.checkValue(textboxValue) &&
-                textboxValue !== selectedValue
-              ) {
-                setSelectedValue(textboxValue);
-              }
               setLabelValue(lable);
             }
           } catch (error) {
@@ -290,17 +200,6 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       }
     }, [textboxValue]);
 
-    useEffect(() => {
-      try {
-        if (label.result) {
-          label.result(labelValue);
-        }
-      } catch (error) {
-        console.log("EROOR: QryTextQryBox.useEffect[labelValue]");
-        console.log(error);
-      }
-    }, [labelValue]);
-
     function resultValue(value) {
       if (textboxValue !== value) {
         setTextboxValue(value);
@@ -308,80 +207,50 @@ export const CommonTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
     }
 
     return (
-      <Card {...props}>
+      <span {...props}>
         {display ? (
-          <>
-            <Row>
-              {
-                <Col
-                  md={5}
-                  style={{
-                    display: (
-                      PublicMethod.checkValue(text.visible)
-                        ? text.visible
-                        : "block"
-                    )
-                      ? "block"
-                      : "none",
-                  }}
+          <Row>
+            {
+              <Col
+                md={1}
+                style={{
+                  display: (
+                    PublicMethod.checkValue(text.visible)
+                      ? text.visible
+                      : "block"
+                  )
+                    ? "block"
+                    : "none",
+                }}
+              >
+                <CommonTextBox
+                  maxLength={maxLength}
+                  disabled={textboxDisable}
+                  defaultValue={defaultValue}
+                  value={selectedValue}
+                  style={text.style}
+                  handleValidation={handleValidation}
+                  result={(value) => resultValue(value)}
+                  ref={textboxRef}
+                />
+              </Col>
+            }
+            {(PublicMethod.checkValue(label.visible) ? label.visible : true) ? (
+              <Col md={11}>
+                <span
+                  style={label.style ? label.style : { fontWeight: "normal" }}
                 >
-                  <CommonTextBox
-                    maxLength={maxLength}
-                    disabled={textboxDisable}
-                    defaultValue={defaultValue}
-                    value={selectedValue}
-                    style={text.style}
-                    handleValidation={handleValidation}
-                    result={(value) => resultValue(value)}
-                    ref={textboxRef}
-                  />
-                </Col>
-              }
-              {(
-                PublicMethod.checkValue(label.visible) ? label.visible : true
-              ) ? (
-                <Col md={5}>
-                  <Label
-                    style={label.style ? label.style : { fontWeight: "normal" }}
-                  >
-                    {labelValue}
-                  </Label>
-                </Col>
-              ) : (
-                <None />
-              )}
-            </Row>
-            {PublicMethod.checkValue(dialogOn) ? (
-              <DraggableDialog open={dialogOn && !objectDisable}>
-                <DialogContent style={dialog.style}>
-                  <dialog.window
-                    callback={(value: any) => {
-                      setDialogValue(value);
-                    }}
-                    {...dialog.parameter}
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setDialogOn(false)}>
-                    <em className={"fas fa-ban"} />
-                    &ensp;
-                    {System.getLocalization("Public", "Cancel")}
-                  </Button>
-                  <Button color="success" onClick={selectQryValue}>
-                    <em className={"far fa-save"} />
-                    &ensp;
-                    {System.getLocalization("Public", "Determine")}
-                  </Button>
-                </DialogActions>
-              </DraggableDialog>
+                  {labelValue}
+                </span>
+              </Col>
             ) : (
               <None />
             )}
-          </>
+          </Row>
         ) : (
           <None />
         )}
-      </Card>
+      </span>
     );
   }
 );

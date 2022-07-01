@@ -14,9 +14,9 @@ select
 from
 	PROGRAM_LIST
 where
-	SYSTEM_UID = $1::varchar
+	SYSTEM_UID = ${programadmin_SYSTEM_UID}
 	and NODE_LEVEL::varchar = coalesce(
-		$2::varchar,
+		${programadmin_NODE_LEVEL},
 		NODE_LEVEL::varchar
 	)
 order by

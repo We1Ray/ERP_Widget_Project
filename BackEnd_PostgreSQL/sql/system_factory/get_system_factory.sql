@@ -4,11 +4,11 @@ select
 from
 	SYSTEM_FACTORY_LIST A
 where
-	A.SYSTEM_UID = $1::varchar
+	A.SYSTEM_UID = ${system_uid}
 	and(
 		(
-			$2::varchar is null
-			or $2::varchar = ''
+			${system_factory_IS_ENABLED} is null
+			or ${system_factory_IS_ENABLED} = ''
 		)
-		or A.IS_ENABLED = $2::varchar
+		or A.IS_ENABLED = ${system_factory_IS_ENABLED}
 	)

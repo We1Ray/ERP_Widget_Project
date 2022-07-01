@@ -9,13 +9,13 @@ insert
 			IS_ENABLED
 		)
 	values(
-		$1::varchar,
-		$2::varchar,
-		$3::varchar,
-		$4::varchar,
-		$5::varchar,
+		${factory_uid},
+		${system_uid},
+		${factory_name},
+		${ws_url},
+		${ws_datasource},
 		coalesce(
-			$6::varchar,
+			${is_enabled},
 			'N'
 		)
 	)

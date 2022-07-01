@@ -1,3 +1,6 @@
-  SELECT DISTINCT LANGUAGE
-    FROM UI_CAPTION_PROPERTIES
-ORDER BY LANGUAGE ASC
+select
+	distinct language
+from
+	UI_CAPTION_PROPERTIES
+order by
+	language asc

@@ -6,14 +6,14 @@ const lib = require("../library");
 
 router.route("/get_accounts_in_group").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["group_account_GROUP_UID"]
+  let parameter = {
+    group_account_GROUP_UID: req.body["group_account_GROUP_UID"]
       ? req.body["group_account_GROUP_UID"]
       : null,
-    req.body["group_account_SEARCH_VALUE"]
+    group_account_SEARCH_VALUE: req.body["group_account_SEARCH_VALUE"]
       ? req.body["group_account_SEARCH_VALUE"]
       : null,
-  ];
+  };
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/group_account/get_accounts_in_group.sql")
@@ -24,15 +24,15 @@ router.route("/get_accounts_in_group").post(async (req, res) => {
 
 router.route("/get_accounts_not_in_group").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["group_uid"] ? req.body["group_uid"] : null,
-    req.body["account_not_group_KEY"]
+  let parameter = {
+    group_uid: req.body["group_uid"] ? req.body["group_uid"] : null,
+    account_not_group_KEY: req.body["account_not_group_KEY"]
       ? req.body["account_not_group_KEY"]
       : null,
-    req.body["account_not_group_ACCOUNT_UID"]
+    account_not_group_ACCOUNT_UID: req.body["account_not_group_ACCOUNT_UID"]
       ? req.body["account_not_group_ACCOUNT_UID"]
       : null,
-  ];
+  };
   let sql = fs
     .readFileSync(
       path.resolve(
@@ -65,22 +65,24 @@ router.route("/switch_account_into_group").post(async (req, res) => {
     await Promise.all(
       req.body.map(async (element) => {
         try {
-          parameter.push([
-            element["account_uid"] ? element["account_uid"] : null,
-            element["group_uid"] ? element["group_uid"] : null,
-            element["access_token"] ? element["access_token"] : null,
-          ]);
+          parameter.push({
+            account_uid: element["account_uid"] ? element["account_uid"] : null,
+            group_uid: element["group_uid"] ? element["group_uid"] : null,
+            access_token: element["access_token"]
+              ? element["access_token"]
+              : null,
+          });
         } catch (error) {
           console.log("error" + error);
         }
       })
     );
   } else {
-    parameter = [
-      req.body["account_uid"] ? req.body["account_uid"] : null,
-      req.body["group_uid"] ? req.body["group_uid"] : null,
-      req.body["access_token"] ? req.body["access_token"] : null,
-    ];
+    parameter = {
+      account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+      group_uid: req.body["group_uid"] ? req.body["group_uid"] : null,
+      access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    };
   }
 
   await lib.executeAPI(

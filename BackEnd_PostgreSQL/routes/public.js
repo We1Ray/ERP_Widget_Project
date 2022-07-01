@@ -10,29 +10,34 @@ router.route("/hello").get(async (req, res) => {
 
 router.route("/ui_caption_properties").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["language"] ? req.body["language"] : null,
-    req.body["source"] ? req.body["source"] : null,
-    req.body["word"] ? req.body["word"] : null,
-  ];
 
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/public/ui_caption_properties.sql")
     )
     .toString();
-  await lib.requestAPI("/ui_caption_properties", DBConfig, sql, parameter, res);
+  await lib.requestAPI(
+    "/ui_caption_properties",
+    DBConfig,
+    sql,
+    {
+      language: req.body["language"] ? req.body["language"] : null,
+      source: req.body["source"] ? req.body["source"] : null,
+      word: req.body["word"] ? req.body["word"] : null,
+    },
+    res
+  );
 });
 
 router.route("/get_account_permissions").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-    req.body["access_token"] ? req.body["access_token"] : null,
-    req.body["factory_uid"] ? req.body["factory_uid"] : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-    req.body["program_code"] ? req.body["program_code"] : null,
-  ];
+  let parameter = {
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    factory_uid: req.body["factory_uid"] ? req.body["factory_uid"] : null,
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    program_code: req.body["program_code"] ? req.body["program_code"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/public/get_account_permissions.sql")
@@ -49,7 +54,9 @@ router.route("/get_account_permissions").post(async (req, res) => {
 
 router.route("/get_ticket_granting_cookie").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [req.body["access_token"] ? req.body["access_token"] : null];
+  let parameter = {
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/public/get_ticket_granting_cookie.sql")
@@ -66,10 +73,10 @@ router.route("/get_ticket_granting_cookie").post(async (req, res) => {
 
 router.route("/get_account").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["account"] ? req.body["account"] : null,
-    req.body["account_uid"] ? req.body["account_uid"] : null,
-  ];
+  let parameter = {
+    account: req.body["account"] ? req.body["account"] : null,
+    account_uid: req.body["account_uid"] ? req.body["account_uid"] : null,
+  };
   let sql = fs
     .readFileSync(path.resolve(__dirname, "../sql/public/get_account.sql"))
     .toString();
@@ -78,15 +85,17 @@ router.route("/get_account").post(async (req, res) => {
 
 router.route("/create_account_access_token").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["access_token"] ? req.body["access_token"] : null,
-    req.body["system_uid"] ? req.body["system_uid"] : null,
-    req.body["expiration_date"] ? req.body["expiration_date"] : null,
-    req.body["is_effective"] ? req.body["is_effective"] : null,
-    req.body["up_user"] ? req.body["up_user"] : null,
-    req.body["create_user"] ? req.body["create_user"] : null,
-    req.body["ldap_id"] ? req.body["ldap_id"] : null,
-  ];
+  let parameter = {
+    access_token: req.body["access_token"] ? req.body["access_token"] : null,
+    system_uid: req.body["system_uid"] ? req.body["system_uid"] : null,
+    expiration_date: req.body["expiration_date"]
+      ? req.body["expiration_date"]
+      : null,
+    is_effective: req.body["is_effective"] ? req.body["is_effective"] : null,
+    up_user: req.body["up_user"] ? req.body["up_user"] : null,
+    create_user: req.body["create_user"] ? req.body["create_user"] : null,
+    ldap_id: req.body["ldap_id"] ? req.body["ldap_id"] : null,
+  };
   let sql = fs
     .readFileSync(
       path.resolve(__dirname, "../sql/public/create_account_access_token.sql")
@@ -103,10 +112,10 @@ router.route("/create_account_access_token").post(async (req, res) => {
 
 router.route("/login").post(async (req, res) => {
   let DBConfig = req.headers.factory ? DataBaseInfo[req.headers.factory] : {};
-  let parameter = [
-    req.body["email"] ? req.body["email"] : null,
-    req.body["password"] ? req.body["password"] : null,
-  ];
+  let parameter = {
+    email: req.body["email"] ? req.body["email"] : null,
+    password: req.body["password"] ? req.body["password"] : null,
+  };
   let sql = fs
     .readFileSync(path.resolve(__dirname, "../sql/public/login.sql"))
     .toString();

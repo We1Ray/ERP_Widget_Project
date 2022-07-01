@@ -1,39 +1,43 @@
 with recursive CTE as(
-	select
+select
 		*
-	from
+from
 		GROUP_LIST
-	where
+where
 		ENABLED = 'Y'
-		and GROUP_UID in(
-			select
+	and GROUP_UID in(
+	select
 				X.GROUP_UID
-			from
-				ACCOUNT_GROUPS X inner join GROUP_LIST Y on
+	from
+				ACCOUNT_GROUPS X
+	inner join GROUP_LIST Y on
 				Y.GROUP_UID = X.GROUP_UID
-				and Y.ENABLED = 'Y'
-			where
-				X.ACCOUNT_UID = $1::varchar
-				or X.ACCOUNT_UID =(
-					select
+		and Y.ENABLED = 'Y'
+	where
+				X.ACCOUNT_UID = ${account_uid}
+		or X.ACCOUNT_UID =(
+		select
 						ACCOUNT_UID
-					from
+		from
 						ACCOUNT_TOKEN
-					where
-						ACCESS_TOKEN = $2::varchar
-						and EXPIRATION_DATE >= DATE_TRUNC(
+		where
+						ACCESS_TOKEN = ${access_token}
+			and EXPIRATION_DATE >= DATE_TRUNC(
 							'day',
 							now()
 						)
-						and IS_EFFECTIVE = 'Y'
+				and IS_EFFECTIVE = 'Y'
 				)
 		)
-union all select
+union all
+select
 		t.*
-	from
-		cte c join GROUP_LIST t on
+from
+		cte c
+join GROUP_LIST t on
 		c.PARENT_GROUP_UID = t.GROUP_UID
-) select
+)
+select
 	case
 		when(
 			B.IS_OPEN > 0
@@ -50,27 +54,30 @@ union all select
 	A.FUNCTION_DESC,
 	A.FUNCTION_CODE
 from
-	FUNCTION_LIST A left join(
-		select
+	FUNCTION_LIST A
+left join(
+	select
 			A.FUNCTION_UID,
 			sum( IS_OPEN::integer ) IS_OPEN
-		from
-			GROUP_FUNCTION_SETTING A inner join CTE B on
+	from
+			GROUP_FUNCTION_SETTING A
+	inner join CTE B on
 			A.GROUP_UID = B.GROUP_UID
-		where
-			A.FACTORY_UID = $3::varchar
-		group by
+	where
+			A.FACTORY_UID = ${factory_uid}
+	group by
 			A.FUNCTION_UID
 	) B on
-	A.FUNCTION_UID = B.FUNCTION_UID left join PROGRAM_LIST C on
+	A.FUNCTION_UID = B.FUNCTION_UID
+left join PROGRAM_LIST C on
 	C.PROGRAM_UID = A.PROGRAM_UID
 where
-	A.SYSTEM_UID = $4::varchar
+	A.SYSTEM_UID = ${system_uid}
 	and C.PROGRAM_CODE = coalesce(
-		$5::varchar,
+		${program_code},
 		C.PROGRAM_CODE
 	)
 order by
 	C.NODE_LEVEL,
 	C.SEQ,
-	A.SEQ;
+	A.SEQ

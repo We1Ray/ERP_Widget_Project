@@ -45,7 +45,13 @@ export const BindSelectionBox: React.FC<SelectionBoxProps> = forwardRef(
     const [selectionOptions, setSelectionOptions] = useState(
       PublicMethod.checkValue(options) ? options : []
     );
-    const [selectedValue, setSelectedValue] = useState([]);
+    const [selectedValue, setSelectedValue] = useState<
+      {
+        value: string;
+        label: string;
+        isFixed?: boolean;
+      }[]
+    >([]);
     const [selectionBoxDisable, setSelectionBoxDisable] = useState(false);
     const [multiSelection, setMultiSelection] = useState(false);
     const [display, setDisplay] = useState(true);

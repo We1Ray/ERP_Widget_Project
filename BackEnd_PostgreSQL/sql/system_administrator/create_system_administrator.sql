@@ -1,9 +1,9 @@
 with cte as(
 	select
-		$1::varchar,
-		$2::varchar,
+		${account_uid},
+		${system_uid},
 		TO_DATE(
-			$3::varchar,
+			${expiration_date},
 			'yyyy/mm/dd'
 		),
 		(
@@ -13,7 +13,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $4::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -29,7 +29,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $4::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -60,7 +60,7 @@ with cte as(
 					ACCOUNT_TOKEN A,
 					ACCOUNTS C
 				where
-					A.ACCESS_TOKEN = $4::varchar
+					A.ACCESS_TOKEN = ${access_token}
 					and a.EXPIRATION_DATE >= DATE_TRUNC(
 						'day',
 						now()

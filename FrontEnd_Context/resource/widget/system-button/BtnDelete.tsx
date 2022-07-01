@@ -49,6 +49,14 @@ interface Props {
    * 設定其他畫面顯示
    */
   childObject?: React.AllHTMLAttributes<any>;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnDelete 刪除按鈕，按下後會改變狀態刪除資料
@@ -63,6 +71,8 @@ export const BtnDelete: React.FC<Props> = ({
   style,
   defaultParameters,
   childObject,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
@@ -338,12 +348,22 @@ export const BtnDelete: React.FC<Props> = ({
     }
   }
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await send(STATUS.DELETE);
+    } else {
+      await send(STATUS.DELETE);
+    }
+  }
+
   return (
     <Button
       style={style}
       color="danger"
       disabled={deleteDisable}
-      onClick={() => send(STATUS.DELETE)}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

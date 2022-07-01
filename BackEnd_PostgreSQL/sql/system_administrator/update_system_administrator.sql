@@ -2,7 +2,7 @@ update
 	ACCOUNT_AVAILABLE_SYSTEMS
 set
 	EXPIRATION_DATE = to_timestamp(
-		$1::varchar,
+		${expiration_date},
 		'YYYY/MM/DD'
 	),
 	UP_DATE = now(),
@@ -13,7 +13,7 @@ set
 			ACCOUNT_TOKEN A,
 			ACCOUNTS C
 		where
-			A.ACCESS_TOKEN = $2::varchar
+			A.ACCESS_TOKEN = ${access_token}
 			and a.EXPIRATION_DATE >= DATE_TRUNC(
 				'day',
 				now()
@@ -29,7 +29,7 @@ where
 			ACCOUNT_TOKEN A,
 			ACCOUNTS C
 		where
-			A.ACCESS_TOKEN = $2::varchar
+			A.ACCESS_TOKEN = ${access_token}
 			and a.EXPIRATION_DATE >= DATE_TRUNC(
 				'day',
 				now()
@@ -37,5 +37,5 @@ where
 			and A.IS_EFFECTIVE = 'Y'
 			and A.ACCOUNT_UID = C.ACCOUNT_UID
 	) is not null
-	and SYSTEM_UID = $3::varchar
-	and ACCOUNT_UID = $4::varchar
+	and SYSTEM_UID = ${system_uid}
+	and ACCOUNT_UID = ${account_uid}
