@@ -60,7 +60,7 @@ interface TextBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (value: string) => any | ((value: string) => Promise<any>);
   /**
    * 元件的Reference
    */

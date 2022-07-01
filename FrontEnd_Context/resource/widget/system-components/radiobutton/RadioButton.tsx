@@ -57,7 +57,10 @@ interface RadioButtonProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (
+    value: string,
+    text?: string
+  ) => any | ((value: string, text?: string) => Promise<any>);
   /**
    * 元件的Reference
    */

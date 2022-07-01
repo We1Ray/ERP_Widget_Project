@@ -262,7 +262,12 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
                 await CallApi.ExecuteApi(
                   System.factory.name,
                   System.factory.ip + label.api,
-                  PublicMethod.checkValue(label.defaultParameters) ? PublicMethod.mergeJSON( { [text.name]: textboxValue }, label.defaultParameters) :  { [text.name]: textboxValue }
+                  PublicMethod.checkValue(label.defaultParameters)
+                    ? PublicMethod.mergeJSON(
+                        { [text.name]: textboxValue },
+                        label.defaultParameters
+                      )
+                    : { [text.name]: textboxValue }
                 ).then(async (res) => {
                   if (PublicMethod.checkValue(res.data)) {
                     //額外再給予Operation和api做查詢給值
@@ -316,6 +321,17 @@ export const QryTextQryBox: React.FC<TextQryBoxProps> = forwardRef(
         console.log(error);
       }
     }, [textboxValue]);
+
+    useEffect(() => {
+      try {
+        if (label.result) {
+          label.result(labelValue);
+        }
+      } catch (error) {
+        console.log("EROOR: QryTextQryBox.useEffect[labelValue]");
+        console.log(error);
+      }
+    }, [labelValue]);
 
     function resultValue(value) {
       if (textboxValue !== value) {

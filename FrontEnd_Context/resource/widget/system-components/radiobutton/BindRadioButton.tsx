@@ -40,6 +40,7 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
     const { Program, ProgramDispatch } = useContext(ProgramContext);
     const { status } = useContext(statusContext);
     const [radioButtonValue, setRadioButtonValue] = useState("");
+    const [radioButtonText, setRadioButtonText] = useState("");
     const [radioButtonDisable, setRadioButtonDisable] = useState(false);
     const [display, setDisplay] = useState(true);
     const radioButtonRef = useRef(null);
@@ -112,14 +113,25 @@ export const BindRadioButton: React.FC<RadioButtonProps> = forwardRef(
             value: { [name]: radioButtonValue },
           });
         }
-        if (result) {
-          result(radioButtonValue);
-        }
+        setRadioButtonText(
+          options.find((obj) => obj.value === radioButtonValue).text
+        );
       } catch (error) {
         console.log("EROOR: BindRadioButton.useEffect[textboxValue]");
         console.log(error);
       }
     }, [radioButtonValue]);
+
+    useEffect(() => {
+      try {
+        if (result) {
+          result(radioButtonValue, radioButtonText);
+        }
+      } catch (error) {
+        console.log("EROOR: BindRadioButton.useEffect[radioButtonText]");
+        console.log(error);
+      }
+    }, [radioButtonText]);
 
     useLatest(
       (latest) => {

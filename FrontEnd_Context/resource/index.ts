@@ -49,3 +49,4 @@ export {
 } from "./methods/PublicMethod";
 export { default as SystemFunc } from "./methods/SystemFunc";
 export { default as CallApi } from "./api/CallApi";
+export { default as useLatest } from "./methods/useLatest";

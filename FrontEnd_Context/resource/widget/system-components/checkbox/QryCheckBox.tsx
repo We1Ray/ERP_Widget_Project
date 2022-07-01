@@ -72,16 +72,17 @@ export const QryCheckBox: React.FC<CheckBoxProps> = forwardRef(
     useEffect(() => {
       try {
         let value = checked ? checkedValue : notCheckedValue;
-        setCheckboxText(checked ? checkedText : notCheckedText);
+        let text = checked ? checkedText : notCheckedText;
+        setCheckboxText(text);
         setQryCheckboxValueToChangeData(value);
         if (result) {
-          result(value);
+          result(value, text);
         }
       } catch (error) {
         console.log("EROOR: QryCheckBox.useEffect[checked]");
         console.log(error);
       }
-    }, [checked]);
+    }, [checked, notCheckedText, notCheckedValue, checkedValue, checkedText]);
 
     /** Query useEffect */
     useEffect(() => {
@@ -93,7 +94,7 @@ export const QryCheckBox: React.FC<CheckBoxProps> = forwardRef(
         console.log("EROOR: QryCheckBox.useEffect[defaultValue]");
         console.log(error);
       }
-    }, [value]);
+    }, [value, checkedValue]);
 
     /** 狀態改變執行的地方 */
     useEffect(() => {

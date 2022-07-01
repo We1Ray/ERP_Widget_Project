@@ -84,7 +84,15 @@ interface SelectionBoxProps {
       label: string;
       isFixed?: boolean;
     }[]
-  ) => any;
+  ) =>
+    | any
+    | ((
+        value: {
+          value: string;
+          label: string;
+          isFixed?: boolean;
+        }[]
+      ) => Promise<any>);
   /**
    * 元件的Reference
    */

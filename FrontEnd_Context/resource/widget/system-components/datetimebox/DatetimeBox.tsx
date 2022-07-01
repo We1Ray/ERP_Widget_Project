@@ -52,7 +52,7 @@ interface DatetimeBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: Date) => any;
+  result?: (value: Date) => any | ((value: Date) => Promise<any>);
   /**
    * 元件的Reference
    */

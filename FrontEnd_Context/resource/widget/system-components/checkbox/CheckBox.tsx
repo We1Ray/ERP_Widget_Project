@@ -8,6 +8,7 @@ import PublicMethod from "../../../methods/PublicMethod";
 import { QryCheckBox } from "./QryCheckBox";
 import { BindCheckBox } from "./BindCheckBox";
 import { CommonCheckBox } from "./CommonCheckBox";
+
 interface CheckBoxProps {
   /**
    * 判斷是否可視 初始值為true
@@ -56,7 +57,10 @@ interface CheckBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (
+    value: string,
+    text: string
+  ) => any | ((value: string, text: string) => Promise<any>);
   /**
    * 元件的Reference
    */
