@@ -1,11 +1,11 @@
 with cte as(
 	select
-		$1::varchar,
-		$2::varchar,
-		$3::varchar,
-		$4::varchar,
-		$5::varchar,
-		$6::varchar,
+		${system_uid},
+		${system_name},
+		${system_desc},
+		${secret_key},
+		${enabled},
+		${system_type},
 		(
 			select
 				C.ACCOUNT
@@ -13,7 +13,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $7::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -29,7 +29,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $7::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -64,7 +64,7 @@ with cte as(
 					ACCOUNT_TOKEN A,
 					ACCOUNTS C
 				where
-					A.ACCESS_TOKEN = $7::varchar
+					A.ACCESS_TOKEN = ${access_token}
 					and a.EXPIRATION_DATE >= DATE_TRUNC(
 						'day',
 						now()

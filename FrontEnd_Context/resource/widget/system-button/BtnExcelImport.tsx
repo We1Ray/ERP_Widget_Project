@@ -59,12 +59,22 @@ interface Props {
    * 設定匯入資料表執行的動作
    */
   importData: (data: any[], wb: XLSX.WorkSheet) => void;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 export const BtnExcelImport: React.FC<Props> = ({
   disableFilter,
   style,
   childObject,
   importData,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
@@ -77,8 +87,9 @@ export const BtnExcelImport: React.FC<Props> = ({
 
   const hiddenFileInput = useRef(null);
 
-  const handleClick = (event) => {
-    hiddenFileInput.current.click();
+  const handleClick = async (event: any) => {
+    await onClick();
+    await hiddenFileInput.current.click();
   };
 
   useEffect(() => {
@@ -206,7 +217,12 @@ export const BtnExcelImport: React.FC<Props> = ({
   }
 
   return (
-    <Button style={style} disabled={importDisable} onClick={handleClick}>
+    <Button
+      style={style}
+      disabled={importDisable}
+      onClick={handleClick}
+      title={title}
+    >
       {PublicMethod.checkValue(childObject) ? (
         childObject
       ) : (

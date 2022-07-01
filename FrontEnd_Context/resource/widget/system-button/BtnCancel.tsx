@@ -16,11 +16,25 @@ interface Props {
    * 設定其他畫面顯示
    */
   childObject?: React.AllHTMLAttributes<any>;
+
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnCancel 取消按鈕，按下後會改變狀態為Read
  */
-export const BtnCancel: React.FC<Props> = ({ style, childObject }) => {
+export const BtnCancel: React.FC<Props> = ({
+  style,
+  childObject,
+  onClick,
+  title,
+}) => {
   const { System } = useContext(SystemContext);
   const { Program, ProgramDispatch } = useContext(ProgramContext);
   const { status, send } = useContext(statusContext);
@@ -49,11 +63,21 @@ export const BtnCancel: React.FC<Props> = ({ style, childObject }) => {
     }
   }, [status]);
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await send(STATUS.CANCEL);
+    } else {
+      await send(STATUS.CANCEL);
+    }
+  }
+
   return (
     <Button
       style={style}
       disabled={CancelDisable}
-      onClick={() => send(STATUS.CANCEL)}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

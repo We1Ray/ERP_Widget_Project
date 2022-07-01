@@ -55,7 +55,7 @@ export const CommonLabel: React.FC<LabelProps> = forwardRef(
     return (
       <>
         {display ? (
-          <p className="col-form-label" ref={labelRef} {...props}>
+          <p className="col-form-label" style={style} ref={labelRef} {...props}>
             {PublicMethod.checkValue(text) ? text : props.children}
           </p>
         ) : (

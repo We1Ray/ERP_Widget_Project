@@ -45,9 +45,13 @@ export const QrySelectionBox: React.FC<SelectionBoxProps> = forwardRef(
     const [selectionOptions, setSelectionOptions] = useState(
       PublicMethod.checkValue(options) ? options : []
     );
-    const [selectedValue, setSelectedValue] = useState(
-      PublicMethod.checkValue(defaultValue) ? defaultValue : []
-    );
+    const [selectedValue, setSelectedValue] = useState<
+      {
+        value: string;
+        label: string;
+        isFixed?: boolean;
+      }[]
+    >(PublicMethod.checkValue(defaultValue) ? defaultValue : []);
     const [selectionBoxDisable, setSelectionBoxDisable] = useState(false);
     const [display, setDisplay] = useState(true);
     const [multiSelection, setMultiSelection] = useState(false);

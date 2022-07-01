@@ -1,9 +1,9 @@
 update
 	SYSTEM_FACTORY_LIST
 set
-	FACTORY_NAME = $1::varchar,
-	WS_URL = $2::varchar,
-	WS_DATASOURCE = $3::varchar,
-	IS_ENABLED = $4::varchar
+	FACTORY_NAME = ${factory_name},
+	WS_URL = ${ws_url},
+	WS_DATASOURCE = ${ws_datasource},
+	IS_ENABLED = ${is_enabled}
 where
-	FACTORY_UID = $5::varchar
+	FACTORY_UID = ${factory_uid}

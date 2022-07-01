@@ -2,4 +2,4 @@ delete
 from
 	PROGRAM_LIST
 where
-	PROGRAM_UID = $1::varchar
+	PROGRAM_UID = ${program_uid}

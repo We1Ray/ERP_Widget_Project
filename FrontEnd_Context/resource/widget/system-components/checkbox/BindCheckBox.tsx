@@ -70,18 +70,19 @@ export const BindCheckBox: React.FC<CheckBoxProps> = forwardRef(
     useEffect(() => {
       try {
         let value = checked ? checkedValue : notCheckedValue;
-        setCheckboxText(checked ? checkedText : notCheckedText);
+        let text = checked ? checkedText : notCheckedText;
+        setCheckboxText(text);
         if (Program.changeData[name] !== value) {
           ProgramDispatch({ type: "changeData", value: { [name]: value } });
         }
         if (result) {
-          result(value);
+          result(value, text);
         }
       } catch (error) {
         console.log("EROOR: BindCheckBox.useEffect[checked]");
         console.log(error);
       }
-    }, [checked]);
+    }, [checked, notCheckedText, notCheckedValue, checkedValue, checkedText]);
 
     useEffect(() => {
       try {
@@ -94,7 +95,7 @@ export const BindCheckBox: React.FC<CheckBoxProps> = forwardRef(
         console.log("EROOR: BindCheckBox.useEffect[defaultValue]");
         console.log(error);
       }
-    }, [value]);
+    }, [value, checkedValue]);
 
     /** Bind useEffect */
     useEffect(() => {

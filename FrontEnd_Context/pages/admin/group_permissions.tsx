@@ -106,7 +106,7 @@ function Group_permissions_Content({ group_uid, is_core, group_name }) {
     }
 
     function change(e) {
-      if (e !== check) {
+      if (e !== check && PublicMethod.checkValue(factory_Options)) {
         CallApi.ExecuteApi(
           System.factory.name,
           System.factory.ip + "/group_permissions/update_group_permission",
@@ -141,7 +141,7 @@ function Group_permissions_Content({ group_uid, is_core, group_name }) {
         defaultValue={check}
         value={check}
         result={(e) => {
-          change(e);
+          change(e.value);
         }}
       />
     );

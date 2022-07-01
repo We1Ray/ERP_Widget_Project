@@ -21,6 +21,14 @@ interface Props {
    * 設定其他畫面顯示
    */
   childObject?: React.AllHTMLAttributes<any>;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnSave 儲存按鈕，按下後會改變狀態讓資料儲存
@@ -29,6 +37,8 @@ export const BtnSave: React.FC<Props> = ({
   disableFilter,
   style,
   childObject,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Program } = useContext(ProgramContext);
@@ -82,12 +92,22 @@ export const BtnSave: React.FC<Props> = ({
     [savePermission, status]
   );
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await send(STATUS.SAVE);
+    } else {
+      await send(STATUS.SAVE);
+    }
+  }
+
   return (
     <Button
       style={style}
       color="success"
       disabled={saveDisable}
-      onClick={() => send(STATUS.SAVE)}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

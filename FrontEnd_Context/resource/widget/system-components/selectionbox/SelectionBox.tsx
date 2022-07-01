@@ -84,11 +84,21 @@ interface SelectionBoxProps {
       label: string;
       isFixed?: boolean;
     }[]
-  ) => any;
+  ) =>
+    | any
+    | ((
+        value: {
+          value: string;
+          label: string;
+          isFixed?: boolean;
+        }[]
+      ) => Promise<any>);
   /**
    * 元件的Reference
    */
   ref?: React.Ref<any>;
+
+  [x: string]: any;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
 

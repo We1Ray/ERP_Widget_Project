@@ -8,6 +8,7 @@ import PublicMethod from "../../../methods/PublicMethod";
 import { QryTextQryBox } from "./QryTextQryBox";
 import { BindTextQryBox } from "./BindTextQryBox";
 import { CommonTextQryBox } from "./CommonTextQryBox";
+import { ReferTextQryBox } from "./ReferTextQryBox";
 /**
  * TextQryBox
  */
@@ -21,13 +22,17 @@ interface TextQryBoxProps {
    */
   disabled?: boolean;
   /**
-   * 是否為Binding欄位(和query擇一)
+   * 是否為Binding欄位(bind, query, refer擇一)
    */
   bind?: boolean;
   /**
-   * 是否為query欄位(和bind擇一)
+   * 是否為query欄位(bind, query, refer擇一)
    */
   query?: boolean;
+  /**
+   * 是否為參考欄位(bind, query, refer擇一)
+   */
+  refer?: boolean;
   /**
    * 元件名稱
    */
@@ -52,10 +57,6 @@ interface TextQryBoxProps {
    * 多選時的分隔符號
    */
   delimiter?: string;
-  /**
-   * 是否隱藏控制項
-   */
-  hideButton?: boolean;
   /**
    * 開窗
    */
@@ -90,6 +91,10 @@ interface TextQryBoxProps {
      */
     api?: string;
     /**
+     * label查詢的api的初始參數
+     */
+    defaultParameters?: object;
+    /**
      * 給予label的值
      */
     value?: string;
@@ -97,6 +102,10 @@ interface TextQryBoxProps {
      * 設定外觀
      */
     style?: React.CSSProperties;
+    /**
+     * 元件回傳目前的值
+     */
+    result?: (value: string) => any | ((value: string) => Promise<any>);
   };
   text: {
     /**
@@ -120,12 +129,13 @@ interface TextQryBoxProps {
    * 元件回傳目前的值
    */
   result?: (value: string) => any | ((value: string) => Promise<any>);
-  [x: string]: any;
   /**
    * 元件的Reference
    */
   ref?: React.Ref<any>;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
+
+  [x: string]: any;
 }
 
 const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
@@ -135,6 +145,7 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       disabled,
       bind,
       query,
+      refer,
       name,
       maxLength,
       defaultValue,
@@ -145,7 +156,6 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
       text,
       label,
       result,
-      hideButton,
       callbackRef,
       ...props
     },
@@ -201,6 +211,21 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             ref={textboxRef}
             {...props}
           />
+        ) : refer ? (
+          <ReferTextQryBox
+            visible={visible}
+            disabled={disabled}
+            maxLength={maxLength}
+            defaultValue={defaultValue}
+            value={value}
+            delimiter={delimiter}
+            dialog={dialog}
+            text={text}
+            label={label}
+            result={result}
+            ref={textboxRef}
+            {...props}
+          />
         ) : (
           <CommonTextQryBox
             visible={visible}
@@ -214,7 +239,6 @@ const TextQryBox: React.FC<TextQryBoxProps> = forwardRef(
             text={text}
             label={label}
             result={result}
-            hideButton={hideButton}
             ref={textboxRef}
             {...props}
           />

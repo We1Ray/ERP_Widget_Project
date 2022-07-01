@@ -44,6 +44,14 @@ interface Props {
    * 設定新增時的預設參數
    */
   defaultParameters?: object;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnCreate 新增按鈕，按下後會改變狀態讓欄位可新增
@@ -57,6 +65,8 @@ export const BtnCreate: React.FC<Props> = ({
   style,
   childObject,
   defaultParameters,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
@@ -283,12 +293,22 @@ export const BtnCreate: React.FC<Props> = ({
     }
   }
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await send(STATUS.CREATE);
+    } else {
+      await send(STATUS.CREATE);
+    }
+  }
+
   return (
     <Button
       style={style}
       color="primary"
       disabled={createDisable}
-      onClick={() => send(STATUS.CREATE)}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

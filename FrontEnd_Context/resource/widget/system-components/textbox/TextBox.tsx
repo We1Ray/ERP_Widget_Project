@@ -60,11 +60,13 @@ interface TextBoxProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (value: string) => any | ((value: string) => Promise<any>);
   /**
    * 元件的Reference
    */
   ref?: React.Ref<any>;
+
+  [x: string]: any;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
 const TextBox: React.FC<TextBoxProps> = forwardRef(

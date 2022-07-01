@@ -70,22 +70,17 @@ export const CommonCheckBox: React.FC<CheckBoxProps> = forwardRef(
 
     useEffect(() => {
       try {
-        if (checked) {
-          setCheckboxText(checkedText);
-          if (result) {
-            result(checkedValue);
-          }
-        } else {
-          setCheckboxText(notCheckedText);
-          if (result) {
-            result(notCheckedValue);
-          }
+        let value = checked ? checkedValue : notCheckedValue;
+        let text = checked ? checkedText : notCheckedText;
+        setCheckboxText(text);
+        if (result) {
+          result(value, text);
         }
       } catch (error) {
         console.log("EROOR: CommonCheckBox.useEffect[checked]");
         console.log(error);
       }
-    }, [checked]);
+    }, [checked, notCheckedText, notCheckedValue, checkedValue, checkedText]);
 
     useEffect(() => {
       try {
@@ -96,7 +91,7 @@ export const CommonCheckBox: React.FC<CheckBoxProps> = forwardRef(
         console.log("EROOR: CommonCheckBox.useEffect[defaultValue]");
         console.log(error);
       }
-    }, [value]);
+    }, [value, checkedValue]);
 
     useEffect(() => {
       try {

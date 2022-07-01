@@ -7,38 +7,38 @@ with cte as(
 		PROGRAM_LIST B,
 		ACCOUNTS C
 	where
-		A.ACCESS_TOKEN = $1::varchar
+		A.ACCESS_TOKEN = ${access_token}
 		and EXPIRATION_DATE >= DATE_TRUNC(
 			'day',
 			now()
 		)
 		and IS_EFFECTIVE = 'Y'
-		and B.PROGRAM_UID = $2::varchar
+		and B.PROGRAM_UID = ${program_uid}
 		and A.ACCOUNT_UID = C.ACCOUNT_UID
 ) update
 	PROGRAM_LIST t
 set
 	PROGRAM_CODE = coalesce(
-		$3::varchar,
+		${program_code},
 		s.PROGRAM_CODE
 	),
-	PROGRAM_NAME = $4::varchar,
-	I18N = $5::varchar,
-	ICON = $6::varchar,
+	PROGRAM_NAME = ${program_name},
+	I18N = ${i18n},
+	ICON = ${icon},
 	path = coalesce(
-		$7::varchar,
+		${path},
 		s.PATH
 	),
 	IS_DIR = case
-		when $8::varchar is not null then $8::varchar
+		when ${is_dir} is not null then ${is_dir}
 		when coalesce(
-			$7::varchar,
+			${path},
 			s.PATH
 		) is null then 'Y'
 		else 'N'
 	end,
-	SEQ = $9::integer,
-	ENABLED = $10::varchar,
+	SEQ = ${seq}::integer,
+	ENABLED = ${enabled},
 	UP_USER = S.ACCOUNT,
 	UP_DATE = now()
 from

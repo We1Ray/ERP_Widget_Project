@@ -44,6 +44,14 @@ interface Props {
    * 設定更新時的預設參數
    */
   defaultParameters?: object;
+  /**
+   * 按下按鈕時觸發(觸發後會改變狀態)
+   */
+  onClick?: () => Promise<any>;
+  /**
+   * 滑鼠移動至按鈕顯示的字眼
+   */
+  title?: string;
 }
 /**
  * BtnUpdate 更新按鈕，按下後會改變狀態讓資料更新
@@ -57,6 +65,8 @@ export const BtnUpdate: React.FC<Props> = ({
   style,
   childObject,
   defaultParameters,
+  onClick,
+  title,
 }) => {
   const { System } = useContext(SystemContext);
   const { Component } = useContext(ComponentContext);
@@ -284,12 +294,22 @@ export const BtnUpdate: React.FC<Props> = ({
     }
   }
 
+  async function buttonClick() {
+    if (onClick) {
+      await onClick();
+      await send(STATUS.UPDATE);
+    } else {
+      await send(STATUS.UPDATE);
+    }
+  }
+
   return (
     <Button
       style={style}
       color="warning"
       disabled={updateDisable}
-      onClick={() => send(STATUS.UPDATE)}
+      onClick={() => buttonClick()}
+      title={title}
     >
       {PublicMethod.checkValue(childObject) ? (
         childObject

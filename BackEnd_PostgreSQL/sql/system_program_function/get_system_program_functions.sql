@@ -5,11 +5,11 @@ from
 	FUNCTION_LIST A
 where
 	PROGRAM_UID = coalesce(
-		$1::varchar,
+		${functionadmin_PROGRAM_UID},
 		PROGRAM_UID
 	)
 	and SYSTEM_UID = coalesce(
-		$2::varchar,
+		${functionadmin_SYSTEM_UID},
 		SYSTEM_UID
 	)
 order by

@@ -77,7 +77,7 @@ export const BindLabel: React.FC<LabelProps> = forwardRef(
           <p
             className="col-form-label"
             ref={labelRef}
-            style={{ fontWeight: "bold" }}
+            style={PublicMethod.mergeJSON({ fontWeight: "bold" }, style)}
             {...props}
           >
             {PublicMethod.checkValue(text) ? text : props.children}

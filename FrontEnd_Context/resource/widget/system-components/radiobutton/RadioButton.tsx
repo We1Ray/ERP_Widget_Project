@@ -57,11 +57,16 @@ interface RadioButtonProps {
   /**
    * 元件回傳目前的值
    */
-  result?: (value: string) => any;
+  result?: (
+    value: string,
+    text?: string
+  ) => any | ((value: string, text?: string) => Promise<any>);
   /**
    * 元件的Reference
    */
   ref?: React.Ref<any>;
+
+  [x: string]: any;
   callbackRef?: (arg: React.MutableRefObject<any>) => void;
 }
 const RadioButton: React.FC<RadioButtonProps> = forwardRef(

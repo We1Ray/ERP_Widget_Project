@@ -8,4 +8,4 @@ from
 	ACCOUNTS B
 where
 	A.ACCOUNT_UID = B.ACCOUNT_UID
-	and A.SYSTEM_UID =$1::varchar
+	and A.SYSTEM_UID =${administrator_SYSTEM_UID}

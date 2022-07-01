@@ -1,20 +1,20 @@
 with cte as(
 	select
-		$1::varchar,
-		$2::varchar,
-		$3::varchar,
-		$4::varchar,
-		$5::varchar,
-		$6::varchar,
-		$7::varchar,
-		$8::varchar,
+		${program_uid},
+		${system_uid},
+		${program_code},
+		${program_name},
+		${i18n},
+		${icon},
+		${path},
+		${parent_uid},
 		case
-			when $9::varchar is not null then $9::varchar when $7::varchar is null then 'Y'
+			when ${is_dir} is not null then ${is_dir} when ${path} is null then 'Y'
 			else 'N'
 		end IS_DIR,
-		$10::varchar,
-		$11::integer,
-		$12::integer,
+		${enabled},
+		${node_level}::integer,
+		${seq}::integer,
 		(
 			select
 				C.ACCOUNT
@@ -22,7 +22,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $13::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -38,7 +38,7 @@ with cte as(
 				ACCOUNT_TOKEN A,
 				ACCOUNTS C
 			where
-				A.ACCESS_TOKEN = $13::varchar
+				A.ACCESS_TOKEN = ${access_token}
 				and a.EXPIRATION_DATE >= DATE_TRUNC(
 					'day',
 					now()
@@ -78,7 +78,7 @@ with cte as(
 					ACCOUNT_TOKEN A,
 					ACCOUNTS C
 				where
-					A.ACCESS_TOKEN = $13::varchar
+					A.ACCESS_TOKEN = ${access_token}
 					and a.EXPIRATION_DATE >= DATE_TRUNC(
 						'day',
 						now()

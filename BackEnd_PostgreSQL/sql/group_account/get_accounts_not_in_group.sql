@@ -12,15 +12,15 @@ where
 		from
 			ACCOUNT_GROUPS
 		where
-			GROUP_UID = $1::varchar
+			GROUP_UID = ${group_uid}
 	)
 	and(
-		upper( ACCOUNT ) like '%' || upper( coalesce( $2::varchar, '' ))|| '%'
-		or upper( name ) like '%' || upper( coalesce( $2::varchar, '' ))|| '%'
+		upper( ACCOUNT ) like '%' || upper( coalesce( ${account_not_group_KEY}, '' ))|| '%'
+		or upper( name ) like '%' || upper( coalesce( ${account_not_group_KEY}, '' ))|| '%'
 	)
 	and(
 		ACCOUNT_UID = coalesce(
-			$3::varchar,
+			${account_not_group_ACCOUNT_UID},
 			ACCOUNT_UID
 		)
 	)
