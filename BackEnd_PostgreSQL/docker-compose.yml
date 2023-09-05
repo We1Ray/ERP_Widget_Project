@@ -1,0 +1,11 @@
+## 建立 Image 開始
+version: "3.7"
+services:
+  ds-backend-dev:
+    build: 
+      context: .
+      dockerfile: "Dockerfile"
+    volumes:
+      - ".:/src"
+    ports:
+      - "3001:80"

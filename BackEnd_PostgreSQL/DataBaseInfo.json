@@ -1,0 +1,10 @@
+{
+  "DS": {
+    "database": "",
+    "user": "",
+    "password": "",
+    "port": 5432,
+    "max": 20,
+    "idleTimeoutMillis": 3000
+  }
+}

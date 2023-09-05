@@ -1,0 +1,9 @@
+insert
+	into
+	emails_group
+(email,
+	groupid,
+	displayname)
+values(${email},
+${groupid},
+${displayname})
